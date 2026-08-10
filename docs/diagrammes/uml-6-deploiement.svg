@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 700" width="100%"><defs><marker id="fl" markerWidth="8" markerHeight="8" refX="7" refY="2.8" orient="auto"><path d="M0,0 L6.5,2.8 L0,5.6 z" fill="#8a7f72"/></marker><marker id="flv" markerWidth="9" markerHeight="9" refX="8" refY="3.2" orient="auto"><path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#2f5d8a"/></marker><marker id="creux" markerWidth="11" markerHeight="11" refX="10" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#fdfbf8" stroke="#8a7f72" stroke-width="1"/></marker></defs><rect width="1140" height="700" fill="#fdfbf8"/>
+<text x="570" y="30" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1a1714" text-anchor="middle">UML — DIAGRAMME DE DÉPLOIEMENT</text>
+<text x="570" y="50" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-style="italic" fill="#7a6a58" text-anchor="middle">Une architecture volontairement modeste : un seul serveur au démarrage, découpable ensuite.</text>
+<path d="M40,104 l14,-14 h250 v150 l-14,14 h-250 z" fill="#f7f2ea" stroke="#3d3630" stroke-width="1.5"/>
+<rect x="40" y="104" width="250" height="150" rx="4" fill="#fff" stroke="#3d3630" stroke-width="1.5"/>
+<text x="52" y="124" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Terminal client</text>
+<text x="52" y="144" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Navigateur mobile (2G/3G)</text>
+<text x="52" y="159" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Application PWA (lot 3)</text>
+<text x="52" y="174" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Appareil photo pour le QR</text>
+<text x="52" y="189" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start"></text>
+<text x="52" y="204" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">Contrainte : afficher en une requête</text>
+<path d="M40,314 l14,-14 h250 v130 l-14,14 h-250 z" fill="#f7f2ea" stroke="#c2571f" stroke-width="1.5"/>
+<rect x="40" y="314" width="250" height="130" rx="4" fill="#fff" stroke="#c2571f" stroke-width="1.5"/>
+<text x="52" y="334" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Terminal vendeur</text>
+<text x="52" y="354" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Navigateur mobile</text>
+<text x="52" y="369" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Photo produit depuis le téléphone</text>
+<text x="52" y="384" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· SMS pour les notifications</text>
+<path d="M40,504 l14,-14 h250 v130 l-14,14 h-250 z" fill="#f7f2ea" stroke="#3d3630" stroke-width="1.5"/>
+<rect x="40" y="504" width="250" height="130" rx="4" fill="#fff" stroke="#3d3630" stroke-width="1.5"/>
+<text x="52" y="524" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Terminal livreur</text>
+<text x="52" y="544" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Saisie du code de livraison</text>
+<text x="52" y="559" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Bordereau d'espèces</text>
+<text x="52" y="574" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Fonctionne hors ligne partiel</text>
+<path d="M370,104 l14,-14 h300 v250 l-14,14 h-300 z" fill="#f7f2ea" stroke="#2f5d8a" stroke-width="1.5"/>
+<rect x="370" y="104" width="300" height="250" rx="4" fill="#fff" stroke="#2f5d8a" stroke-width="1.5"/>
+<text x="382" y="124" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Serveur applicatif</text>
+<text x="382" y="144" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">« Nginx + PHP-FPM 8.3 »</text>
+<text x="382" y="159" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· API Laravel 13</text>
+<text x="382" y="174" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Files d'attente (SMS, PDF, webhooks)</text>
+<text x="382" y="189" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Planificateur : libération des fonds,</text>
+<text x="382" y="204" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">  cantonnement, réconciliation</text>
+<text x="382" y="219" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start"></text>
+<text x="382" y="234" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">Un seul serveur suffit au démarrage.</text>
+<text x="382" y="249" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">Découper trop tôt coûte plus qu'il ne rapporte.</text>
+<path d="M370,414 l14,-14 h300 v120 l-14,14 h-300 z" fill="#f7f2ea" stroke="#7a6a58" stroke-width="1.5"/>
+<rect x="370" y="414" width="300" height="120" rx="4" fill="#fff" stroke="#7a6a58" stroke-width="1.5"/>
+<text x="382" y="434" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Base de données</text>
+<text x="382" y="454" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">« MySQL 8 / MariaDB 10.6 »</text>
+<text x="382" y="469" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· InnoDB, utf8mb4</text>
+<text x="382" y="484" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Sauvegarde quotidienne, 30 jours</text>
+<path d="M370,574 l14,-14 h300 v100 l-14,14 h-300 z" fill="#f7f2ea" stroke="#7a6a58" stroke-width="1.5"/>
+<rect x="370" y="574" width="300" height="100" rx="4" fill="#fff" stroke="#7a6a58" stroke-width="1.5"/>
+<text x="382" y="594" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Stockage objet</text>
+<text x="382" y="614" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Photos produits (4 tailles)</text>
+<text x="382" y="629" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Pièces justificatives (privé)</text>
+<text x="382" y="644" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Planches d'étiquettes QR</text>
+<path d="M760,104 l14,-14 h340 v120 l-14,14 h-340 z" fill="#f7f2ea" stroke="#8a5a1c" stroke-width="1.5"/>
+<rect x="760" y="104" width="340" height="120" rx="4" fill="#fff" stroke="#8a5a1c" stroke-width="1.5"/>
+<text x="772" y="124" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Prestataire de paiement agréé BCEAO</text>
+<text x="772" y="144" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Encaissement Mobile Money et carte</text>
+<text x="772" y="159" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· API de versement (payout)</text>
+<text x="772" y="174" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Webhooks signés</text>
+<path d="M760,264 l14,-14 h340 v100 l-14,14 h-340 z" fill="#f7f2ea" stroke="#8a5a1c" stroke-width="1.5"/>
+<rect x="760" y="264" width="340" height="100" rx="4" fill="#fff" stroke="#8a5a1c" stroke-width="1.5"/>
+<text x="772" y="284" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Banque — compte de cantonnement</text>
+<text x="772" y="304" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Fonds des boutiques, compte séparé</text>
+<text x="772" y="319" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Rapprochement quotidien obligatoire</text>
+<path d="M760,404 l14,-14 h340 v100 l-14,14 h-340 z" fill="#f7f2ea" stroke="#0f7b8a" stroke-width="1.5"/>
+<rect x="760" y="404" width="340" height="100" rx="4" fill="#fff" stroke="#0f7b8a" stroke-width="1.5"/>
+<text x="772" y="424" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Passerelle SMS</text>
+<text x="772" y="444" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Codes de livraison, confirmations</text>
+<text x="772" y="459" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Coût par message : poste à surveiller</text>
+<path d="M760,544 l14,-14 h340 v110 l-14,14 h-340 z" fill="#f7f2ea" stroke="#8a5a1c" stroke-width="1.5"/>
+<rect x="760" y="544" width="340" height="110" rx="4" fill="#fff" stroke="#8a5a1c" stroke-width="1.5"/>
+<text x="772" y="564" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#1a1714" text-anchor="start">Plateforme de facturation de l'État</text>
+<text x="772" y="584" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· e-MECeF (BJ), FEC (BF), FNE (CI), e-SECeF (NE)</text>
+<text x="772" y="599" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Certification de chaque facture</text>
+<text x="772" y="614" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#4a423a" text-anchor="start">· Un par pays : à intégrer un par un</text>
+<polyline points="290,165 370,165" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="330.0" y="160.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">HTTPS</text>
+<polyline points="290,375 370,200" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="330.0" y="282.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">HTTPS</text>
+<polyline points="290,565 370,200" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="330.0" y="377.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">HTTPS</text>
+<polyline points="670,200 760,165" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="715.0" y="177.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">API + webhook</text>
+<polyline points="670,230 760,305" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="715.0" y="262.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">virements</text>
+<polyline points="670,260 760,435" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="715.0" y="342.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">envoi</text>
+<polyline points="670,290 760,580" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="715.0" y="430.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">certification</text>
+<polyline points="520,354 520,400" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<polyline points="520,534 520,560" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/></svg>

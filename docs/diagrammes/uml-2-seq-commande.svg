@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 790" width="100%"><defs><marker id="fl" markerWidth="8" markerHeight="8" refX="7" refY="2.8" orient="auto"><path d="M0,0 L6.5,2.8 L0,5.6 z" fill="#8a7f72"/></marker><marker id="flv" markerWidth="9" markerHeight="9" refX="8" refY="3.2" orient="auto"><path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#2f5d8a"/></marker><marker id="creux" markerWidth="11" markerHeight="11" refX="10" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#fdfbf8" stroke="#8a7f72" stroke-width="1"/></marker></defs><rect width="1180" height="790" fill="#fdfbf8"/>
+<text x="590.0" y="30" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1a1714" text-anchor="middle">UML — SÉQUENCE : COMMANDE ET PAIEMENT MOBILE MONEY</text>
+<text x="590.0" y="50" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-style="italic" fill="#7a6a58" text-anchor="middle">Le chemin nominal, du panier à l'écriture comptable.</text>
+<rect x="50.0" y="74" width="120" height="34" rx="5" fill="#fff" stroke="#3d3630" stroke-width="1.5"/>
+<text x="110" y="95" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#1a1714" text-anchor="middle">Client</text>
+<line x1="110" y1="108" x2="110" y2="720" stroke="#c9c0b3" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="270.0" y="74" width="120" height="34" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.5"/>
+<text x="330" y="95" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#1a1714" text-anchor="middle">API Afrishop</text>
+<line x1="330" y1="108" x2="330" y2="720" stroke="#c9c0b3" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="500.0" y="74" width="120" height="34" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.5"/>
+<text x="560" y="95" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#1a1714" text-anchor="middle">PanierService</text>
+<line x1="560" y1="108" x2="560" y2="720" stroke="#c9c0b3" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="730.0" y="74" width="120" height="34" rx="5" fill="#fff" stroke="#8a5a1c" stroke-width="1.5"/>
+<text x="790" y="95" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#1a1714" text-anchor="middle">PSP agréé</text>
+<line x1="790" y1="108" x2="790" y2="720" stroke="#c9c0b3" stroke-width="1.2" stroke-dasharray="5,4"/>
+<rect x="950.0" y="74" width="120" height="34" rx="5" fill="#fff" stroke="#8a5a1c" stroke-width="1.5"/>
+<text x="1010" y="95" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#1a1714" text-anchor="middle">GrandLivre</text>
+<line x1="1010" y1="108" x2="1010" y2="720" stroke="#c9c0b3" stroke-width="1.2" stroke-dasharray="5,4"/>
+<line x1="110" y1="150" x2="330" y2="150" stroke="#2f5d8a" stroke-width="1.4" marker-end="url(#flv)"/>
+<text x="220.0" y="144" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#4a423a" text-anchor="middle">POST /commandes (panier, coordonnées, mode)</text>
+<line x1="330" y1="180" x2="560" y2="180" stroke="#2f5d8a" stroke-width="1.4" marker-end="url(#flv)"/>
+<text x="445.0" y="174" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#4a423a" text-anchor="middle">creerCommande()</text>
+<path d="M560,210 h34 v22 h-34" fill="none" stroke="#4a423a" stroke-width="1.3" marker-end="url(#fl)"/>
+<text x="602" y="225" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">verrou sur les variantes (lockForUpdate)</text>
+<path d="M560,255 h34 v22 h-34" fill="none" stroke="#4a423a" stroke-width="1.3" marker-end="url(#fl)"/>
+<text x="602" y="270" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">contrôle stock, boutique ouverte, plafond opérateur</text>
+<path d="M560,300 h34 v22 h-34" fill="none" stroke="#4a423a" stroke-width="1.3" marker-end="url(#fl)"/>
+<text x="602" y="315" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">éclatement par boutique + TVA + commission + retenue</text>
+<line x1="560" y1="345" x2="330" y2="345" stroke="#8a7f72" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#fl)"/>
+<text x="445.0" y="339" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#7a6a58" text-anchor="middle">commande + N sous-commandes</text>
+<line x1="330" y1="375" x2="790" y2="375" stroke="#2f5d8a" stroke-width="1.4" marker-end="url(#flv)"/>
+<text x="560.0" y="369" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#4a423a" text-anchor="middle">initier encaissement (montant total)</text>
+<line x1="790" y1="405" x2="330" y2="405" stroke="#8a7f72" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#fl)"/>
+<text x="560.0" y="399" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#7a6a58" text-anchor="middle">url de paiement + référence</text>
+<line x1="330" y1="435" x2="110" y2="435" stroke="#8a7f72" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#fl)"/>
+<text x="220.0" y="429" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#7a6a58" text-anchor="middle">redirection vers l'opérateur</text>
+<line x1="110" y1="475" x2="790" y2="475" stroke="#2f5d8a" stroke-width="1.4" marker-end="url(#flv)"/>
+<text x="450.0" y="469" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#4a423a" text-anchor="middle">saisit son code Mobile Money</text>
+<line x1="790" y1="515" x2="330" y2="515" stroke="#2f5d8a" stroke-width="1.4" marker-end="url(#flv)"/>
+<text x="560.0" y="509" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#4a423a" text-anchor="middle">WEBHOOK paiement confirmé</text>
+<path d="M330,545 h34 v22 h-34" fill="none" stroke="#4a423a" stroke-width="1.3" marker-end="url(#fl)"/>
+<text x="372" y="560" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">vérifie la signature, idempotence</text>
+<line x1="330" y1="590" x2="1010" y2="590" stroke="#2f5d8a" stroke-width="1.4" marker-end="url(#flv)"/>
+<text x="670.0" y="584" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#4a423a" text-anchor="middle">écritures : vente, commission, retenue</text>
+<line x1="1010" y1="620" x2="330" y2="620" stroke="#8a7f72" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#fl)"/>
+<text x="670.0" y="614" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#7a6a58" text-anchor="middle">mouvements créés</text>
+<line x1="330" y1="650" x2="110" y2="650" stroke="#2f5d8a" stroke-width="1.4" marker-end="url(#flv)"/>
+<text x="220.0" y="644" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#4a423a" text-anchor="middle">SMS de confirmation</text>
+<path d="M60,670 h506 l14,14 v37 h-520 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1"/>
+<path d="M566,670 v14 h14 z" fill="#f3e4c4" stroke="#b58a3a" stroke-width="1"/>
+<text x="68" y="688" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">Le webhook fait foi, PAS la page de retour du client : celui-ci peut</text>
+<text x="68" y="701" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">fermer son navigateur avant la redirection, et la commande serait</text>
+<text x="68" y="714" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">perdue alors que l'argent a été prélevé.</text>
+<path d="M620,670 h486 l14,14 v24 h-500 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1"/>
+<path d="M1106,670 v14 h14 z" fill="#f3e4c4" stroke="#b58a3a" stroke-width="1"/>
+<text x="628" y="688" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">L'idempotence est indispensable : les PSP rejouent leurs webhooks.</text>
+<text x="628" y="701" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">Sans elle, un même paiement crée deux fois les écritures.</text></svg>

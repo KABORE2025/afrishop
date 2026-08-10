@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 690" width="100%"><defs><marker id="fl" markerWidth="8" markerHeight="8" refX="7" refY="2.8" orient="auto"><path d="M0,0 L6.5,2.8 L0,5.6 z" fill="#8a7f72"/></marker><marker id="flv" markerWidth="9" markerHeight="9" refX="8" refY="3.2" orient="auto"><path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#2f5d8a"/></marker><marker id="creux" markerWidth="11" markerHeight="11" refX="10" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#fdfbf8" stroke="#8a7f72" stroke-width="1"/></marker></defs><rect width="1180" height="690" fill="#fdfbf8"/>
+<text x="590" y="34" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#1a1714" text-anchor="middle">AFRISHOP — CARTE DES DOMAINES</text>
+<text x="590" y="54" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-style="italic" fill="#7a6a58" text-anchor="middle">54 entités réparties en 8 domaines. Les flèches indiquent la dépendance, pas le flux de données.</text>
+<rect x="40" y="100" width="250" height="130.8" rx="7" fill="#fff" stroke="#7a6a58" stroke-width="1.6"/>
+<path d="M47,100 h236 a7,7 0 0 1 7,7 v17 h-250 v-17 a7,7 0 0 1 7,-7 z" fill="#7a6a58"/>
+<text x="50" y="117" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">Référentiels</text>
+<text x="280" y="117" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#ffffffcc" text-anchor="end">7 entités</text>
+<text x="52" y="138.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· pays</text>
+<text x="52" y="150.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· taux_taxe</text>
+<text x="52" y="162.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· villes</text>
+<text x="52" y="175.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· operateurs_paiement</text>
+<text x="52" y="187.6" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· prestataires_paiement</text>
+<text x="52" y="200.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· traductions</text>
+<text x="52" y="212.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· parametres</text>
+<rect x="330" y="100" width="250" height="118.4" rx="7" fill="#fff" stroke="#6b3fa0" stroke-width="1.6"/>
+<path d="M337,100 h236 a7,7 0 0 1 7,7 v17 h-250 v-17 a7,7 0 0 1 7,-7 z" fill="#6b3fa0"/>
+<text x="340" y="117" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">Identité &amp; conformité</text>
+<text x="570" y="117" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#ffffffcc" text-anchor="end">6 entités</text>
+<text x="342" y="138.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· utilisateurs</text>
+<text x="342" y="150.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· consentements</text>
+<text x="342" y="162.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· registre_traitements</text>
+<text x="342" y="175.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· demandes_droits</text>
+<text x="342" y="187.6" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· journal_acces_donnees</text>
+<text x="342" y="200.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· journal_administration</text>
+<rect x="620" y="100" width="250" height="155.60000000000002" rx="7" fill="#fff" stroke="#c2571f" stroke-width="1.6"/>
+<path d="M627,100 h236 a7,7 0 0 1 7,7 v17 h-250 v-17 a7,7 0 0 1 7,-7 z" fill="#c2571f"/>
+<text x="630" y="117" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">Boutiques &amp; catalogue</text>
+<text x="860" y="117" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#ffffffcc" text-anchor="end">9 entités</text>
+<text x="632" y="138.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· boutiques</text>
+<text x="632" y="150.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· documents_boutique</text>
+<text x="632" y="162.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· candidatures</text>
+<text x="632" y="175.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· categories</text>
+<text x="632" y="187.6" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· produits</text>
+<text x="632" y="200.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· variantes_produit</text>
+<text x="632" y="212.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· attributs</text>
+<text x="632" y="224.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· variante_attributs</text>
+<text x="632" y="237.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· medias</text>
+<rect x="910" y="100" width="230" height="81.2" rx="7" fill="#fff" stroke="#1f6b4a" stroke-width="1.6"/>
+<path d="M917,100 h216 a7,7 0 0 1 7,7 v17 h-230 v-17 a7,7 0 0 1 7,-7 z" fill="#1f6b4a"/>
+<text x="920" y="117" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">Traçabilité</text>
+<text x="1130" y="117" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#ffffffcc" text-anchor="end">3 entités</text>
+<text x="922" y="138.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· lots_qr</text>
+<text x="922" y="150.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· codes_qr</text>
+<text x="922" y="162.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· scans_qr</text>
+<rect x="40" y="330" width="250" height="168.0" rx="7" fill="#fff" stroke="#2f5d8a" stroke-width="1.6"/>
+<path d="M47,330 h236 a7,7 0 0 1 7,7 v17 h-250 v-17 a7,7 0 0 1 7,-7 z" fill="#2f5d8a"/>
+<text x="50" y="347" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">Commandes &amp; livraison</text>
+<text x="280" y="347" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#ffffffcc" text-anchor="end">10 entités</text>
+<text x="52" y="368.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· paniers</text>
+<text x="52" y="380.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· lignes_panier</text>
+<text x="52" y="392.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· commandes</text>
+<text x="52" y="405.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· sous_commandes</text>
+<text x="52" y="417.6" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· lignes_commande</text>
+<text x="52" y="430.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· expeditions</text>
+<text x="52" y="442.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· evenements_commande</text>
+<text x="52" y="454.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· zones_livraison</text>
+<text x="52" y="467.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· points_relais</text>
+<text x="52" y="479.6" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· transporteurs</text>
+<rect x="330" y="330" width="250" height="155.60000000000002" rx="7" fill="#fff" stroke="#8a5a1c" stroke-width="1.6"/>
+<path d="M337,330 h236 a7,7 0 0 1 7,7 v17 h-250 v-17 a7,7 0 0 1 7,-7 z" fill="#8a5a1c"/>
+<text x="340" y="347" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">Argent &amp; fiscalité</text>
+<text x="570" y="347" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#ffffffcc" text-anchor="end">9 entités</text>
+<text x="342" y="368.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· transactions_paiement</text>
+<text x="342" y="380.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· encaissements_especes</text>
+<text x="342" y="392.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· mouvements_compte</text>
+<text x="342" y="405.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· cantonnement_journalier</text>
+<text x="342" y="417.6" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· reconciliations_psp</text>
+<text x="342" y="430.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· reversements</text>
+<text x="342" y="442.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· reversement_lignes</text>
+<text x="342" y="454.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· factures</text>
+<text x="342" y="467.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· retenues_source</text>
+<rect x="620" y="330" width="250" height="118.4" rx="7" fill="#fff" stroke="#b3261e" stroke-width="1.6"/>
+<path d="M627,330 h236 a7,7 0 0 1 7,7 v17 h-250 v-17 a7,7 0 0 1 7,-7 z" fill="#b3261e"/>
+<text x="630" y="347" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">Après-vente</text>
+<text x="860" y="347" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#ffffffcc" text-anchor="end">6 entités</text>
+<text x="632" y="368.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· retours</text>
+<text x="632" y="380.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· lignes_retour</text>
+<text x="632" y="392.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· litiges</text>
+<text x="632" y="405.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· tickets_support</text>
+<text x="632" y="417.6" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· messages_ticket</text>
+<text x="632" y="430.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· avis</text>
+<rect x="910" y="330" width="230" height="93.6" rx="7" fill="#fff" stroke="#0f7b8a" stroke-width="1.6"/>
+<path d="M917,330 h216 a7,7 0 0 1 7,7 v17 h-230 v-17 a7,7 0 0 1 7,-7 z" fill="#0f7b8a"/>
+<text x="920" y="347" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">Relation &amp; marketing</text>
+<text x="1130" y="347" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#ffffffcc" text-anchor="end">4 entités</text>
+<text x="922" y="368.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· notifications</text>
+<text x="922" y="380.4" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· gabarits_notification</text>
+<text x="922" y="392.8" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· promotions</text>
+<text x="922" y="405.2" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" fill="#4a423a" text-anchor="start">· utilisations_promotion</text>
+<polyline points="290,145 330,145" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<polyline points="580,155 620,155" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<polyline points="870,200 910,200" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="890" y="190" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">porte</text>
+<polyline points="745,275 745,330" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="745.0" y="297.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">vendus dans</text>
+<polyline points="165,285 165,330" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="165.0" y="302.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">commandés par</text>
+<polyline points="290,400 330,400" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="310.0" y="395.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">génèrent</text>
+<polyline points="580,415 620,415" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<polyline points="870,425 910,425" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<polyline points="455,285 455,330" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="455.0" y="302.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">clients</text>
+<path d="M40,600 h486 l14,14 v24 h-500 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1"/>
+<path d="M526,600 v14 h14 z" fill="#f3e4c4" stroke="#b58a3a" stroke-width="1"/>
+<text x="48" y="618" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">Une catégorie n'est PAS une boutique : le produit porte la catégorie,</text>
+<text x="48" y="631" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">plusieurs boutiques se concurrencent dans la même.</text>
+<path d="M620,600 h506 l14,14 v24 h-520 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1"/>
+<path d="M1126,600 v14 h14 z" fill="#f3e4c4" stroke="#b58a3a" stroke-width="1"/>
+<text x="628" y="618" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">Le domaine « Argent » est le plus sensible : la plateforme détient des</text>
+<text x="628" y="631" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">fonds de tiers, faute de sous-comptes marchands disponibles en UEMOA.</text></svg>

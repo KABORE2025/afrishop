@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" width="100%"><defs><marker id="fl" markerWidth="8" markerHeight="8" refX="7" refY="2.8" orient="auto"><path d="M0,0 L6.5,2.8 L0,5.6 z" fill="#8a7f72"/></marker><marker id="flv" markerWidth="9" markerHeight="9" refX="8" refY="3.2" orient="auto"><path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#2f5d8a"/></marker><marker id="creux" markerWidth="11" markerHeight="11" refX="10" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#fdfbf8" stroke="#8a7f72" stroke-width="1"/></marker></defs><rect width="1180" height="760" fill="#fdfbf8"/>
+<text x="590" y="30" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1a1714" text-anchor="middle">MCD 2 — COMMANDES ET LIVRAISON</text>
+<text x="590" y="50" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-style="italic" fill="#7a6a58" text-anchor="middle">Une commande client est éclatée en autant de sous-commandes que de boutiques.</text>
+<rect x="30" y="90" width="210" height="88" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<path d="M35,90 h200 a5,5 0 0 1 5,5 v18 h-210 v-18 a5,5 0 0 1 5,-5 z" fill="#2f5d8a"/>
+<text x="38" y="106" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">PANIER</text>
+<text x="38" y="127" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_panier</text>
+<line x1="38" y1="129" x2="88.4" y2="129" stroke="#4a423a" stroke-width="0.8"/>
+<text x="38" y="141" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">jeton_session</text>
+<text x="38" y="155" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<text x="38" y="169" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">relance_envoyee_le</text>
+<rect x="30" y="230" width="210" height="60" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<path d="M35,230 h200 a5,5 0 0 1 5,5 v18 h-210 v-18 a5,5 0 0 1 5,-5 z" fill="#2f5d8a"/>
+<text x="38" y="246" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">LIGNE_PANIER</text>
+<text x="38" y="267" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_ligne</text>
+<line x1="38" y1="269" x2="82.8" y2="269" stroke="#4a423a" stroke-width="0.8"/>
+<text x="38" y="281" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">quantite</text>
+<rect x="30" y="360" width="210" height="102" rx="5" fill="#fff" stroke="#7a6a58" stroke-width="1.3"/>
+<path d="M35,360 h200 a5,5 0 0 1 5,5 v18 h-210 v-18 a5,5 0 0 1 5,-5 z" fill="#7a6a58"/>
+<text x="38" y="376" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">ZONE_LIVRAISON</text>
+<text x="38" y="397" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_zone</text>
+<line x1="38" y1="399" x2="77.19999999999999" y2="399" stroke="#4a423a" stroke-width="0.8"/>
+<text x="38" y="411" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">quartier</text>
+<text x="38" y="425" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">frais_base_cfa</text>
+<text x="38" y="439" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">frais_boutique_sup</text>
+<text x="38" y="453" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">cod_autorise</text>
+<rect x="30" y="540" width="210" height="88" rx="5" fill="#fff" stroke="#7a6a58" stroke-width="1.3"/>
+<path d="M35,540 h200 a5,5 0 0 1 5,5 v18 h-210 v-18 a5,5 0 0 1 5,-5 z" fill="#7a6a58"/>
+<text x="38" y="556" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">POINT_RELAIS</text>
+<text x="38" y="577" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_relais</text>
+<line x1="38" y1="579" x2="88.4" y2="579" stroke="#4a423a" stroke-width="0.8"/>
+<text x="38" y="591" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">nom, adresse</text>
+<text x="38" y="605" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">repere</text>
+<text x="38" y="619" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">frais_cfa</text>
+<rect x="300" y="90" width="250" height="172" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<path d="M305,90 h240 a5,5 0 0 1 5,5 v18 h-250 v-18 a5,5 0 0 1 5,-5 z" fill="#2f5d8a"/>
+<text x="308" y="106" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">COMMANDE</text>
+<text x="308" y="127" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_commande</text>
+<line x1="308" y1="129" x2="369.6" y2="129" stroke="#4a423a" stroke-width="0.8"/>
+<text x="308" y="141" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">reference</text>
+<text x="308" y="155" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">client_nom / telephone</text>
+<text x="308" y="169" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">quartier, repere</text>
+<text x="308" y="183" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">mode_livraison</text>
+<text x="308" y="197" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">mode_paiement</text>
+<text x="308" y="211" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut_paiement</text>
+<text x="308" y="225" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">total_a_payer_cfa</text>
+<text x="308" y="239" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">cgv_acceptees_le</text>
+<text x="308" y="253" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">retractation_avant</text>
+<rect x="300" y="400" width="250" height="158" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<path d="M305,400 h240 a5,5 0 0 1 5,5 v18 h-250 v-18 a5,5 0 0 1 5,-5 z" fill="#2f5d8a"/>
+<text x="308" y="416" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">SOUS_COMMANDE</text>
+<text x="308" y="437" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_sous_commande</text>
+<line x1="308" y1="439" x2="397.6" y2="439" stroke="#4a423a" stroke-width="0.8"/>
+<text x="308" y="451" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">reference</text>
+<text x="308" y="465" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<text x="308" y="479" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">etat_fonds</text>
+<text x="308" y="493" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">taux_commission_pct</text>
+<text x="308" y="507" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">commission_cfa</text>
+<text x="308" y="521" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">taux_retenue_pct</text>
+<text x="308" y="535" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">retenue_source_cfa</text>
+<text x="308" y="549" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">montant_net_cfa</text>
+<rect x="620" y="400" width="235" height="116" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<path d="M625,400 h225 a5,5 0 0 1 5,5 v18 h-235 v-18 a5,5 0 0 1 5,-5 z" fill="#2f5d8a"/>
+<text x="628" y="416" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">LIGNE_COMMANDE</text>
+<text x="628" y="437" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_ligne</text>
+<line x1="628" y1="439" x2="672.8" y2="439" stroke="#4a423a" stroke-width="0.8"/>
+<text x="628" y="451" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">sku</text>
+<text x="628" y="465" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">nom_produit (copié)</text>
+<text x="628" y="479" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">prix_unitaire (copié)</text>
+<text x="628" y="493" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">taux_tva_pct</text>
+<text x="628" y="507" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">quantite</text>
+<rect x="620" y="570" width="235" height="88" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<path d="M625,570 h225 a5,5 0 0 1 5,5 v18 h-235 v-18 a5,5 0 0 1 5,-5 z" fill="#2f5d8a"/>
+<text x="628" y="586" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">EVENEMENT_COMMANDE</text>
+<text x="628" y="607" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_evenement</text>
+<line x1="628" y1="609" x2="695.2" y2="609" stroke="#4a423a" stroke-width="0.8"/>
+<text x="628" y="621" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">type</text>
+<text x="628" y="635" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">donnees (JSON)</text>
+<text x="628" y="649" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">auteur_type</text>
+<rect x="620" y="120" width="235" height="116" rx="5" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<path d="M625,120 h225 a5,5 0 0 1 5,5 v18 h-235 v-18 a5,5 0 0 1 5,-5 z" fill="#2f5d8a"/>
+<text x="628" y="136" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">EXPEDITION</text>
+<text x="628" y="157" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_expedition</text>
+<line x1="628" y1="159" x2="700.8" y2="159" stroke="#4a423a" stroke-width="0.8"/>
+<text x="628" y="171" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">code_suivi</text>
+<text x="628" y="185" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">code_livraison (OTP)</text>
+<text x="628" y="199" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">preuve_media</text>
+<text x="628" y="213" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">tentatives</text>
+<text x="628" y="227" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<rect x="920" y="120" width="225" height="88" rx="5" fill="#fff" stroke="#7a6a58" stroke-width="1.3"/>
+<path d="M925,120 h215 a5,5 0 0 1 5,5 v18 h-225 v-18 a5,5 0 0 1 5,-5 z" fill="#7a6a58"/>
+<text x="928" y="136" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">TRANSPORTEUR</text>
+<text x="928" y="157" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_transporteur</text>
+<line x1="928" y1="159" x2="1012.0" y2="159" stroke="#4a423a" stroke-width="0.8"/>
+<text x="928" y="171" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">nom</text>
+<text x="928" y="185" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">type</text>
+<text x="928" y="199" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">encaisse_especes</text>
+<rect x="920" y="290" width="225" height="102" rx="5" fill="#fff" stroke="#b3261e" stroke-width="1.3"/>
+<path d="M925,290 h215 a5,5 0 0 1 5,5 v18 h-225 v-18 a5,5 0 0 1 5,-5 z" fill="#b3261e"/>
+<text x="928" y="306" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">RETOUR</text>
+<text x="928" y="327" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_retour</text>
+<line x1="928" y1="329" x2="978.4" y2="329" stroke="#4a423a" stroke-width="0.8"/>
+<text x="928" y="341" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">type</text>
+<text x="928" y="355" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">motif</text>
+<text x="928" y="369" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">frais_a_la_charge</text>
+<text x="928" y="383" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<rect x="920" y="450" width="225" height="102" rx="5" fill="#fff" stroke="#b3261e" stroke-width="1.3"/>
+<path d="M925,450 h215 a5,5 0 0 1 5,5 v18 h-225 v-18 a5,5 0 0 1 5,-5 z" fill="#b3261e"/>
+<text x="928" y="466" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">LITIGE</text>
+<text x="928" y="487" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_litige</text>
+<line x1="928" y1="489" x2="978.4" y2="489" stroke="#4a423a" stroke-width="0.8"/>
+<text x="928" y="501" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">motif</text>
+<text x="928" y="515" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<text x="928" y="529" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">resolution</text>
+<text x="928" y="543" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">conteste_par_boutique</text>
+<rect x="920" y="620" width="225" height="88" rx="5" fill="#fff" stroke="#0f7b8a" stroke-width="1.3"/>
+<path d="M925,620 h215 a5,5 0 0 1 5,5 v18 h-225 v-18 a5,5 0 0 1 5,-5 z" fill="#0f7b8a"/>
+<text x="928" y="636" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">AVIS</text>
+<text x="928" y="657" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_avis</text>
+<line x1="928" y1="659" x2="967.2" y2="659" stroke="#4a423a" stroke-width="0.8"/>
+<text x="928" y="671" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">note</text>
+<text x="928" y="685" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">commentaire</text>
+<text x="928" y="699" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">reponse_boutique</text>
+<polyline points="135,175 135,230" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="135.0" y="197.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,n</text>
+<polyline points="240,130 300,130" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="270.0" y="125.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,1 converti en</text>
+<polyline points="240,400 270,400 270,190 300,190" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="270.0" y="290.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,1 tarifée par</text>
+<polyline points="240,585 270,585 270,210 300,210" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="270.0" y="392.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,1 retiré à</text>
+<polyline points="425,350 425,400" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="425.0" y="370.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,n ÉCLATEMENT</text>
+<polyline points="550,460 620,460" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="585.0" y="455.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,n</text>
+<polyline points="550,500 585,500 585,610 620,610" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="585.0" y="550.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,n journalise</text>
+<polyline points="550,430 585,430 585,190 620,190" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="585.0" y="305.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,1 expédiée par</text>
+<polyline points="855,170 920,170" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="887.5" y="165.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,1</text>
+<polyline points="550,445 585,445 585,340 900,340 920,340" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="585.0" y="387.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n</text>
+<polyline points="550,505 600,505 600,545 900,545 900,495 920,495" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="750.0" y="540.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n</text>
+<polyline points="550,490 605,490 605,665 920,665" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="605.0" y="572.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n</text>
+<path d="M30,660 h526 l14,14 v37 h-540 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1"/>
+<path d="M556,660 v14 h14 z" fill="#f3e4c4" stroke="#b58a3a" stroke-width="1"/>
+<text x="38" y="678" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">L'ÉCLATEMENT est la décision structurante : chaque boutique prépare,</text>
+<text x="38" y="691" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">expédie et se fait payer indépendamment. Sans lui, un vendeur défaillant</text>
+<text x="38" y="704" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">bloquerait toute la commande et tous les autres vendeurs avec.</text></svg>

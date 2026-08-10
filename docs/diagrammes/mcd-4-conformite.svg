@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 720" width="100%"><defs><marker id="fl" markerWidth="8" markerHeight="8" refX="7" refY="2.8" orient="auto"><path d="M0,0 L6.5,2.8 L0,5.6 z" fill="#8a7f72"/></marker><marker id="flv" markerWidth="9" markerHeight="9" refX="8" refY="3.2" orient="auto"><path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#2f5d8a"/></marker><marker id="creux" markerWidth="11" markerHeight="11" refX="10" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#fdfbf8" stroke="#8a7f72" stroke-width="1"/></marker></defs><rect width="1180" height="720" fill="#fdfbf8"/>
+<text x="590" y="30" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1a1714" text-anchor="middle">MCD 4 — CONFORMITÉ, RELATION CLIENT ET TRAÇABILITÉ</text>
+<text x="590" y="50" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-style="italic" fill="#7a6a58" text-anchor="middle">Les obligations « données personnelles » de la zone se modélisent : elles ne s'improvisent pas.</text>
+<rect x="30" y="90" width="225" height="102" rx="5" fill="#fff" stroke="#6b3fa0" stroke-width="1.3"/>
+<path d="M35,90 h215 a5,5 0 0 1 5,5 v18 h-225 v-18 a5,5 0 0 1 5,-5 z" fill="#6b3fa0"/>
+<text x="38" y="106" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">UTILISATEUR</text>
+<text x="38" y="127" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_utilisateur</text>
+<line x1="38" y1="129" x2="116.39999999999999" y2="129" stroke="#4a423a" stroke-width="0.8"/>
+<text x="38" y="141" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">telephone</text>
+<text x="38" y="155" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">langue</text>
+<text x="38" y="169" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">kyc_niveau</text>
+<text x="38" y="183" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">anonymise_le</text>
+<rect x="30" y="260" width="225" height="116" rx="5" fill="#fff" stroke="#6b3fa0" stroke-width="1.3"/>
+<path d="M35,260 h215 a5,5 0 0 1 5,5 v18 h-225 v-18 a5,5 0 0 1 5,-5 z" fill="#6b3fa0"/>
+<text x="38" y="276" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">CONSENTEMENT</text>
+<text x="38" y="297" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_consentement</text>
+<line x1="38" y1="299" x2="122.0" y2="299" stroke="#4a423a" stroke-width="0.8"/>
+<text x="38" y="311" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">finalite</text>
+<text x="38" y="325" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">version_texte</text>
+<text x="38" y="339" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">canal</text>
+<text x="38" y="353" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">accorde</text>
+<text x="38" y="367" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">donne_le / retire_le</text>
+<rect x="30" y="470" width="225" height="88" rx="5" fill="#fff" stroke="#6b3fa0" stroke-width="1.3"/>
+<path d="M35,470 h215 a5,5 0 0 1 5,5 v18 h-225 v-18 a5,5 0 0 1 5,-5 z" fill="#6b3fa0"/>
+<text x="38" y="486" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">DEMANDE_DROITS</text>
+<text x="38" y="507" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_demande</text>
+<line x1="38" y1="509" x2="94.0" y2="509" stroke="#4a423a" stroke-width="0.8"/>
+<text x="38" y="521" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">type</text>
+<text x="38" y="535" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<text x="38" y="549" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">echeance (2 mois)</text>
+<rect x="30" y="600" width="225" height="88" rx="5" fill="#fff" stroke="#6b3fa0" stroke-width="1.3"/>
+<path d="M35,600 h215 a5,5 0 0 1 5,5 v18 h-225 v-18 a5,5 0 0 1 5,-5 z" fill="#6b3fa0"/>
+<text x="38" y="616" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">REGISTRE_TRAITEMENTS</text>
+<text x="38" y="637" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_traitement</text>
+<line x1="38" y1="639" x2="110.8" y2="639" stroke="#4a423a" stroke-width="0.8"/>
+<text x="38" y="651" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">finalite</text>
+<text x="38" y="665" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">base_legale</text>
+<text x="38" y="679" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">duree_conservation</text>
+<rect x="320" y="90" width="230" height="102" rx="5" fill="#fff" stroke="#6b3fa0" stroke-width="1.3"/>
+<path d="M325,90 h220 a5,5 0 0 1 5,5 v18 h-230 v-18 a5,5 0 0 1 5,-5 z" fill="#6b3fa0"/>
+<text x="328" y="106" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">JOURNAL_ACCES_DONNEES</text>
+<text x="328" y="127" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_acces</text>
+<line x1="328" y1="129" x2="372.8" y2="129" stroke="#4a423a" stroke-width="0.8"/>
+<text x="328" y="141" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">agent</text>
+<text x="328" y="155" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">personne_type / id</text>
+<text x="328" y="169" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">action</text>
+<text x="328" y="183" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">motif</text>
+<rect x="320" y="250" width="230" height="102" rx="5" fill="#fff" stroke="#6b3fa0" stroke-width="1.3"/>
+<path d="M325,250 h220 a5,5 0 0 1 5,5 v18 h-230 v-18 a5,5 0 0 1 5,-5 z" fill="#6b3fa0"/>
+<text x="328" y="266" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">JOURNAL_ADMINISTRATION</text>
+<text x="328" y="287" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_action</text>
+<line x1="328" y1="289" x2="378.4" y2="289" stroke="#4a423a" stroke-width="0.8"/>
+<text x="328" y="301" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">action</text>
+<text x="328" y="315" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">cible</text>
+<text x="328" y="329" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">avant / apres (JSON)</text>
+<text x="328" y="343" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">motif</text>
+<rect x="320" y="430" width="230" height="102" rx="5" fill="#fff" stroke="#0f7b8a" stroke-width="1.3"/>
+<path d="M325,430 h220 a5,5 0 0 1 5,5 v18 h-230 v-18 a5,5 0 0 1 5,-5 z" fill="#0f7b8a"/>
+<text x="328" y="446" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">TICKET_SUPPORT</text>
+<text x="328" y="467" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_ticket</text>
+<line x1="328" y1="469" x2="378.4" y2="469" stroke="#4a423a" stroke-width="0.8"/>
+<text x="328" y="481" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">canal</text>
+<text x="328" y="495" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">priorite</text>
+<text x="328" y="509" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<text x="328" y="523" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">echeance_reponse</text>
+<rect x="320" y="600" width="230" height="88" rx="5" fill="#fff" stroke="#0f7b8a" stroke-width="1.3"/>
+<path d="M325,600 h220 a5,5 0 0 1 5,5 v18 h-230 v-18 a5,5 0 0 1 5,-5 z" fill="#0f7b8a"/>
+<text x="328" y="616" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">MESSAGE_TICKET</text>
+<text x="328" y="637" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_message</text>
+<line x1="328" y1="639" x2="384.0" y2="639" stroke="#4a423a" stroke-width="0.8"/>
+<text x="328" y="651" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">corps</text>
+<text x="328" y="665" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">auteur_type</text>
+<text x="328" y="679" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">interne</text>
+<rect x="615" y="90" width="230" height="102" rx="5" fill="#fff" stroke="#0f7b8a" stroke-width="1.3"/>
+<path d="M620,90 h220 a5,5 0 0 1 5,5 v18 h-230 v-18 a5,5 0 0 1 5,-5 z" fill="#0f7b8a"/>
+<text x="623" y="106" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">GABARIT_NOTIFICATION</text>
+<text x="623" y="127" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_gabarit</text>
+<line x1="623" y1="129" x2="679.0" y2="129" stroke="#4a423a" stroke-width="0.8"/>
+<text x="623" y="141" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">code</text>
+<text x="623" y="155" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">canal</text>
+<text x="623" y="169" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">langue</text>
+<text x="623" y="183" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">corps</text>
+<rect x="615" y="250" width="230" height="116" rx="5" fill="#fff" stroke="#0f7b8a" stroke-width="1.3"/>
+<path d="M620,250 h220 a5,5 0 0 1 5,5 v18 h-230 v-18 a5,5 0 0 1 5,-5 z" fill="#0f7b8a"/>
+<text x="623" y="266" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">NOTIFICATION</text>
+<text x="623" y="287" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_notification</text>
+<line x1="623" y1="289" x2="707.0" y2="289" stroke="#4a423a" stroke-width="0.8"/>
+<text x="623" y="301" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">canal</text>
+<text x="623" y="315" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">corps_envoye</text>
+<text x="623" y="329" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<text x="623" y="343" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">cout_cfa</text>
+<text x="623" y="357" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">nb_segments</text>
+<rect x="615" y="450" width="230" height="102" rx="5" fill="#fff" stroke="#0f7b8a" stroke-width="1.3"/>
+<path d="M620,450 h220 a5,5 0 0 1 5,5 v18 h-230 v-18 a5,5 0 0 1 5,-5 z" fill="#0f7b8a"/>
+<text x="623" y="466" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">PROMOTION</text>
+<text x="623" y="487" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_promotion</text>
+<line x1="623" y1="489" x2="690.2" y2="489" stroke="#4a423a" stroke-width="0.8"/>
+<text x="623" y="501" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">code</text>
+<text x="623" y="515" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">type, valeur</text>
+<text x="623" y="529" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">financeur</text>
+<text x="623" y="543" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">accepte_par_boutique</text>
+<rect x="615" y="620" width="230" height="60" rx="5" fill="#fff" stroke="#0f7b8a" stroke-width="1.3"/>
+<path d="M620,620 h220 a5,5 0 0 1 5,5 v18 h-230 v-18 a5,5 0 0 1 5,-5 z" fill="#0f7b8a"/>
+<text x="623" y="636" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">UTILISATION_PROMOTION</text>
+<text x="623" y="657" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_utilisation</text>
+<line x1="623" y1="659" x2="701.4" y2="659" stroke="#4a423a" stroke-width="0.8"/>
+<text x="623" y="671" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">remise_cfa</text>
+<rect x="910" y="150" width="240" height="116" rx="5" fill="#fff" stroke="#1f6b4a" stroke-width="1.3"/>
+<path d="M915,150 h230 a5,5 0 0 1 5,5 v18 h-240 v-18 a5,5 0 0 1 5,-5 z" fill="#1f6b4a"/>
+<text x="918" y="166" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">LOT_QR</text>
+<text x="918" y="187" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_lot</text>
+<line x1="918" y1="189" x2="951.6" y2="189" stroke="#4a423a" stroke-width="0.8"/>
+<text x="918" y="201" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">date_fabrication</text>
+<text x="918" y="215" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">date_expiration</text>
+<text x="918" y="229" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">numero_debut</text>
+<text x="918" y="243" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">quantite</text>
+<text x="918" y="257" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<rect x="910" y="340" width="240" height="102" rx="5" fill="#fff" stroke="#1f6b4a" stroke-width="1.3"/>
+<path d="M915,340 h230 a5,5 0 0 1 5,5 v18 h-240 v-18 a5,5 0 0 1 5,-5 z" fill="#1f6b4a"/>
+<text x="918" y="356" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">CODE_QR</text>
+<text x="918" y="377" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_code</text>
+<line x1="918" y1="379" x2="957.2" y2="379" stroke="#4a423a" stroke-width="0.8"/>
+<text x="918" y="391" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">code_lisible (IDENTIFIE)</text>
+<text x="918" y="405" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">jeton (AUTHENTIFIE)</text>
+<text x="918" y="419" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">statut</text>
+<text x="918" y="433" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">nb_scans</text>
+<rect x="910" y="520" width="240" height="88" rx="5" fill="#fff" stroke="#1f6b4a" stroke-width="1.3"/>
+<path d="M915,520 h230 a5,5 0 0 1 5,5 v18 h-240 v-18 a5,5 0 0 1 5,-5 z" fill="#1f6b4a"/>
+<text x="918" y="536" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="start">SCAN_QR</text>
+<text x="918" y="557" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#4a423a" text-anchor="start">id_scan</text>
+<line x1="918" y1="559" x2="957.2" y2="559" stroke="#4a423a" stroke-width="0.8"/>
+<text x="918" y="571" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">scanne_le</text>
+<text x="918" y="585" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">ip_hachee</text>
+<text x="918" y="599" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#4a423a" text-anchor="start">ville_estimee</text>
+<polyline points="142,175 142,260" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="142.0" y="212.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,n</text>
+<polyline points="255,140 290,140 290,160 320,160" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="290.0" y="145.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n consulté</text>
+<polyline points="255,130 280,130 280,300 320,300" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="280.0" y="210.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n</text>
+<polyline points="142,385 142,470" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="142.0" y="422.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n</text>
+<polyline points="255,500 320,500" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="287.5" y="495.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n</text>
+<polyline points="435,520 435,600" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="435.0" y="555.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,n</text>
+<polyline points="845,140 880,140 880,200 910,200" fill="none" stroke="#8a7f72" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#fl)"/>
+<polyline points="730,175 730,250" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="730.0" y="207.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,n instancié</text>
+<polyline points="730,545 730,620" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="730.0" y="577.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n</text>
+<polyline points="1030,265 1030,340" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="1030.0" y="297.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">1,n INCRÉMENTAL</text>
+<polyline points="1030,455 1030,520" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="1030.0" y="482.5" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">0,n</text>
+<path d="M30,690 h1106 l14,14 v11 h-1120 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1"/>
+<path d="M1136,690 v14 h14 z" fill="#f3e4c4" stroke="#b58a3a" stroke-width="1"/>
+<text x="38" y="708" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">Le consentement doit être PROUVABLE : date, version exacte du texte affiché, canal et preuve d'opt-in. Un consentement dont on ne peut pas prouver la version ne vaut rien en contrôle.</text></svg>

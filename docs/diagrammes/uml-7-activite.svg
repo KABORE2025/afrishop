@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 940" width="100%"><defs><marker id="fl" markerWidth="8" markerHeight="8" refX="7" refY="2.8" orient="auto"><path d="M0,0 L6.5,2.8 L0,5.6 z" fill="#8a7f72"/></marker><marker id="flv" markerWidth="9" markerHeight="9" refX="8" refY="3.2" orient="auto"><path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#2f5d8a"/></marker><marker id="creux" markerWidth="11" markerHeight="11" refX="10" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#fdfbf8" stroke="#8a7f72" stroke-width="1"/></marker></defs><rect width="1180" height="940" fill="#fdfbf8"/>
+<text x="590" y="30" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1a1714" text-anchor="middle">UML — DIAGRAMME D'ACTIVITÉ : CYCLE D'UNE COMMANDE</text>
+<text x="590" y="50" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-style="italic" fill="#7a6a58" text-anchor="middle">Quatre couloirs. Le point de décision central est le mode de paiement.</text>
+<rect x="75" y="78" width="185" height="800" rx="4" fill="#ffffff30" stroke="#3d3630" stroke-width="1.2"/>
+<rect x="75" y="78" width="185" height="26" fill="#3d3630" rx="4"/>
+<text x="167.5" y="96" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">CLIENT</text>
+<rect x="260" y="78" width="300" height="800" rx="4" fill="#ffffff30" stroke="#2f5d8a" stroke-width="1.2"/>
+<rect x="260" y="78" width="300" height="26" fill="#2f5d8a" rx="4"/>
+<text x="410.0" y="96" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">PLATEFORME</text>
+<rect x="560" y="78" width="300" height="800" rx="4" fill="#ffffff30" stroke="#c2571f" stroke-width="1.2"/>
+<rect x="560" y="78" width="300" height="26" fill="#c2571f" rx="4"/>
+<text x="710.0" y="96" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">VENDEUR / LIVREUR</text>
+<rect x="860" y="78" width="290" height="800" rx="4" fill="#ffffff30" stroke="#8a5a1c" stroke-width="1.2"/>
+<rect x="860" y="78" width="290" height="26" fill="#8a5a1c" rx="4"/>
+<text x="1005.0" y="96" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">SYSTÈME COMPTABLE</text>
+<circle cx="167" cy="128" r="8" fill="#3d3630"/>
+<rect x="90" y="150" width="155" height="38" rx="8" fill="#fff" stroke="#4a423a" stroke-width="1.4"/>
+<text x="167.5" y="173.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Remplit son panier</text>
+<rect x="90" y="210" width="155" height="38" rx="8" fill="#fff" stroke="#4a423a" stroke-width="1.4"/>
+<text x="167.5" y="227.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Saisit coordonnées</text>
+<text x="167.5" y="239.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">et repère</text>
+<rect x="90" y="270" width="155" height="38" rx="8" fill="#fff" stroke="#4a423a" stroke-width="1.4"/>
+<text x="167.5" y="287.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Choisit le mode</text>
+<text x="167.5" y="299.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">de paiement</text>
+<polyline points="167,136 167,150" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<polyline points="167,188 167,210" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<polyline points="167,248 167,270" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<path d="M410.0,320 L490,355.0 L410.0,390 L330,355.0 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1.6"/>
+<text x="410.0" y="359.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#6b5424" text-anchor="middle">Mobile Money ?</text>
+<polyline points="167,308 167,355 330,355" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<rect x="275" y="420" width="130" height="38" rx="8" fill="#fff" stroke="#8a5a1c" stroke-width="1.4"/>
+<text x="340.0" y="437.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Encaisse</text>
+<text x="340.0" y="449.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">via le PSP</text>
+<rect x="430" y="420" width="145" height="38" rx="8" fill="#fff" stroke="#8a5a1c" stroke-width="1.4"/>
+<text x="502.5" y="437.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Aucun encaissement</text>
+<text x="502.5" y="449.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">(espèces à la livraison)</text>
+<polyline points="370,388 340,388 340,420" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="355.0" y="383.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">oui</text>
+<polyline points="450,388 500,388 500,420" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="475.0" y="383.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">non</text>
+<rect x="280" y="500" width="260" height="46" rx="8" fill="#fff" stroke="#2f5d8a" stroke-width="1.4"/>
+<text x="410.0" y="521.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Éclate la commande par boutique</text>
+<text x="410.0" y="533.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">calcule TVA, commission, retenue</text>
+<polyline points="340,458 340,480 410,480 410,500" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<polyline points="500,458 500,480 410,480" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<rect x="590" y="500" width="240" height="38" rx="8" fill="#fff" stroke="#c2571f" stroke-width="1.4"/>
+<text x="710.0" y="523.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Prépare et emballe le colis</text>
+<polyline points="540,520 590,520" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<rect x="590" y="560" width="240" height="38" rx="8" fill="#fff" stroke="#c2571f" stroke-width="1.4"/>
+<text x="710.0" y="583.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Remet au livreur</text>
+<polyline points="710,538 710,560" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<rect x="590" y="620" width="240" height="46" rx="8" fill="#fff" stroke="#c2571f" stroke-width="1.4"/>
+<text x="710.0" y="641.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Livre et fait saisir le code</text>
+<text x="710.0" y="653.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">à usage unique</text>
+<polyline points="710,598 710,620" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<path d="M710.0,690 L820,723.0 L710.0,756 L600,723.0 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1.6"/>
+<text x="710.0" y="727.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.6" font-weight="700" fill="#6b5424" text-anchor="middle">Colis accepté ?</text>
+<polyline points="710,666 710,690" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<rect x="560" y="780" width="130" height="38" rx="8" fill="#fff" stroke="#b3261e" stroke-width="1.4"/>
+<text x="625.0" y="797.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Refuse</text>
+<text x="625.0" y="809.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">le colis</text>
+<polyline points="650,745 625,745 625,780" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="637.5" y="740.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">non</text>
+<rect x="880" y="690" width="250" height="46" rx="8" fill="#fff" stroke="#8a5a1c" stroke-width="1.4"/>
+<text x="1005.0" y="711.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Écritures : vente, commission,</text>
+<text x="1005.0" y="723.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">retenue à la source</text>
+<polyline points="820,723 880,723" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="850.0" y="718.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">oui</text>
+<rect x="880" y="770" width="250" height="46" rx="8" fill="#fff" stroke="#8a5a1c" stroke-width="1.4"/>
+<text x="1005.0" y="791.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Libère les fonds après</text>
+<text x="1005.0" y="803.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">confirmation ou délai</text>
+<polyline points="1005,736 1005,770" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<rect x="880" y="840" width="250" height="38" rx="8" fill="#fff" stroke="#8a5a1c" stroke-width="1.4"/>
+<text x="1005.0" y="863.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Regroupe et verse à la boutique</text>
+<polyline points="1005,816 1005,840" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<rect x="90" y="690" width="155" height="46" rx="8" fill="#fff" stroke="#3d3630" stroke-width="1.4"/>
+<text x="167.5" y="711.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">Confirme la</text>
+<text x="167.5" y="723.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.8" fill="#1a1714" text-anchor="middle">réception</text>
+<polyline points="600,723 245,723" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="422.5" y="718.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">notification</text>
+<polyline points="167,736 167,862 868,862 868,793 880,793" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<text x="874.0" y="787.0" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.2" fill="#7a6a58" text-anchor="middle">ou silence 3 jours</text>
+<circle cx="1005" cy="905" r="10" fill="none" stroke="#3d3630" stroke-width="1.6"/>
+<circle cx="1005" cy="905" r="6" fill="#3d3630"/>
+<polyline points="1005,878 1005,895" fill="none" stroke="#8a7f72" stroke-width="1.2" marker-end="url(#fl)"/>
+<path d="M30,890 h486 l14,14 v24 h-500 z" fill="#fdf6e8" stroke="#b58a3a" stroke-width="1"/>
+<path d="M516,890 v14 h14 z" fill="#f3e4c4" stroke="#b58a3a" stroke-width="1"/>
+<text x="38" y="908" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">Le point de décision « Mobile Money ? » est le vrai embranchement du système :</text>
+<text x="38" y="921" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.4" fill="#6b5424" text-anchor="start">il détermine s'il y a de l'argent à séquestrer, ou seulement une promesse.</text></svg>

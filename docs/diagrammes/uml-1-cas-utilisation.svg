@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 900" width="100%"><defs><marker id="fl" markerWidth="8" markerHeight="8" refX="7" refY="2.8" orient="auto"><path d="M0,0 L6.5,2.8 L0,5.6 z" fill="#8a7f72"/></marker><marker id="flv" markerWidth="9" markerHeight="9" refX="8" refY="3.2" orient="auto"><path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#2f5d8a"/></marker><marker id="creux" markerWidth="11" markerHeight="11" refX="10" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#fdfbf8" stroke="#8a7f72" stroke-width="1"/></marker></defs><rect width="1180" height="900" fill="#fdfbf8"/>
+<text x="590" y="32" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#1a1714" text-anchor="middle">UML — DIAGRAMME DE CAS D'UTILISATION</text>
+<text x="590" y="52" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-style="italic" fill="#7a6a58" text-anchor="middle">Six acteurs. Les cas grisés sont hors du périmètre du premier lot.</text>
+<rect x="255" y="85" width="620" height="780" rx="8" fill="#ffffff00" stroke="#8a7f72" stroke-width="1.4" stroke-dasharray="6,4"/>
+<text x="565" y="106" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11.5" font-weight="700" fill="#7a6a58" text-anchor="middle">PLATEFORME AFRISHOP</text>
+<circle cx="120" cy="150" r="11" fill="none" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="161" x2="120" y2="184" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="107" y1="170" x2="133" y2="170" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="184" x2="109" y2="202" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="184" x2="131" y2="202" stroke="#3d3630" stroke-width="1.6"/>
+<text x="120" y="218" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#1a1714" text-anchor="middle">Visiteur</text>
+<circle cx="120" cy="320" r="11" fill="none" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="331" x2="120" y2="354" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="107" y1="340" x2="133" y2="340" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="354" x2="109" y2="372" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="354" x2="131" y2="372" stroke="#3d3630" stroke-width="1.6"/>
+<text x="120" y="388" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#1a1714" text-anchor="middle">Client</text>
+<circle cx="120" cy="640" r="11" fill="none" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="651" x2="120" y2="674" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="107" y1="660" x2="133" y2="660" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="674" x2="109" y2="692" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="120" y1="674" x2="131" y2="692" stroke="#3d3630" stroke-width="1.6"/>
+<text x="120" y="708" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#1a1714" text-anchor="middle">Livreur</text>
+<circle cx="1050" cy="150" r="11" fill="none" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="161" x2="1050" y2="184" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1037" y1="170" x2="1063" y2="170" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="184" x2="1039" y2="202" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="184" x2="1061" y2="202" stroke="#3d3630" stroke-width="1.6"/>
+<text x="1050" y="218" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#1a1714" text-anchor="middle">Agent</text>
+<text x="1050" y="231" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9" fill="#7a6a58" text-anchor="middle">support</text>
+<circle cx="1050" cy="330" r="11" fill="none" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="341" x2="1050" y2="364" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1037" y1="350" x2="1063" y2="350" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="364" x2="1039" y2="382" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="364" x2="1061" y2="382" stroke="#3d3630" stroke-width="1.6"/>
+<text x="1050" y="398" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#1a1714" text-anchor="middle">Administrateur</text>
+<circle cx="1050" cy="560" r="11" fill="none" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="571" x2="1050" y2="594" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1037" y1="580" x2="1063" y2="580" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="594" x2="1039" y2="612" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="594" x2="1061" y2="612" stroke="#3d3630" stroke-width="1.6"/>
+<text x="1050" y="628" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#1a1714" text-anchor="middle">Vendeur</text>
+<circle cx="1050" cy="760" r="11" fill="none" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="771" x2="1050" y2="794" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1037" y1="780" x2="1063" y2="780" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="794" x2="1039" y2="812" stroke="#3d3630" stroke-width="1.6"/>
+<line x1="1050" y1="794" x2="1061" y2="812" stroke="#3d3630" stroke-width="1.6"/>
+<text x="1050" y="828" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#1a1714" text-anchor="middle">Prestataire</text>
+<text x="1050" y="841" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9" fill="#7a6a58" text-anchor="middle">de paiement</text>
+<ellipse cx="415.0" cy="146" rx="125.0" ry="21" fill="#fff" stroke="#c2571f" stroke-width="1.3"/>
+<text x="415.0" y="150" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Rechercher et filtrer des produits</text>
+<ellipse cx="415.0" cy="201" rx="125.0" ry="21" fill="#fff" stroke="#c2571f" stroke-width="1.3"/>
+<text x="415.0" y="205" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Comparer les offres concurrentes</text>
+<ellipse cx="415.0" cy="256" rx="125.0" ry="21" fill="#fff" stroke="#1f6b4a" stroke-width="1.3"/>
+<text x="415.0" y="260" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Vérifier une étiquette QR</text>
+<ellipse cx="415.0" cy="321" rx="125.0" ry="21" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<text x="415.0" y="325" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Passer une commande multi-boutiques</text>
+<ellipse cx="415.0" cy="376" rx="125.0" ry="21" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<text x="415.0" y="380" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Payer (Mobile Money ou espèces)</text>
+<ellipse cx="415.0" cy="431" rx="125.0" ry="21" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<text x="415.0" y="435" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Suivre et confirmer la réception</text>
+<ellipse cx="415.0" cy="486" rx="125.0" ry="21" fill="#fff" stroke="#b3261e" stroke-width="1.3"/>
+<text x="415.0" y="490" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Demander un retour ou ouvrir un litige</text>
+<ellipse cx="415.0" cy="541" rx="125.0" ry="21" fill="#fff" stroke="#0f7b8a" stroke-width="1.3"/>
+<text x="415.0" y="545" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Déposer un avis</text>
+<ellipse cx="722.5" cy="501" rx="132.5" ry="21" fill="#fff" stroke="#c2571f" stroke-width="1.3"/>
+<text x="722.5" y="505" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Gérer produits, variantes et photos</text>
+<ellipse cx="722.5" cy="556" rx="132.5" ry="21" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<text x="722.5" y="560" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Traiter les commandes reçues</text>
+<ellipse cx="722.5" cy="611" rx="132.5" ry="21" fill="#fff" stroke="#8a5a1c" stroke-width="1.3"/>
+<text x="722.5" y="615" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Consulter son solde et ses versements</text>
+<ellipse cx="722.5" cy="666" rx="132.5" ry="21" fill="#fff" stroke="#1f6b4a" stroke-width="1.3"/>
+<text x="722.5" y="670" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Demander un lot d'étiquettes QR</text>
+<ellipse cx="722.5" cy="721" rx="132.5" ry="21" fill="#fff" stroke="#b3261e" stroke-width="1.3"/>
+<text x="722.5" y="725" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Contester un litige</text>
+<ellipse cx="415.0" cy="721" rx="125.0" ry="21" fill="#fff" stroke="#2f5d8a" stroke-width="1.3"/>
+<text x="415.0" y="725" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Valider la livraison par code</text>
+<ellipse cx="415.0" cy="776" rx="125.0" ry="21" fill="#fff" stroke="#8a5a1c" stroke-width="1.3"/>
+<text x="415.0" y="780" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Remettre les espèces collectées</text>
+<ellipse cx="722.5" cy="151" rx="132.5" ry="21" fill="#fff" stroke="#c2571f" stroke-width="1.3"/>
+<text x="722.5" y="155" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Modérer le catalogue</text>
+<ellipse cx="722.5" cy="206" rx="132.5" ry="21" fill="#fff" stroke="#b3261e" stroke-width="1.3"/>
+<text x="722.5" y="210" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Trancher les litiges</text>
+<ellipse cx="722.5" cy="261" rx="132.5" ry="21" fill="#fff" stroke="#6b3fa0" stroke-width="1.3"/>
+<text x="722.5" y="265" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Traiter les demandes de droits</text>
+<ellipse cx="722.5" cy="316" rx="132.5" ry="21" fill="#fff" stroke="#c2571f" stroke-width="1.3"/>
+<text x="722.5" y="320" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Valider les candidatures vendeurs</text>
+<ellipse cx="722.5" cy="371" rx="132.5" ry="21" fill="#fff" stroke="#1f6b4a" stroke-width="1.3"/>
+<text x="722.5" y="375" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Générer les lots QR</text>
+<ellipse cx="722.5" cy="426" rx="132.5" ry="21" fill="#fff" stroke="#8a5a1c" stroke-width="1.3"/>
+<text x="722.5" y="430" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#1a1714" text-anchor="middle">Exécuter les versements</text>
+<ellipse cx="415.0" cy="601" rx="125.0" ry="21" fill="#f0ece6" stroke="#b0a89c" stroke-width="1.3"/>
+<text x="415.0" y="605" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#7a6a58" text-anchor="middle">Parrainer un ami</text>
+<ellipse cx="415.0" cy="656" rx="125.0" ry="21" fill="#f0ece6" stroke="#b0a89c" stroke-width="1.3"/>
+<text x="415.0" y="660" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="10" fill="#7a6a58" text-anchor="middle">Payer en plusieurs fois</text>
+<line x1="140" y1="190" x2="290" y2="146" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="190" x2="290" y2="201" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="190" x2="290" y2="256" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="360" x2="290" y2="321" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="360" x2="290" y2="376" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="360" x2="290" y2="431" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="360" x2="290" y2="486" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="360" x2="290" y2="541" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="360" x2="290" y2="601" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="360" x2="290" y2="656" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="680" x2="290" y2="721" stroke="#b0a89c" stroke-width="1"/>
+<line x1="140" y1="680" x2="290" y2="776" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="190" x2="855" y2="151" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="190" x2="855" y2="206" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="190" x2="855" y2="261" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="370" x2="855" y2="261" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="370" x2="855" y2="316" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="370" x2="855" y2="371" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="370" x2="855" y2="426" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="600" x2="855" y2="501" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="600" x2="855" y2="556" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="600" x2="855" y2="611" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="600" x2="855" y2="666" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="600" x2="855" y2="721" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="800" x2="855" y2="426" stroke="#b0a89c" stroke-width="1"/>
+<line x1="1030" y1="800" x2="540" y2="376" stroke="#b0a89c" stroke-width="1"/>
+<rect x="255" y="875" width="10" height="10" rx="2" fill="#c2571f"/>
+<text x="270" y="884" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#4a423a" text-anchor="start">Catalogue</text>
+<rect x="373" y="875" width="10" height="10" rx="2" fill="#2f5d8a"/>
+<text x="388" y="884" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#4a423a" text-anchor="start">Commande</text>
+<rect x="491" y="875" width="10" height="10" rx="2" fill="#8a5a1c"/>
+<text x="506" y="884" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#4a423a" text-anchor="start">Argent</text>
+<rect x="609" y="875" width="10" height="10" rx="2" fill="#1f6b4a"/>
+<text x="624" y="884" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#4a423a" text-anchor="start">Traçabilité</text>
+<rect x="727" y="875" width="10" height="10" rx="2" fill="#b3261e"/>
+<text x="742" y="884" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#4a423a" text-anchor="start">Après-vente</text>
+<rect x="845" y="875" width="10" height="10" rx="2" fill="#6b3fa0"/>
+<text x="860" y="884" font-family="DejaVu Sans, Helvetica, sans-serif" font-size="9.5" fill="#4a423a" text-anchor="start">Conformité</text></svg>
