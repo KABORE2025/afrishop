@@ -26,6 +26,20 @@ return [
     'commission_defaut' => (int) env('AFRISHOP_COMMISSION_DEFAUT', 10),
 
     /*
+     * Prestataire de paiement en ligne.
+     * « fake » est le seul driver livré : il simule un encaissement
+     * instantané, pour que le parcours de commande en ligne soit
+     * testable sans contrat signé avec un PSP. Brancher un vrai
+     * prestataire consiste à ajouter une classe qui implémente
+     * PaymentGatewayInterface et un cas dans AppServiceProvider —
+     * rien d'autre dans le code n'a besoin de changer.
+     */
+    'psp' => [
+        'driver'         => env('PSP_DRIVER', 'fake'),
+        'webhook_secret' => env('PSP_WEBHOOK_SECRET'),
+    ],
+
+    /*
      * Seuil minimum de reversement.
      * En dessous, on attend le cycle suivant : les frais fixes de
      * transfert Mobile Money rendraient l'opération absurde.

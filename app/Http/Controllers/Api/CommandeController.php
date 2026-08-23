@@ -3,35 +3,37 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CandidaterRequest;
+use App\Http\Requests\CreerCommandeRequest;
+use App\Models\Candidature;
 use App\Models\Commande;
+use App\Models\Pays;
+use App\Services\Paiement\PaiementCommandeService;
 use App\Services\PanierService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 /**
  * =====================================================================
- *  COMMANDES — CE CONTRÔLEUR EST UNE AMORCE, PAS UNE IMPLÉMENTATION
+ *  COMMANDES
  * =====================================================================
- *  `suivi()` fonctionne : il est en lecture seule et sans règle métier.
+ *  `suivi()` est en lecture seule et sans règle métier.
  *
- *  `creer()` et `candidater()` sont volontairement laissés à écrire.
- *  Ce n'est pas de la paresse : créer une commande engage l'éclatement
- *  en sous-commandes, le calcul de commission, la retenue à la source,
- *  l'état des fonds et l'écriture au grand livre. Livrer une version
- *  approximative de tout cela serait pire que de ne rien livrer — les
- *  erreurs d'argent ne se voient qu'au premier reversement.
- *
- *  Les règles à respecter sont numérotées dans le dossier de conception
- *  (§ 2.6 et § 2.7, règles RG-27 à RG-36). Les services qui font le
- *  travail existent déjà : PanierService, TaxeService,
- *  RetenueSourceService, SequestreService, GrandLivreService.
+ *  `creer()` s'appuie entièrement sur PanierService::creerCommande(), qui
+ *  fait déjà l'éclatement par boutique, la TVA, la commission et la
+ *  retenue à la source. Ce contrôleur ne fait que : valider la requête,
+ *  répondre pour le paiement à la livraison (rien de plus à faire), et
+ *  démarrer l'encaissement pour les autres modes via PaiementCommandeService
+ *  — qui isole tout ce qui dépend d'un vrai prestataire de paiement.
  * =====================================================================
  */
 class CommandeController extends Controller
 {
-    public function __construct(private PanierService $panier)
-    {
-    }
+    public function __construct(
+        private PanierService $panier,
+        private PaiementCommandeService $paiement,
+    ) {}
 
     /**
      * Suivi d'une commande.
@@ -67,19 +69,65 @@ class CommandeController extends Controller
         return response()->json($commande);
     }
 
-    /** À IMPLÉMENTER — voir § 2.6 du dossier (éclatement, RG-27 à RG-36). */
-    public function creer(Request $r): JsonResponse
+    /**
+     * Crée une commande à partir d'un panier.
+     *
+     * Paiement à la livraison : c'est terminé, rien n'est encaissé (voir
+     * PanierService). Les autres modes démarrent un encaissement dont le
+     * dénouement dépend de la passerelle configurée (App\Services\Paiement).
+     */
+    public function creer(CreerCommandeRequest $r): JsonResponse
     {
-        return response()->json([
-            'message' => "Non implémenté. La création de commande engage l'éclatement en "
-                       . "sous-commandes, la commission, la retenue à la source et le grand "
-                       . "livre : voir § 2.6 et § 2.7 du dossier de conception.",
-        ], 501);
+        $data = $r->validated();
+        $pays = Pays::findOrFail($data['pays_id']);
+
+        try {
+            $commande = $this->panier->creerCommande(
+                articles: $data['articles'],
+                client: [
+                    'nom'             => $data['nom'],
+                    'telephone'       => $data['telephone'],
+                    'ville_id'        => $data['ville_id'] ?? null,
+                    'quartier'        => $data['quartier'],
+                    'repere'          => $data['repere'] ?? null,
+                    'mode_livraison'  => $data['mode_livraison'] ?? 'domicile',
+                    'mode_paiement'   => $data['mode_paiement'],
+                    'cgv_version'     => $data['cgv_version'] ?? null,
+                ],
+                pays: $pays,
+                utilisateurId: $r->user()?->id,
+            );
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        if ($data['mode_paiement'] === 'especes_livraison') {
+            return response()->json($commande, 201);
+        }
+
+        $resultat = $this->paiement->demarrerPaiement($commande);
+
+        return match ($resultat['statut']) {
+            'reussie' => response()->json($commande->fresh(['sousCommandes.lignes']), 201),
+            'en_attente' => response()->json([
+                'commande' => $commande,
+                'paiement' => ['statut' => 'en_attente', 'url_paiement' => $resultat['url_paiement']],
+            ], 202),
+            default => response()->json([
+                'message'  => "Le paiement a été refusé. La commande a été annulée et les articles remis en stock.",
+                'commande' => $commande->fresh(),
+            ], 422),
+        };
     }
 
-    /** À IMPLÉMENTER — candidature d'une boutique (§ 2.13). */
-    public function candidater(Request $r): JsonResponse
+    /** Candidature d'une boutique. Traitée ensuite par un administrateur. */
+    public function candidater(CandidaterRequest $r): JsonResponse
     {
-        return response()->json(['message' => 'Non implémenté.'], 501);
+        $candidature = Candidature::create($r->validated() + ['statut' => 'en_attente']);
+
+        return response()->json([
+            'message' => "Candidature enregistrée. Nous vous recontacterons sous quelques jours.",
+            'id'      => $candidature->id,
+        ], 201);
     }
 }

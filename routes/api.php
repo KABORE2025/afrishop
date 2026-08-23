@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogueController;
 use App\Http\Controllers\Api\CommandeController;
 use App\Http\Controllers\Api\LotQrController;
+use App\Http\Controllers\Api\PaiementWebhookController;
 use App\Http\Controllers\Api\VendeurController;
 use App\Http\Controllers\Api\VerificationQrController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +27,18 @@ use Illuminate\Support\Facades\Route;
 | bénéfice. À introduire le jour où une application mobile publiée sur les
 | stores consommera cette API — car on ne pourra plus forcer sa mise à jour.
 */
+
+// ---------------------------------------------------------------------
+// 0. AUTHENTIFICATION
+// ---------------------------------------------------------------------
+// Un compte créé via /auth/inscription est toujours un CLIENT : devenir
+// vendeur passe par /candidatures, traitée par un administrateur.
+Route::post('/auth/inscription',   [AuthController::class, 'inscrire']);
+Route::post('/auth/connexion',     [AuthController::class, 'connecter']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/auth/deconnexion', [AuthController::class, 'deconnecter']);
+    Route::get('/auth/moi',          [AuthController::class, 'moi']);
+});
 
 // ---------------------------------------------------------------------
 // 1. PUBLIC
@@ -70,3 +84,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('/lots-qr/{lot}/statistiques',   [LotQrController::class, 'statistiques']);
     Route::post('/lots-qr/{lot}/rappel',        [LotQrController::class, 'rappeler']);
 });
+
+// ---------------------------------------------------------------------
+// 4. WEBHOOKS PSP
+// ---------------------------------------------------------------------
+// Hors auth:sanctum par nature : c'est le prestataire de paiement qui
+// appelle, pas un utilisateur de la plateforme. L'authenticité est
+// vérifiée par signature (PaymentGatewayInterface::verifierSignatureWebhook()),
+// pas par un jeton Sanctum.
+Route::post('/webhooks/paiement/{prestataire}', [PaiementWebhookController::class, 'recevoir']);

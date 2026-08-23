@@ -320,7 +320,7 @@ SQL);
            ================================================================= */
 
         Schema::table('categories', function (Blueprint $t) {
-            $t->boolean('reservee')->default(false)->after('libelle')
+            $t->boolean('reservee')->default(false)->after('nom')
               ->comment('Une fiche de cette catégorie n\'est visible qu\'après autorisation');
             $t->string('note_reserve', 300)->nullable()->after('reservee');
         });

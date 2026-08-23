@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Produit extends Model
 {
@@ -87,5 +88,29 @@ class Produit extends Model
         $sansAccents = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $nom);
 
         return preg_replace('/[^a-z0-9]/', '', mb_strtolower($sansAccents));
+    }
+
+    /** Référence lisible, préfixée par le code boutique : BF-V001-P0007. */
+    public static function prochaineReference(Boutique $boutique): string
+    {
+        $prefixe = $boutique->code . '-P';
+        $dernier = static::where('reference', 'like', $prefixe . '%')->max('reference');
+        $numero = $dernier ? ((int) substr($dernier, strlen($prefixe))) + 1 : 1;
+
+        return sprintf('%s%04d', $prefixe, $numero);
+    }
+
+    /** Slug unique : on ajoute un compteur plutôt qu'un suffixe aléatoire, plus lisible en URL. */
+    public static function slugUnique(string $nom): string
+    {
+        $base = Str::slug($nom);
+        $slug = $base;
+        $n = 1;
+
+        while (static::where('slug', $slug)->exists()) {
+            $slug = $base . '-' . ++$n;
+        }
+
+        return $slug;
     }
 }

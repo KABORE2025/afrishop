@@ -49,8 +49,8 @@ class SequestreService
 
     public function liberables(SousCommande $sc): bool
     {
-        if ($sc->statut !== 'livree')          return false;
-        if ($sc->etat_fonds !== 'sequestre')   return false;
+        if ($sc->statut !== 'livree')             return false;
+        if ($sc->etat_fonds->value !== 'sequestre') return false;
         if ($sc->aUnLitigeOuvert())            return false;
         // Un retour en cours gèle aussi les fonds : rembourser après
         // avoir payé le vendeur oblige à lui reprendre l'argent, ce qui
@@ -66,9 +66,9 @@ class SequestreService
 
     public function rembourser(SousCommande $sc, string $motif, ?int $auteurId = null): void
     {
-        if (! in_array($sc->etat_fonds, ['sequestre', 'attente_encaissement'], true)) {
+        if (! in_array($sc->etat_fonds->value, ['sequestre', 'attente_encaissement'], true)) {
             throw new RuntimeException(
-                "Impossible de rembourser {$sc->reference} : les fonds sont déjà « {$sc->etat_fonds} »."
+                "Impossible de rembourser {$sc->reference} : les fonds sont déjà « {$sc->etat_fonds->value} »."
             );
         }
 
@@ -110,12 +110,12 @@ class SequestreService
     public function raisonBlocage(SousCommande $sc): string
     {
         return match (true) {
-            $sc->etat_fonds === 'attente_encaissement' =>
+            $sc->etat_fonds->value === 'attente_encaissement' =>
                 'la commande est payable à la livraison : rien n\'a encore été encaissé',
-            $sc->etat_fonds === 'impaye' =>
+            $sc->etat_fonds->value === 'impaye' =>
                 'le colis a été refusé à la porte : rien n\'a été encaissé',
-            $sc->etat_fonds !== 'sequestre' =>
-                "les fonds sont déjà « {$sc->etat_fonds} »",
+            $sc->etat_fonds->value !== 'sequestre' =>
+                "les fonds sont déjà « {$sc->etat_fonds->value} »",
             $sc->statut !== 'livree' =>
                 "le colis n'est pas encore livré ({$sc->statut})",
             $sc->aUnLitigeOuvert() => 'un litige est en cours d\'examen',
