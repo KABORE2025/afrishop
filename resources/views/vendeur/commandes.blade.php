@@ -3,8 +3,7 @@
 @section('titre', 'Mes commandes')
 
 @section('navigation')
-    <a href="/vendeur" class="hover:text-brun">Tableau de bord</a>
-    <a href="/vendeur/commandes" class="text-brun">Commandes</a>
+    @include('vendeur._navigation')
 @endsection
 
 @section('contenu')

@@ -45,4 +45,14 @@ class EspaceVendeurController extends Controller
     {
         return view('vendeur.commandes');
     }
+
+    public function produits(): View
+    {
+        return view('vendeur.produits');
+    }
+
+    public function reversements(): View
+    {
+        return view('vendeur.reversements');
+    }
 }
