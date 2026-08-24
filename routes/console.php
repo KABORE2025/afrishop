@@ -24,6 +24,16 @@ Schedule::command('afrishop:preparer-reversements')->weeklyOn(1, '07:00');
 // qu'aucun connecteur PSP n'est branché (ReconciliationPspService::rapprocher()).
 Schedule::command('afrishop:reconcilier-psp')->dailyAt('05:30');
 
+// Draine la file des SMS. Toutes les minutes : un code de livraison qui
+// arrive dix minutes après le livreur ne sert à rien.
+// MÊME RISQUE QUE LA LIBÉRATION DES FONDS : si elle s'arrête, la file
+// grossit en silence et les clients ne reçoivent plus leur code.
+// withoutOverlapping() évite que deux passages prennent les mêmes lignes
+// quand un envoi traîne.
+Schedule::command('afrishop:envoyer-notifications')
+    ->everyMinute()
+    ->withoutOverlapping();
+
 // afrishop:arreter-cantonnement N'EST PAS planifiée : le solde du compte
 // de cantonnement est un chiffre humain (relevé bancaire), pas une
 // valeur que l'application peut calculer seule. À lancer par un

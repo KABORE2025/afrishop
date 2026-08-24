@@ -40,6 +40,30 @@ return [
     ],
 
     /*
+     * Passerelle SMS.
+     * Le SMS porte le code de livraison à usage unique : sans envoi,
+     * le parcours de livraison ne peut pas se terminer.
+     *
+     * « journal » n'envoie rien et écrit dans les logs — c'est le
+     * pendant SMS de « fake » côté PSP, pour développer sans contrat
+     * opérateur. « orange » utilise l'API SMS Burkina Faso d'Orange.
+     *
+     * Le coût unitaire est renseigné à la main d'après le paquet acheté
+     * (Silver : 1 000 SMS pour 8 000 F → 8 F). Il sert à chiffrer la
+     * ligne « SMS » chaque mois, pas à facturer : le vrai décompte reste
+     * celui d'Orange.
+     */
+    'sms' => [
+        'driver'            => env('SMS_DRIVER', 'journal'),
+        'client_id'         => env('SMS_ORANGE_CLIENT_ID'),
+        'client_secret'     => env('SMS_ORANGE_CLIENT_SECRET'),
+        'adresse_expediteur'=> env('SMS_ORANGE_ADRESSE', '+22600000000'),
+        /* 11 caractères alphanumériques maximum, validés par Orange. */
+        'nom_expediteur'    => env('SMS_NOM_EXPEDITEUR', 'AFRISHOP'),
+        'cout_unitaire_cfa' => (int) env('SMS_COUT_UNITAIRE_CFA', 8),
+    ],
+
+    /*
      * Seuil minimum de reversement.
      * En dessous, on attend le cycle suivant : les frais fixes de
      * transfert Mobile Money rendraient l'opération absurde.
