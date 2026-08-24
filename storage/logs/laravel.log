@@ -2175,3 +2175,7 @@ Did you mean one of these?
 #52 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('F://Afrishop//Afr...')
 #53 {main}
 "} 
+[2026-08-24 22:45:57] local.ERROR: Maximum execution time of 30 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 30 seconds exceeded at F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Collections/LazyCollection.php:26)
+[stacktrace]
+#0 {main}
+"} 

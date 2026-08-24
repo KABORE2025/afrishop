@@ -4,12 +4,20 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreerProduitRequest;
+use App\Http\Requests\MajStockRequest;
+use App\Http\Requests\ModifierProduitRequest;
+use App\Http\Resources\ProduitResource;
+use App\Http\Resources\ReversementResource;
+use App\Http\Resources\SousCommandeResource;
+use App\Http\Resources\VarianteProduitResource;
 use App\Models\Boutique;
 use App\Models\Expedition;
 use App\Models\Produit;
 use App\Models\Reversement;
 use App\Models\SousCommande;
+use App\Models\VarianteProduit;
 use App\Services\EspecesService;
+use App\Services\TableauBordVendeurService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,13 +47,42 @@ class VendeurController extends Controller
             return response()->json(['message' => 'Aucune boutique rattachée à ce compte.'], 403);
         }
 
+        $requete = SousCommande::query()
+            ->where('boutique_id', $boutiqueId)
+            ->with(['lignes', 'expedition', 'commande:id,reference,cree_le']);
+
+        /*
+         * Filtres — un vendeur cherche « ce que je dois préparer », pas
+         * « toutes mes ventes depuis l'ouverture ». Sans eux, l'écran
+         * devient inutilisable dès la centième commande.
+         */
+        if ($r->filled('statut')) {
+            $requete->whereIn('statut', (array) $r->input('statut'));
+        }
+
+        if ($r->filled('etat_fonds')) {
+            $requete->whereIn('etat_fonds', (array) $r->input('etat_fonds'));
+        }
+
+        if ($r->filled('recherche')) {
+            $requete->where('reference', 'like', '%' . $r->string('recherche') . '%');
+        }
+
         return response()->json(
-            SousCommande::query()
-                ->where('boutique_id', $boutiqueId)
-                ->with(['lignes', 'commande:id,reference,cree_le'])
-                ->orderByDesc('id')
-                ->paginate($r->integer('par_page', 25))
+            SousCommandeResource::collection(
+                $requete->orderByDesc('id')->paginate($r->integer('par_page', 25))
+            )->response()->getData(true)
         );
+    }
+
+    /**
+     * Les indicateurs de la boutique, calculés côté serveur.
+     * La liste des commandes étant paginée, un total calculé depuis le
+     * front porterait sur 25 lignes en croyant porter sur toutes.
+     */
+    public function tableauDeBord(Request $r, TableauBordVendeurService $service): JsonResponse
+    {
+        return response()->json($service->pour($this->resoudreBoutique($r)));
     }
 
     /**
@@ -90,7 +127,7 @@ class VendeurController extends Controller
             $sousCommande->journaliser('expediee', ['code_suivi' => $data['code_suivi'] ?? null], $r->user()->id, 'vendeur');
         });
 
-        return response()->json($sousCommande->fresh(['expedition']));
+        return response()->json(new SousCommandeResource($sousCommande->fresh(['expedition', 'lignes'])));
     }
 
     /**
@@ -136,7 +173,7 @@ class VendeurController extends Controller
             $sousCommande->commande->rafraichirStatut();
         });
 
-        return response()->json($sousCommande->fresh(['expedition']));
+        return response()->json(new SousCommandeResource($sousCommande->fresh(['expedition', 'lignes'])));
     }
 
     /** Produits de la boutique, avec leurs variantes. */
@@ -145,10 +182,12 @@ class VendeurController extends Controller
         $boutique = $this->resoudreBoutique($r);
 
         return response()->json(
-            Produit::where('boutique_id', $boutique->id)
-                ->with('variantes')
-                ->orderByDesc('id')
-                ->paginate($r->integer('par_page', 25))
+            ProduitResource::collection(
+                Produit::where('boutique_id', $boutique->id)
+                    ->with('variantes')
+                    ->orderByDesc('id')
+                    ->paginate($r->integer('par_page', 25))
+            )->response()->getData(true)
         );
     }
 
@@ -193,7 +232,7 @@ class VendeurController extends Controller
             return $produit;
         });
 
-        return response()->json($produit->fresh('variantes'), 201);
+        return response()->json(new ProduitResource($produit->fresh('variantes')), 201);
     }
 
     /** Historique des reversements de la boutique. */
@@ -202,10 +241,109 @@ class VendeurController extends Controller
         $boutique = $this->resoudreBoutique($r);
 
         return response()->json(
-            Reversement::where('boutique_id', $boutique->id)
-                ->orderByDesc('id')
-                ->paginate($r->integer('par_page', 25))
+            ReversementResource::collection(
+                Reversement::where('boutique_id', $boutique->id)
+                    ->orderByDesc('id')
+                    ->paginate($r->integer('par_page', 25))
+            )->response()->getData(true)
         );
+    }
+
+    /**
+     * Modification d'un produit existant.
+     *
+     * MANQUAIT COMPLÈTEMENT : un vendeur pouvait créer une fiche mais
+     * jamais corriger un prix ni une description. Le seul recours était
+     * d'en créer une seconde — d'où des catalogues en double.
+     *
+     * Ce qui n'est PAS modifiable ici (référence, slug, boutique,
+     * statut de modération) est justifié dans ModifierProduitRequest.
+     */
+    public function modifierProduit(ModifierProduitRequest $r, Produit $produit): JsonResponse
+    {
+        $boutique = $this->resoudreBoutique($r);
+
+        if ($produit->boutique_id !== $boutique->id) {
+            abort(403, "Ce produit n'appartient pas à votre boutique.");
+        }
+
+        $donnees = $r->validated();
+
+        /*
+         * REPASSAGE EN MODÉRATION SUR CHANGEMENT DE FOND.
+         * Corriger une faute de frappe dans le prix ne doit pas
+         * remettre la fiche en file d'attente. Changer le nom, la
+         * description ou la catégorie, si : sans cela, il suffirait de
+         * publier « Miel de karité », d'attendre la validation, puis de
+         * réécrire la fiche en produit interdit. Le contournement est
+         * évident, la parade doit l'être aussi.
+         */
+        $champsSensibles = ['nom', 'description', 'categorie_id'];
+        $remoderer = $produit->statut_moderation === 'publie'
+            && collect($champsSensibles)->contains(
+                fn ($c) => array_key_exists($c, $donnees) && $donnees[$c] !== $produit->$c
+            );
+
+        if ($remoderer) {
+            $donnees['statut_moderation'] = 'en_attente';
+            $donnees['motif_moderation']  = 'Fiche modifiée par la boutique — nouvelle validation requise.';
+        }
+
+        $produit->update($donnees);
+
+        return response()->json([
+            'produit'     => new ProduitResource($produit->fresh('variantes')),
+            'remodere'    => $remoderer,
+            'information' => $remoderer
+                ? 'La fiche a été modifiée sur le fond : elle repasse en validation et n\'est plus visible en vitrine en attendant.'
+                : null,
+        ]);
+    }
+
+    /**
+     * Mise à jour d'une variante — stock, prix, libellé.
+     * Le geste le plus fréquent d'une boutique, et il n'existait pas.
+     */
+    public function majVariante(MajStockRequest $r, VarianteProduit $variante): JsonResponse
+    {
+        $boutique = $this->resoudreBoutique($r);
+
+        if ($variante->produit->boutique_id !== $boutique->id) {
+            abort(403, "Cette variante n'appartient pas à votre boutique.");
+        }
+
+        $donnees = $r->validated();
+
+        return DB::transaction(function () use ($variante, $donnees) {
+            /*
+             * Le mouvement relatif est appliqué SOUS VERROU. Deux
+             * réceptions saisies en même temps par deux personnes de la
+             * même boutique doivent s'additionner ; sans le verrou, la
+             * seconde écrase la première et le stock est faux sans que
+             * rien ne le signale.
+             */
+            if (array_key_exists('mouvement', $donnees)) {
+                $verrouillee = VarianteProduit::whereKey($variante->id)->lockForUpdate()->first();
+                $donnees['stock'] = $verrouillee->stock + (int) $donnees['mouvement'];
+                unset($donnees['mouvement']);
+                $variante = $verrouillee;
+            }
+
+            $variante->update($donnees);
+            $variante->refresh();
+
+            return response()->json([
+                'variante' => new VarianteProduitResource($variante),
+                /* Une alerte lisible plutôt qu'un booléen que l'écran
+                 * oubliera d'interpréter. */
+                'alerte'   => match (true) {
+                    $variante->stock < 0        => 'Stock négatif : une survente a été constatée sur cette variante.',
+                    $variante->enRupture()      => 'Rupture de stock : la variante n\'est plus achetable.',
+                    $variante->stockCritique()  => 'Stock critique : ' . $variante->stock . ' unité(s) restante(s).',
+                    default                     => null,
+                },
+            ]);
+        });
     }
 
     /**
