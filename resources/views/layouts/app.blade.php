@@ -80,5 +80,13 @@
     </div>
 </noscript>
 
+{{--
+  Les écrans déclarent ici leurs propres composants Alpine.
+  Alpine ne démarre qu'au `DOMContentLoaded` (voir `resources/js/app.js`) :
+  ces scripts ont donc le temps de s'enregistrer avant qu'il ne parcoure
+  le DOM. Inverser cet ordre rendrait les écrans inertes, sans erreur.
+--}}
+@stack('scripts')
+
 </body>
 </html>

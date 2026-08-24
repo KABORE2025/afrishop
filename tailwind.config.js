@@ -29,6 +29,27 @@ export default {
         './resources/js/**/*.js',
     ],
 
+    /*
+     * LISTE BLANCHE — indispensable, pas une précaution.
+     *
+     * Les badges d'état sont construits dynamiquement dans les écrans :
+     * `:class="'etat-' + sc.argent.etat"`. Tailwind ne lit pas le
+     * JavaScript à l'exécution, il cherche des noms de classes ÉCRITS
+     * EN TOUTES LETTRES dans les fichiers. La chaîne `'etat-' + ...`
+     * n'en est pas un : sans cette liste, les classes ne seraient pas
+     * générées et tous les badges s'afficheraient sans couleur — sans
+     * la moindre erreur pour le signaler.
+     *
+     * Toute nouvelle valeur de `etat_fonds` ou de `statut` doit être
+     * ajoutée ici EN MÊME TEMPS que dans l'enum PHP.
+     */
+    safelist: [
+        'etat-attente_encaissement', 'etat-sequestre', 'etat-reverse',
+        'etat-rembourse', 'etat-impaye',
+        'statut-a_preparer', 'statut-prete', 'statut-expediee',
+        'statut-livree', 'statut-retournee', 'statut-annulee',
+    ],
+
     theme: {
         extend: {
             colors: {

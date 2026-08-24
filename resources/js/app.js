@@ -21,6 +21,28 @@ window.fcfa = fcfa;
 window.dateFr = dateFr;
 
 /*
+ * Garde d'accès côté navigateur.
+ *
+ * Les pages de l'espace vendeur sont servies SANS contrôle côté serveur,
+ * et c'est cohérent : elles ne contiennent aucune donnée. Ce sont des
+ * coquilles vides que le JavaScript remplit en appelant l'API — laquelle,
+ * elle, est protégée par `auth:sanctum` et `role:vendeur`. Un visiteur
+ * sans jeton qui atteindrait l'URL ne verrait qu'une page vide.
+ *
+ * Cette fonction ne protège donc RIEN : elle évite seulement d'afficher
+ * un écran vide à quelqu'un qui devrait se connecter. La vraie barrière
+ * est l'API, et elle est ailleurs.
+ */
+window.exigerConnexion = function () {
+    if (!jeton.lire()) {
+        const retour = encodeURIComponent(window.location.pathname);
+        window.location.replace(`/vendeur/connexion?retour=${retour}`);
+        return false;
+    }
+    return true;
+};
+
+/*
  * Formulaire générique.
  *
  * Il existe pour une raison précise : l'API renvoie ses messages de
@@ -123,4 +145,18 @@ Alpine.data('session', () => ({
 }));
 
 window.Alpine = Alpine;
-Alpine.start();
+
+/*
+ * DÉMARRAGE DIFFÉRÉ — et c'est nécessaire, pas cosmétique.
+ *
+ * Les écrans déclarent leurs propres composants dans un `@push('scripts')`
+ * placé en fin de page. Les modules s'exécutent dans l'ordre du document :
+ * ce fichier, chargé dans le <head>, tourne AVANT eux. Si Alpine démarrait
+ * ici, il aurait déjà parcouru le DOM quand un écran enregistre son
+ * composant, et l'écran resterait inerte — sans la moindre erreur en
+ * console, ce qui est le pire cas à diagnostiquer.
+ *
+ * `DOMContentLoaded` se déclenche après l'exécution de tous les modules :
+ * chacun a eu le temps de s'enregistrer.
+ */
+document.addEventListener('DOMContentLoaded', () => Alpine.start());
