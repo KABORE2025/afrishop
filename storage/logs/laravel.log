@@ -2179,3 +2179,20 @@ Did you mean one of these?
 [stacktrace]
 #0 {main}
 "} 
+[2026-08-24 22:56:49] local.ERROR: Command "test" is not defined.
+
+Did you mean one of these?
+    make:test
+    schedule:test {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"test\" is not defined.
+
+Did you mean one of these?
+    make:test
+    schedule:test at F:/Afrishop/Afrishop/3-Backend-laravel/vendor/symfony/console/Application.php:785)
+[stacktrace]
+#0 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/symfony/console/Application.php(321): Symfony/Component/Console/Application->find('test')
+#1 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/symfony/console/Application.php(218): Symfony/Component/Console/Application->doRun(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#2 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony/Component/Console/Application->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#3 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1242): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#4 F:/Afrishop/Afrishop/3-Backend-laravel/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
+#5 {main}
+"} 

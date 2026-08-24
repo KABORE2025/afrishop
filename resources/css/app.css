@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * =====================================================================
+ *  COMPOSANTS COMMUNS AUX ÉCRANS CONNECTÉS
+ * =====================================================================
+ *  Peu de classes, et seulement celles qui portent une RÈGLE MÉTIER.
+ *  Le reste se fait en utilitaires Tailwind, à l'endroit où on s'en
+ *  sert : une bibliothèque de composants écrite avant d'avoir des
+ *  écrans finit toujours à moitié inutilisée et à moitié contournée.
+ * =====================================================================
+ */
+@layer components {
+
+    /* ---------------------------------------------------------------
+     * ÉTATS DE L'ARGENT
+     * Les couleurs des cinq états de `etat_fonds`, définies UNE FOIS.
+     * Le piège que ces classes existent pour éviter : peindre en vert
+     * une commande livrée dont les fonds sont encore en séquestre. Le
+     * vert dit « rien à faire », pas « livré » — et tant que l'argent
+     * est retenu, il reste quelque chose à faire.
+     * --------------------------------------------------------------- */
+    .etat {
+        @apply inline-block rounded-full px-2.5 py-1 text-xs font-bold;
+    }
+    .etat-attente_encaissement { @apply bg-amber-50   text-attente; }
+    .etat-sequestre            { @apply bg-amber-50   text-attente; }
+    .etat-reverse              { @apply bg-emerald-50 text-succes; }
+    .etat-rembourse            { @apply bg-slate-100  text-gris; }
+    .etat-impaye               { @apply bg-red-50     text-alerte; }
+
+    /* ---------------------------------------------------------------
+     * STATUTS DE LA MARCHANDISE — délibérément NEUTRES.
+     * Aucun n'est vert. Le statut logistique ne dit rien de l'argent,
+     * et les deux axes ne doivent jamais se ressembler visuellement,
+     * sinon l'œil les fusionne — l'erreur exacte que la structure des
+     * réponses JSON cherche à empêcher.
+     * --------------------------------------------------------------- */
+    .statut {
+        @apply inline-block rounded-full border border-bord bg-surface
+               px-2.5 py-1 text-xs font-bold text-gris;
+    }
+    .statut-a_preparer { @apply border-brun-clair text-brun; }
+
+    /* --------------------------------------------------------------- */
+    .carte {
+        @apply rounded-carte border border-bord bg-surface;
+    }
+
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+               text-sm font-bold transition
+               disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .btn-primaire  { @apply btn bg-brun text-white hover:bg-brun-clair; }
+    .btn-secondaire{ @apply btn border border-bord bg-surface text-texte hover:bg-fond; }
+    .btn-danger    { @apply btn bg-alerte text-white; }
+
+    .champ {
+        @apply w-full rounded-lg border-bord bg-surface text-sm
+               focus:border-brun-clair focus:ring-brun-clair;
+    }
+    .libelle { @apply mb-1 block text-sm font-semibold text-gris; }
+
+    /* Message d'erreur de validation renvoyé par l'API. */
+    .erreur-champ { @apply mt-1 block text-xs font-semibold text-alerte; }
+
+    .tableau       { @apply w-full border-collapse text-sm; }
+    .tableau th    { @apply bg-fond px-3 py-2.5 text-left text-xs font-bold text-brun; }
+    .tableau td    { @apply border-t border-bord px-3 py-2.5 align-top; }
+
+    /* Encadré d'information — même style que `.note` de la vitrine. */
+    .note {
+        @apply rounded-r-lg border-l-4 border-brun-clair bg-amber-50/60 px-4 py-3 text-sm;
+    }
+}
+
+/*
+ * Montants : chiffres à chasse fixe. Une colonne de francs CFA dont les
+ * chiffres n'ont pas la même largeur est illisible en diagonale, et
+ * c'est exactement comme cela qu'un vendeur lit ses reversements.
+ */
+.montant {
+    font-variant-numeric: tabular-nums;
+}

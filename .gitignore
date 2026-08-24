@@ -1,0 +1,38 @@
+# =====================================================================
+#  Fichiers non versionnés
+# =====================================================================
+#  Ce fichier n'existait pas. Sans lui, le premier `npm install` aurait
+#  ajouté quelques dizaines de milliers de fichiers de `node_modules` au
+#  dépôt — un commit dont on ne se remet pas facilement.
+# =====================================================================
+
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+
+# Secrets. `.env` porte les clés PSP, les identifiants SMS et le sel des
+# scans QR : il ne doit JAMAIS partir dans un dépôt.
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+
+# Bases locales
+*.sqlite
+*.sqlite-journal
+
+# Outils
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+.DS_Store
+Thumbs.db
+npm-debug.log
+yarn-error.log
+auth.json
