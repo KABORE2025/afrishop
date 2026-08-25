@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\VerificationQrController;
+use App\Http\Controllers\ConsoleController;
 use App\Http\Controllers\EspaceVendeurController;
 use App\Http\Controllers\VitrineController;
 use Illuminate\Support\Facades\Route;
@@ -62,4 +63,18 @@ Route::prefix('vendeur')->name('vendeur.')->group(function () {
     Route::get('/commandes',    [EspaceVendeurController::class, 'commandes'])->name('commandes');
     Route::get('/produits',     [EspaceVendeurController::class, 'produits'])->name('produits');
     Route::get('/reversements', [EspaceVendeurController::class, 'reversements'])->name('reversements');
+});
+
+/*
+|--------------------------------------------------------------------------
+| CONSOLE AFRISHOP
+|--------------------------------------------------------------------------
+| Même principe que l'espace vendeur : coquilles vides, aucune donnée
+| côté serveur, l'API fait la garde (`auth:sanctum` + `role:admin`).
+*/
+Route::prefix('console')->name('console.')->group(function () {
+    Route::get('/',              [ConsoleController::class, 'tableauDeBord'])->name('tableau');
+    Route::get('/candidatures',  [ConsoleController::class, 'candidatures'])->name('candidatures');
+    Route::get('/litiges',       [ConsoleController::class, 'litiges'])->name('litiges');
+    Route::get('/reversements',  [ConsoleController::class, 'reversements'])->name('reversements');
 });

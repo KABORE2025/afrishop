@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogueController;
 use App\Http\Controllers\Api\CommandeController;
 use App\Http\Controllers\Api\LotQrController;
 use App\Http\Controllers\Api\PaiementWebhookController;
-use App\Http\Controllers\Api\TransporteurController;
 use App\Http\Controllers\Api\VendeurController;
 use App\Http\Controllers\Api\VerificationQrController;
 use Illuminate\Support\Facades\Route;
@@ -53,13 +53,6 @@ Route::post('/commandes',              [CommandeController::class, 'creer']);
 Route::get('/commandes/suivi',         [CommandeController::class, 'suivi']);   // ?telephone=...&reference=...
 Route::post('/candidatures',           [CommandeController::class, 'candidater']);
 
-// Référentiel des transporteurs — alimente le choix du transporteur à
-// l'expédition. Réservé aux comptes connectés : la liste des partenaires
-// logistiques et leurs numéros n'a pas à être publique.
-// `?encaisse_especes=1` restreint aux transporteurs habilités à collecter
-// de l'argent, seuls utilisables en paiement à la livraison.
-Route::middleware('auth:sanctum')->get('/transporteurs', [TransporteurController::class, 'index']);
-
 // Vérification d'une étiquette, en JSON. La version HTML est dans web.php.
 // Limitée à 60 requêtes par minute et par IP : un contrefacteur qui
 // voudrait tester des jetons au hasard doit être ralenti.
@@ -70,25 +63,11 @@ Route::get('/v/{jeton}', [VerificationQrController::class, 'verifier'])
 // 2. VENDEUR
 // ---------------------------------------------------------------------
 Route::middleware(['auth:sanctum', 'role:vendeur'])->prefix('vendeur')->group(function () {
-    // Les quatre indicateurs de l'espace vendeur. Calculés côté serveur :
-    // la liste des commandes étant paginée, un total additionné par le
-    // front porterait sur 25 lignes en croyant porter sur toutes.
-    Route::get('/tableau-de-bord',              [VendeurController::class, 'tableauDeBord']);
-
     Route::get('/commandes',                    [VendeurController::class, 'commandes']);
     Route::post('/commandes/{sousCommande}/expedier', [VendeurController::class, 'expedier']);
     Route::post('/commandes/{sousCommande}/livrer',   [VendeurController::class, 'livrer']);
-
     Route::get('/produits',                     [VendeurController::class, 'produits']);
     Route::post('/produits',                    [VendeurController::class, 'creerProduit']);
-    // Corriger un prix ou une description. Une modification de FOND
-    // (nom, description, catégorie) fait repasser la fiche en
-    // modération — sinon il suffirait de faire valider une fiche
-    // anodine puis de la réécrire.
-    Route::put('/produits/{produit}',           [VendeurController::class, 'modifierProduit']);
-    // Le geste le plus fréquent d'une boutique : mettre à jour le stock.
-    Route::patch('/variantes/{variante}',       [VendeurController::class, 'majVariante']);
-
     Route::get('/reversements',                 [VendeurController::class, 'reversements']);
 
     // Le vendeur DEMANDE un lot d'étiquettes ; il ne le génère pas.
@@ -101,6 +80,27 @@ Route::middleware(['auth:sanctum', 'role:vendeur'])->prefix('vendeur')->group(fu
 // 3. ADMINISTRATION AFRISHOP
 // ---------------------------------------------------------------------
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+
+    // Ce qui attend une décision humaine — pas un chiffre d'affaires.
+    Route::get('/tableau-de-bord',              [AdminController::class, 'tableauDeBord']);
+
+    // Candidatures. Accepter CRÉE la boutique et rattache son gérant ;
+    // refuser exige un motif, parce qu'un refus muet est incontestable.
+    Route::get('/candidatures',                 [AdminController::class, 'candidatures']);
+    Route::post('/candidatures/{candidature}/accepter', [AdminController::class, 'accepterCandidature']);
+    Route::post('/candidatures/{candidature}/refuser',  [AdminController::class, 'refuserCandidature']);
+
+    // Litiges. L'arbitrage est le SEUL endroit de la console qui déplace
+    // de l'argent, et il le fait par SequestreService — jamais par une
+    // écriture composée à la main.
+    Route::get('/litiges',                      [AdminController::class, 'litiges']);
+    Route::post('/litiges/{litige}/arbitrer',   [AdminController::class, 'arbitrerLitige']);
+
+    // Reversements : LECTURE SEULE. Déclarer un virement « payé » depuis
+    // une console reviendrait à affirmer qu'une somme est partie ; cette
+    // confirmation doit venir du prestataire, par webhook.
+    Route::get('/reversements',                 [AdminController::class, 'reversements']);
+
     Route::post('/lots-qr',                     [LotQrController::class, 'creer']);
     Route::get('/lots-qr/{lot}/planche',        [LotQrController::class, 'planche'])->name('admin.lots.planche');
     Route::get('/lots-qr/{lot}/statistiques',   [LotQrController::class, 'statistiques']);

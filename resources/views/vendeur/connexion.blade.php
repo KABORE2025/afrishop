@@ -60,18 +60,17 @@
                 try {
                     const r = await window.api.post('/auth/connexion', this.donnees);
 
-                    /* Le nom du champ dépend de ce que renvoie AuthController.
-                     * On accepte les formes courantes plutôt que d'échouer
-                     * silencieusement sur une clé différente. */
-                    const t = r.jeton ?? r.token ?? r.access_token;
-
-                    if (!t) {
-                        this.message = "Connexion réussie mais aucun jeton reçu : vérifier la réponse de /api/auth/connexion.";
+                    /* AuthController::connecter() renvoie { utilisateur, jeton }.
+                     * Le jeton Sanctum est conservé dans le navigateur et
+                     * renvoyé en en-tête `Authorization: Bearer` à chaque
+                     * appel suivant — c'est lui, et lui seul, qui prouve
+                     * au serveur qui vous êtes. */
+                    if (!r.jeton) {
+                        this.message = "Connexion acceptée mais aucun jeton reçu. Contactez le support.";
                         return;
                     }
 
-                    window.jetonAfrishop = t;
-                    localStorage.setItem('afrishop.jeton', t);
+                    localStorage.setItem('afrishop.jeton', r.jeton);
 
                     const params = new URLSearchParams(window.location.search);
                     window.location.href = params.get('retour') || '/vendeur';
