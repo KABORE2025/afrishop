@@ -21,12 +21,37 @@
  */
 
 const CLE_JETON = 'afrishop.jeton';
+const CLE_ROLE  = 'afrishop.role';
 
 export const jeton = {
-    lire:      () => { try { return localStorage.getItem(CLE_JETON); } catch { return null; } },
+    lire:   () => { try { return localStorage.getItem(CLE_JETON); } catch { return null; } },
     ecrire: (v) => { try { localStorage.setItem(CLE_JETON, v); } catch { /* navigation privée */ } },
-    effacer:   () => { try { localStorage.removeItem(CLE_JETON); } catch { /* idem */ } },
+    effacer:() => {
+        try { localStorage.removeItem(CLE_JETON); localStorage.removeItem(CLE_ROLE); } catch { /* idem */ }
+    },
 };
+
+/*
+ * Le rôle est mémorisé à la connexion, à côté du jeton.
+ *
+ * Il ne sert QU'À ORIENTER LA NAVIGATION — envoyer un administrateur
+ * vers la console plutôt que vers l'espace vendeur. Il n'autorise
+ * rien : la vraie vérification est côté API, et un rôle trafiqué dans
+ * le navigateur ne donne accès à rien de plus. Sans lui, la seule
+ * façon de savoir où envoyer quelqu'un serait de le deviner — ce qui
+ * revenait à envoyer tout le monde chez les vendeurs.
+ */
+export const role = {
+    lire:   () => { try { return localStorage.getItem(CLE_ROLE); } catch { return null; } },
+    ecrire: (v) => { try { localStorage.setItem(CLE_ROLE, v ?? ''); } catch { /* idem */ } },
+};
+
+/** Espace par défaut d'un rôle donné. */
+export function espaceDe(r) {
+    if (['admin', 'agent'].includes(r)) return '/console';
+    if (r === 'vendeur') return '/vendeur';
+    return '/';
+}
 
 /**
  * Erreur d'API, avec de quoi décider quoi afficher sans réinspecter le
@@ -102,7 +127,53 @@ async function requete(methode, chemin, corps = null) {
     throw new ErreurApi(message, { statut: reponse.status });
 }
 
+/**
+ * Envoi de fichier (multipart).
+ *
+ * On NE FIXE PAS `Content-Type` : le navigateur doit l'écrire lui-même
+ * pour y placer la frontière (`boundary`) qui sépare les parties du
+ * corps. Le poser à la main casse l'envoi, avec une erreur de parsing
+ * illisible côté serveur.
+ */
+async function envoyerFichier(chemin, formData) {
+    const entetes = { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+    const t = jeton.lire();
+    if (t) entetes['Authorization'] = `Bearer ${t}`;
+
+    let reponse;
+    try {
+        reponse = await fetch(`/api${chemin}`, { method: 'POST', headers: entetes, body: formData });
+    } catch {
+        throw new ErreurApi('Envoi interrompu. Vérifiez votre réseau, puis réessayez.', { statut: 0 });
+    }
+
+    const donnees = await reponse.json().catch(() => ({}));
+
+    if (reponse.ok) return donnees;
+
+    /*
+     * 413 : le fichier a été refusé par le serveur web AVANT d'arriver
+     * à Laravel — `upload_max_filesize` ou `post_max_size` de php.ini.
+     * Le message par défaut ne dit rien d'utile, celui-ci si.
+     */
+    if (reponse.status === 413) {
+        throw new ErreurApi(
+            'Fichier trop lourd pour le serveur. Réduisez-le, ou faites relever '
+            + 'upload_max_filesize et post_max_size dans php.ini.',
+            { statut: 413 }
+        );
+    }
+
+    if (reponse.status === 422) {
+        throw new ErreurApi(donnees.message || 'Fichier refusé.',
+            { statut: 422, erreurs: donnees.errors || {} });
+    }
+
+    throw new ErreurApi(donnees.message || 'Envoi impossible.', { statut: reponse.status });
+}
+
 export const api = {
+    fichier: (chemin, formData) => envoyerFichier(chemin, formData),
     get:    (chemin)         => requete('GET', chemin),
     post:   (chemin, corps)  => requete('POST', chemin, corps ?? {}),
     put:    (chemin, corps)  => requete('PUT', chemin, corps ?? {}),

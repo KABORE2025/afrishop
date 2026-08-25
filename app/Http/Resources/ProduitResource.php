@@ -47,6 +47,10 @@ class ProduitResource extends JsonResource
                     : null,
             ],
 
+            /* Les médias en premier dans l'esprit du vendeur comme de
+             * l'acheteur : un produit sans photo ne se vend pas. */
+            'medias'      => MediaResource::collection($this->whenLoaded('medias')),
+
             'stock_total' => $this->whenLoaded('variantes', fn () => (int) $this->variantes->where('actif', true)->sum('stock')),
             'variantes'   => VarianteProduitResource::collection($this->whenLoaded('variantes')),
 

@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs';
-import { api, jeton, ErreurApi, fcfa, dateFr } from './api.js';
+import { api, jeton, role, espaceDe, ErreurApi, fcfa, dateFr } from './api.js';
 
 /*
  * =====================================================================
@@ -33,12 +33,32 @@ window.dateFr = dateFr;
  * un écran vide à quelqu'un qui devrait se connecter. La vraie barrière
  * est l'API, et elle est ailleurs.
  */
-window.exigerConnexion = function () {
+window.exigerConnexion = function (roleAttendu = null) {
     if (!jeton.lire()) {
         const retour = encodeURIComponent(window.location.pathname);
         window.location.replace(`/vendeur/connexion?retour=${retour}`);
         return false;
     }
+
+    /*
+     * Mauvais espace : on redirige plutôt que de laisser l'écran
+     * appeler une API à laquelle le rôle ne donne pas accès. Un
+     * administrateur arrivant sur /vendeur y recevrait « aucune
+     * boutique rattachée » — un message vrai, mais qui n'explique
+     * rien de ce qui se passe réellement.
+     */
+    const r = role.lire();
+
+    if (roleAttendu === 'vendeur' && r && r !== 'vendeur') {
+        window.location.replace(espaceDe(r));
+        return false;
+    }
+
+    if (roleAttendu === 'admin' && r && !['admin', 'agent'].includes(r)) {
+        window.location.replace(espaceDe(r));
+        return false;
+    }
+
     return true;
 };
 

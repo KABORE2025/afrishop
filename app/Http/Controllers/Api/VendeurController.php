@@ -3,20 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AjouterMediaRequest;
 use App\Http\Requests\CreerProduitRequest;
 use App\Http\Requests\MajStockRequest;
 use App\Http\Requests\ModifierProduitRequest;
+use App\Http\Resources\MediaResource;
 use App\Http\Resources\ProduitResource;
 use App\Http\Resources\ReversementResource;
 use App\Http\Resources\SousCommandeResource;
 use App\Http\Resources\VarianteProduitResource;
 use App\Models\Boutique;
+use App\Models\Media;
 use App\Models\Expedition;
 use App\Models\Produit;
 use App\Models\Reversement;
 use App\Models\SousCommande;
 use App\Models\VarianteProduit;
 use App\Services\EspecesService;
+use App\Services\MediaService;
 use App\Services\TableauBordVendeurService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -184,7 +188,7 @@ class VendeurController extends Controller
         return response()->json(
             ProduitResource::collection(
                 Produit::where('boutique_id', $boutique->id)
-                    ->with('variantes')
+                    ->with(['variantes', 'medias'])
                     ->orderByDesc('id')
                     ->paginate($r->integer('par_page', 25))
             )->response()->getData(true)
@@ -344,6 +348,68 @@ class VendeurController extends Controller
                 },
             ]);
         });
+    }
+
+    /**
+     * Ajoute une photo ou une vidéo à un produit.
+     *
+     * SUR CE MARCHÉ, LA PHOTO FAIT LA VENTE. Un produit sans image ne
+     * se vend pas, quel que soit son prix — c'est le premier manque à
+     * combler de l'espace vendeur.
+     *
+     * L'image est réduite en trois tailles à l'arrivée (1200 / 400 /
+     * 100 px) : c'est ce qui rend le catalogue consultable sur un
+     * forfait facturé au mégaoctet.
+     */
+    public function ajouterMedia(AjouterMediaRequest $r, Produit $produit, MediaService $medias): JsonResponse
+    {
+        $boutique = $this->resoudreBoutique($r);
+
+        if ($produit->boutique_id !== $boutique->id) {
+            abort(403, "Ce produit n'appartient pas à votre boutique.");
+        }
+
+        /*
+         * Plafond par produit. Sans lui, rien n'empêche une boutique de
+         * déposer quarante photos : le disque se remplit, et la fiche
+         * devient illisible pour l'acheteur.
+         */
+        $existants = Media::where('proprietaire_type', 'produit')
+            ->where('proprietaire_id', $produit->id)->count();
+
+        if ($existants >= 8) {
+            return response()->json([
+                'message' => 'Huit médias au maximum par produit. Supprimez-en un avant d\'en ajouter.',
+            ], 422);
+        }
+
+        $media = $r->input('type') === 'video'
+            ? $medias->ajouterVideo($r->file('fichier'), $r->file('poster'),
+                                    'produit', $produit->id, $r->input('texte_alternatif'))
+            : $medias->ajouterImage($r->file('fichier'),
+                                    'produit', $produit->id, $r->input('texte_alternatif'));
+
+        return response()->json(new MediaResource($media), 201);
+    }
+
+    /** Suppression d'un média — fichiers compris. */
+    public function supprimerMedia(Request $r, Media $media, MediaService $medias): JsonResponse
+    {
+        $boutique = $this->resoudreBoutique($r);
+
+        // Le média ne porte pas de boutique_id : le cloisonnement passe
+        // par le produit propriétaire, qu'il faut donc aller chercher.
+        $produit = $media->proprietaire_type === 'produit'
+            ? Produit::find($media->proprietaire_id)
+            : null;
+
+        if (! $produit || $produit->boutique_id !== $boutique->id) {
+            abort(403, "Ce média n'appartient pas à votre boutique.");
+        }
+
+        $medias->supprimer($media);
+
+        return response()->json(['message' => 'Média supprimé.']);
     }
 
     /**

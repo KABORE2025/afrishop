@@ -5,11 +5,8 @@
 @section('contenu')
 <div class="mx-auto max-w-md py-8" x-data="connexion">
 
-    {{-- Titre neutre : administrateurs et vendeurs se connectent par la
-         même porte. C'est le RÔLE du compte qui décide où l'on arrive,
-         pas l'URL par laquelle on est entré. --}}
-    <h1 class="mb-1 text-2xl font-extrabold">Connexion</h1>
-    <p class="mb-6 text-sm text-gris">Espace vendeur et console Afrishop.</p>
+    <h1 class="mb-1 text-2xl font-extrabold">Espace vendeur</h1>
+    <p class="mb-6 text-sm text-gris">Connectez-vous pour gérer vos commandes et vos produits.</p>
 
     <form class="carte space-y-4 p-5" @submit.prevent="entrer">
 
@@ -75,26 +72,8 @@
 
                     localStorage.setItem('afrishop.jeton', r.jeton);
 
-                    /*
-                     * DESTINATION SELON LE RÔLE, pas selon l'URL.
-                     * Renvoyer tout le monde vers /vendeur envoyait un
-                     * administrateur sur une API vendeur à laquelle son
-                     * rôle ne donne pas accès — et le message d'erreur
-                     * ne disait pas pourquoi.
-                     *
-                     * `?retour=` (posé par la garde `exigerConnexion`)
-                     * reste prioritaire : quelqu'un qui visait une page
-                     * précise doit y revenir après s'être connecté.
-                     */
                     const params = new URLSearchParams(window.location.search);
-                    const retour = params.get('retour');
-
-                    const role = r.utilisateur?.role;
-                    const parDefaut = ['admin', 'agent'].includes(role) ? '/console'
-                                    : role === 'vendeur'               ? '/vendeur'
-                                    : '/';
-
-                    window.location.href = retour || parDefaut;
+                    window.location.href = params.get('retour') || '/vendeur';
                 } catch (e) {
                     this.erreurs = e.erreurs ?? {};
                     this.message = e.message;

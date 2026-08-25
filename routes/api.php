@@ -88,6 +88,11 @@ Route::middleware(['auth:sanctum', 'role:vendeur'])->prefix('vendeur')->group(fu
     // Le geste le plus fréquent d'une boutique : mettre à jour le stock.
     Route::patch('/variantes/{variante}',       [VendeurController::class, 'majVariante']);
 
+    // Photos et vidéos. Un produit sans image ne se vend pas : c'est
+    // le premier manque que signalent les vendeurs.
+    Route::post('/produits/{produit}/medias',   [VendeurController::class, 'ajouterMedia']);
+    Route::delete('/medias/{media}',            [VendeurController::class, 'supprimerMedia']);
+
     Route::get('/reversements',                 [VendeurController::class, 'reversements']);
 
     // Le vendeur DEMANDE un lot d'étiquettes ; il ne le génère pas.

@@ -66,6 +66,34 @@
                    x-text="'Motif : ' + p.moderation.motif"></p>
 
                 
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <template x-for="m in (p.medias ?? [])" :key="m.id">
+                        <div class="relative">
+                            <img :src="m.urls.miniature" :alt="m.texte_alternatif || p.nom"
+                                 class="h-16 w-16 rounded-lg border border-bord object-cover">
+                            
+                            <span x-show="m.type === 'video'"
+                                  class="absolute bottom-0 left-0 rounded-br-lg rounded-tl-lg bg-texte/80 px-1 text-[10px] font-bold text-white">
+                                vidéo
+                            </span>
+                            <button type="button"
+                                    class="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-alerte text-xs font-bold text-white"
+                                    title="Supprimer" @click="supprimerMedia(p, m)">×</button>
+                        </div>
+                    </template>
+
+                    <button type="button" class="btn-secondaire h-16" @click="ouvrirMedias(p)">
+                        <span x-show="!(p.medias ?? []).length">Ajouter une photo</span>
+                        <span x-show="(p.medias ?? []).length">+ Média</span>
+                    </button>
+                </div>
+
+                
+                <p class="tuile-note text-attente" x-show="!(p.medias ?? []).length">
+                    Aucune photo. Une fiche sans image ne se vend pratiquement pas.
+                </p>
+
+                
                 <div class="mt-3 overflow-x-auto">
                     <table class="tableau">
                         <thead>
@@ -197,6 +225,69 @@
     </div>
 
     
+    <div x-show="med.p" class="fixed inset-0 z-20 overflow-y-auto bg-black/40 p-4" x-cloak>
+        <div class="carte mx-auto my-6 w-full max-w-lg p-5">
+            <h2 class="mb-1 text-lg font-bold">Ajouter un média</h2>
+            <p class="mb-4 text-sm text-gris" x-text="med.p?.nom"></p>
+
+            <div class="mb-3 flex gap-2">
+                <button class="btn-secondaire flex-1" :class="med.type === 'image' && 'border-brun text-brun'"
+                        @click="med.type = 'image'">Photo</button>
+                <button class="btn-secondaire flex-1" :class="med.type === 'video' && 'border-brun text-brun'"
+                        @click="med.type = 'video'">Vidéo</button>
+            </div>
+
+            <div class="mb-3">
+                <label class="libelle" for="m-fichier">
+                    <span x-show="med.type === 'image'">Photo — JPEG, PNG ou WebP, 8 Mo maximum</span>
+                    <span x-show="med.type === 'video'">Vidéo — MP4, WebM ou MOV, 20 Mo maximum</span>
+                </label>
+                <input id="m-fichier" type="file" class="champ"
+                       :accept="med.type === 'video' ? 'video/mp4,video/webm,video/quicktime' : 'image/jpeg,image/png,image/webp'"
+                       @change="med.fichier = $event.target.files[0] ?? null">
+                <p class="tuile-note" x-show="med.fichier"
+                   x-text="'Sélectionné : ' + med.fichier.name + ' — ' + Math.round(med.fichier.size / 1024) + ' Ko'"></p>
+            </div>
+
+            
+            <div class="mb-3" x-show="med.type === 'video'">
+                <label class="libelle" for="m-poster">Image de couverture — obligatoire</label>
+                <input id="m-poster" type="file" class="champ" accept="image/jpeg,image/png,image/webp"
+                       @change="med.poster = $event.target.files[0] ?? null">
+                <p class="tuile-note">
+                    Sans couverture, le client devrait télécharger la vidéo pour savoir ce qu'elle montre.
+                </p>
+            </div>
+
+            <div class="mb-3">
+                <label class="libelle" for="m-alt">Description de l'image</label>
+                <input id="m-alt" type="text" class="champ" maxlength="255" x-model="med.texte_alternatif"
+                       placeholder="Ex. : savon de karité posé sur un pagne">
+                <p class="tuile-note">
+                    Affichée si l'image ne se charge pas — ce qui arrive souvent en réseau lent —
+                    et lue par les logiciels pour aveugles.
+                </p>
+            </div>
+
+            <div class="note mb-3" x-show="med.type === 'video'">
+                <b>Une vidéo coûte cher à regarder.</b>
+                Elle n'est pas compressée par la plateforme : ce que vous envoyez est ce que
+                le client télécharge. Filmez court, et gardez la photo comme premier média.
+            </div>
+
+            <div class="note mb-3" x-show="med.message" x-text="med.message"></div>
+
+            <div class="flex justify-end gap-2">
+                <button class="btn-secondaire" @click="med.p = null">Fermer</button>
+                <button class="btn-primaire" :disabled="med.enCours || !med.fichier" @click="envoyerMedia">
+                    <span x-show="!med.enCours">Envoyer</span>
+                    <span x-show="med.enCours">Envoi…</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
     <div x-show="stock.v" class="fixed inset-0 z-20 grid place-items-center bg-black/40 p-4" x-cloak>
         <div class="carte w-full max-w-md p-5">
             <h2 class="mb-1 text-lg font-bold">Stock</h2>
@@ -261,9 +352,11 @@
                      original: {}, erreurs: {}, message: null, enCours: false },
             stock: { p: null, v: null, mode: 'mouvement', mouvement: '', stock: '',
                      seuil_alerte: '', message: null, enCours: false },
+            med: { p: null, type: 'image', fichier: null, poster: null,
+                   texte_alternatif: '', message: null, enCours: false },
 
             async init() {
-                if (!window.exigerConnexion()) return;
+                if (!window.exigerConnexion('vendeur')) return;
                 this.charger(1);
                 this.chargerCategories();
             },
@@ -367,6 +460,52 @@
                     this.fiche.erreurs = e.erreurs ?? {};
                     this.fiche.message = e.message;
                 } finally { this.fiche.enCours = false; }
+            },
+
+            ouvrirMedias(p) {
+                this.med = { p, type: 'image', fichier: null, poster: null,
+                             texte_alternatif: '', message: null, enCours: false };
+            },
+
+            async envoyerMedia() {
+                if (this.med.enCours || !this.med.fichier) return;
+
+                if (this.med.type === 'video' && !this.med.poster) {
+                    this.med.message = "Une vidéo demande une image de couverture.";
+                    return;
+                }
+
+                this.med.enCours = true;
+                this.med.message = null;
+
+                /* FormData, pas JSON : un fichier ne se sérialise pas.
+                 * Le navigateur pose lui-même l'en-tête multipart. */
+                const corps = new FormData();
+                corps.append('type', this.med.type);
+                corps.append('fichier', this.med.fichier);
+                if (this.med.poster) corps.append('poster', this.med.poster);
+                if (this.med.texte_alternatif) corps.append('texte_alternatif', this.med.texte_alternatif);
+
+                try {
+                    await window.api.fichier(`/vendeur/produits/${this.med.p.id}/medias`, corps);
+                    await this.charger(this.pagination?.current_page ?? 1);
+                    this.med.p = null;
+                } catch (e) {
+                    this.med.message = e.message;
+                } finally { this.med.enCours = false; }
+            },
+
+            async supprimerMedia(p, m) {
+                /* Confirmation explicite : la suppression efface aussi
+                 * les fichiers sur le disque, elle ne se défait pas. */
+                if (!confirm('Supprimer ce média ? Cette action est définitive.')) return;
+
+                try {
+                    await window.api.delete(`/vendeur/medias/${m.id}`);
+                    await this.charger(this.pagination?.current_page ?? 1);
+                } catch (e) {
+                    alert(e.message);
+                }
             },
 
             ouvrirStock(p, v) {

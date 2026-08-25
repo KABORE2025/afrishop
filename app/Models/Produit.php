@@ -29,7 +29,27 @@ class Produit extends Model
     public function categorie(): BelongsTo { return $this->belongsTo(Categorie::class); }
     public function lotsQr(): HasMany      { return $this->hasMany(LotQr::class, 'produit_id'); }
     public function variantes(): HasMany   { return $this->hasMany(VarianteProduit::class); }
-    public function medias()               { return $this->morphMedias(); }
+    /**
+     * Médias du produit — VRAIE relation, et c'est nécessaire.
+     *
+     * `morphMedias()` ci-dessous renvoie un Builder, pas une relation :
+     * `with('medias')` échouait donc, et chaque produit d'une liste
+     * déclenchait sa propre requête. Sur quarante produits, c'est
+     * quarante requêtes de plus — la panne de performance la plus
+     * banale de Laravel, invisible tant que le catalogue est petit.
+     */
+    public function medias(): HasMany
+    {
+        return $this->hasMany(Media::class, 'proprietaire_id')
+            ->where('proprietaire_type', 'produit')
+            ->orderBy('ordre');
+    }
+
+    /** Média principal : celui qu'on montre dans la grille. */
+    public function mediaPrincipal(): ?Media
+    {
+        return $this->medias()->first();
+    }
 
     /** Stock total, toutes variantes confondues. */
     public function stockTotal(): int
