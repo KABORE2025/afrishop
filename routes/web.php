@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\VerificationQrController;
+use App\Http\Controllers\CommandeWebController;
 use App\Http\Controllers\ConsoleController;
+use App\Http\Controllers\PanierController;
 use App\Http\Controllers\EspaceVendeurController;
 use App\Http\Controllers\VitrineController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +37,34 @@ Route::get('/v/{jeton}', [VerificationQrController::class, 'verifier'])
 */
 Route::get('/', [VitrineController::class, 'index'])->name('vitrine');
 Route::get('/p/{slug}', [VitrineController::class, 'produit'])->name('produit');
+
+/*
+|--------------------------------------------------------------------------
+| PANIER ET COMMANDE — rendu serveur, zéro JavaScript
+|--------------------------------------------------------------------------
+| Le panier vit en SESSION, pas en base : un visiteur anonyme qui
+| parcourt le catalogue n'a pas à écrire des lignes en base. La table
+| `paniers` du modèle reste utile pour la relance des paniers
+| abandonnés, mais cela demande d'abord un moyen de recontacter le
+| client — tant qu'on ne l'a pas, écrire en base ne remplirait que le
+| disque.
+|
+| Chaque action est un POST suivi d'une redirection : sans cela, un
+| client qui rafraîchit après un ajout se retrouve avec deux articles.
+*/
+Route::get('/panier',   [PanierController::class, 'voir'])->name('panier');
+Route::post('/panier/ajouter',  [PanierController::class, 'ajouter'])->name('panier.ajouter');
+Route::post('/panier/modifier', [PanierController::class, 'modifier'])->name('panier.modifier');
+Route::post('/panier/vider',    [PanierController::class, 'vider'])->name('panier.vider');
+
+Route::get('/commander',  [CommandeWebController::class, 'formulaire'])->name('commander');
+Route::post('/commander', [CommandeWebController::class, 'enregistrer'])->name('commander.enregistrer');
+
+// Accessible par la seule référence : un client sans compte doit pouvoir
+// y revenir depuis son SMS. En contrepartie, cette page ne montre rien
+// de sensible — une référence peut être devinée ou partagée.
+Route::get('/commande/{reference}', [CommandeWebController::class, 'confirmee'])
+    ->name('commande.confirmee');
 
 /*
 |--------------------------------------------------------------------------

@@ -34,7 +34,7 @@ class VitrineController extends Controller
             // `with()` charge les relations en une seule requête. Sans lui,
             // 24 produits déclenchent 73 requêtes — invisible en local,
             // fatal dès que le catalogue grossit.
-            ->with(['boutique:id,nom,emoji,slug', 'categorie:id,nom,emoji,slug', 'variantes'])
+            ->with(['boutique:id,nom,emoji,slug', 'categorie:id,nom,emoji,slug', 'variantes', 'medias'])
             ->when($categorieActive, fn ($q, $slug) =>
                 $q->whereHas('categorie', fn ($c) => $c->where('slug', $slug)))
             ->orderBy('nom')
@@ -54,7 +54,7 @@ class VitrineController extends Controller
         $produit = Produit::query()
             ->where('slug', $slug)
             ->where('actif', true)
-            ->with(['boutique', 'categorie', 'variantes'])
+            ->with(['boutique', 'categorie', 'variantes', 'medias'])
             ->firstOrFail();
 
         // Rapprochement sur le nom exact. Volontairement simple : imposer
@@ -66,7 +66,7 @@ class VitrineController extends Controller
             ->where('nom', $produit->nom)
             ->where('actif', true)
             ->whereHas('boutique', fn ($b) => $b->where('statut', 'actif')->where('vend_en_ligne', true))
-            ->with(['boutique:id,nom,emoji', 'variantes'])
+            ->with(['boutique:id,nom,emoji', 'variantes', 'medias'])
             ->get();
 
         return view('produit', compact('produit', 'offres'));

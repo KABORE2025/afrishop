@@ -26,7 +26,7 @@
   <div class="vide">
     <p><strong>Aucun produit dans cette base.</strong></p>
     <p>Chargez le jeu de démonstration :<br>
-       <code>mysql -u root afrishope &lt; database/seeders/donnees-demonstration.sql</code></p>
+       <code>mysql -u root afrishop &lt; database/seeders/donnees-demonstration.sql</code></p>
   </div>
 @else
   <div class="grille">
@@ -39,7 +39,19 @@
         $prixMini = $p->variantes->min('prix_ttc_cfa') ?? $p->prix_ttc_cfa;
       @endphp
       <a href="{{ route('produit', $p->slug) }}" class="carte">
-        <div class="vis">{{ $p->categorie->emoji ?? '📦' }}</div>
+        {{-- La photo si elle existe, l'emoji de catégorie sinon.
+             Le repli n'est pas une élégance : beaucoup de fiches
+             n'auront pas d'image au début, et une case vide fait
+             croire à une page cassée. --}}
+        <div class="vis">
+          @php $img = $p->medias->first(); @endphp
+          @if ($img && $img->chemin_vignette)
+            <img src="{{ Storage::disk('public')->url($img->chemin_vignette) }}"
+                 alt="{{ $img->texte_alternatif ?: $p->nom }}" loading="lazy" width="400" height="400">
+          @else
+            {{ $p->categorie->emoji ?? '📦' }}
+          @endif
+        </div>
         <div class="corps">
           @if ($dispo <= 0)
             <span class="etiq rupture">Rupture</span>
