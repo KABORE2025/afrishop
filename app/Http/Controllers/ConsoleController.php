@@ -21,6 +21,7 @@ class ConsoleController extends Controller
 {
     public function tableauDeBord(): View { return view('console.tableau-de-bord'); }
     public function candidatures(): View  { return view('console.candidatures'); }
+    public function produits(): View      { return view('console.produits'); }
     public function litiges(): View       { return view('console.litiges'); }
     public function reversements(): View  { return view('console.reversements'); }
 }

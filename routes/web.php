@@ -105,6 +105,7 @@ Route::prefix('vendeur')->name('vendeur.')->group(function () {
 Route::prefix('console')->name('console.')->group(function () {
     Route::get('/',              [ConsoleController::class, 'tableauDeBord'])->name('tableau');
     Route::get('/candidatures',  [ConsoleController::class, 'candidatures'])->name('candidatures');
+    Route::get('/produits',      [ConsoleController::class, 'produits'])->name('produits');
     Route::get('/litiges',       [ConsoleController::class, 'litiges'])->name('litiges');
     Route::get('/reversements',  [ConsoleController::class, 'reversements'])->name('reversements');
 });

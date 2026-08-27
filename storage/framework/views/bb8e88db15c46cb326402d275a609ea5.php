@@ -39,7 +39,14 @@ nav a.on,nav a:hover{color:var(--brun)}
 .carte{background:var(--surface);border:1px solid var(--bord);border-radius:12px;
   overflow:hidden;display:flex;flex-direction:column}
 .carte .vis{aspect-ratio:1;display:grid;place-items:center;font-size:56px;
-  background:linear-gradient(135deg,#efe4d6,#dcc9b0)}
+  background:linear-gradient(135deg,#efe4d6,#dcc9b0);overflow:hidden}
+/* La photo remplit la vignette sans se déformer. `loading=lazy` sur les
+   balises évite de télécharger les images du bas de page tant qu'on n'y
+   est pas descendu — sur un forfait au mégaoctet, ce n'est pas un
+   détail. */
+.carte .vis img{width:100%;height:100%;object-fit:cover;display:block}
+.pastille{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;
+  border-radius:12px;background:var(--brun);color:#fff;font-size:11.5px;font-weight:800}
 .carte .corps{padding:12px;display:flex;flex-direction:column;gap:5px;flex:1}
 .vendeur{font-size:12px;font-weight:700;color:var(--gris)}
 .titre{font-weight:700;line-height:1.3}
@@ -70,7 +77,11 @@ footer{margin-top:40px;background:var(--surface);border-top:1px solid var(--bord
     <a href="<?php echo e(route('vitrine')); ?>" class="logo"><i>A</i>Afrishop</a>
     <nav style="display:flex;gap:16px">
       <a href="<?php echo e(route('vitrine')); ?>" class="on">Marketplace</a>
-      <a href="<?php echo e(url('/api/categories')); ?>">API</a>
+      <a href="<?php echo e(route('panier')); ?>">
+        Panier
+        <?php $nbPanier = array_sum(session('panier', [])); ?>
+        <?php if($nbPanier > 0): ?><span class="pastille"><?php echo e($nbPanier); ?></span><?php endif; ?>
+      </a>
     </nav>
   </div>
 </header>

@@ -23,7 +23,7 @@
   <div class="vide">
     <p><strong>Aucun produit dans cette base.</strong></p>
     <p>Chargez le jeu de démonstration :<br>
-       <code>mysql -u root afrishope &lt; database/seeders/donnees-demonstration.sql</code></p>
+       <code>mysql -u root afrishop &lt; database/seeders/donnees-demonstration.sql</code></p>
   </div>
 <?php else: ?>
   <div class="grille">
@@ -36,7 +36,17 @@
         $prixMini = $p->variantes->min('prix_ttc_cfa') ?? $p->prix_ttc_cfa;
       ?>
       <a href="<?php echo e(route('produit', $p->slug)); ?>" class="carte">
-        <div class="vis"><?php echo e($p->categorie->emoji ?? '📦'); ?></div>
+        
+        <div class="vis">
+          <?php $img = $p->medias->first(); ?>
+          <?php if($img && $img->chemin_vignette): ?>
+            <img src="<?php echo e(Storage::disk('public')->url($img->chemin_vignette)); ?>"
+                 alt="<?php echo e($img->texte_alternatif ?: $p->nom); ?>" loading="lazy" width="400" height="400">
+          <?php else: ?>
+            <?php echo e($p->categorie->emoji ?? '📦'); ?>
+
+          <?php endif; ?>
+        </div>
         <div class="corps">
           <?php if($dispo <= 0): ?>
             <span class="etiq rupture">Rupture</span>

@@ -90,11 +90,14 @@
                     </p>
                 </a>
 
-                <div class="tuile">
+                {{-- Cette tuile était un simple compteur : elle annonçait
+                     du travail sans donner l'écran pour le faire. --}}
+                <a href="/console/produits" class="tuile hover:border-brun-clair"
+                   :class="d.a_traiter.produits_a_moderer > 0 && 'border-attente/50'">
                     <p class="tuile-libelle">Produits à modérer</p>
                     <p class="tuile-valeur" x-text="d.a_traiter.produits_a_moderer"></p>
                     <p class="tuile-note">Invisibles en vitrine tant qu'ils ne sont pas validés.</p>
-                </div>
+                </a>
 
                 <a href="/console/reversements" class="tuile hover:border-brun-clair">
                     <p class="tuile-libelle">Virements à exécuter</p>

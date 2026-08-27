@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CandidatureResource;
 use App\Http\Resources\LitigeResource;
+use App\Http\Resources\ProduitResource;
 use App\Http\Resources\ReversementResource;
 use App\Models\Boutique;
 use App\Models\Candidature;
 use App\Models\Litige;
 use App\Models\Pays;
+use App\Models\Produit;
 use App\Models\Reversement;
 use App\Models\Utilisateur;
 use App\Services\SequestreService;
@@ -246,6 +248,103 @@ class AdminController extends Controller
         });
 
         return response()->json(new LitigeResource($litige->fresh(['sousCommande'])));
+    }
+
+    // -----------------------------------------------------------------
+    //  MODÉRATION DU CATALOGUE
+    // -----------------------------------------------------------------
+
+    /**
+     * Les fiches produit qui attendent une décision.
+     *
+     * CE CHAÎNON MANQUAIT, et son absence rendait le catalogue
+     * inutilisable : `VendeurController::creerProduit()` laisse
+     * volontairement `statut_moderation` à « en_attente » (défaut de la
+     * table), et rien nulle part ne permettait de passer à « publie ».
+     * Un vendeur pouvait donc créer une fiche que personne, jamais, ne
+     * pouvait rendre visible. Le tableau de bord comptait même les
+     * fiches à modérer — sans offrir d'écran pour les modérer.
+     */
+    public function produits(Request $r): JsonResponse
+    {
+        $requete = Produit::query()
+            ->with(['boutique:id,nom,emoji,code', 'categorie:id,nom,emoji', 'variantes', 'medias']);
+
+        // Par défaut, la file d'attente. Une console qui s'ouvre sur le
+        // catalogue entier fait chercher le travail du jour.
+        $requete->whereIn('statut_moderation', (array) $r->input('statut', ['en_attente']));
+
+        if ($r->filled('recherche')) {
+            $requete->where('nom', 'like', '%' . $r->string('recherche') . '%');
+        }
+
+        return response()->json(
+            ProduitResource::collection(
+                // Le plus ancien en premier : c'est celui qui fait le
+                // plus de mal en restant là.
+                $requete->orderBy('cree_le')->paginate($r->integer('par_page', 25))
+            )->response()->getData(true)
+        );
+    }
+
+    /**
+     * Décision de modération sur une fiche.
+     *
+     * Les quatre décisions possibles sont celles de l'énumération en
+     * base, et pas une de plus :
+     *
+     *   publie  — la fiche devient visible en vitrine et achetable ;
+     *   rejete  — refusée, le vendeur doit corriger et resoumettre ;
+     *   retire  — était publiée, on la sort du catalogue ;
+     *   en_attente — remise dans la file (annulation d'une décision).
+     *
+     * LE MOTIF EST OBLIGATOIRE DÈS QUE LA DÉCISION EST DÉFAVORABLE.
+     * Un rejet muet est incontestable : le vendeur ne sait pas quoi
+     * corriger, il resoumet à l'identique, et la file grossit. C'est la
+     * même règle que pour le refus d'une candidature.
+     */
+    public function modererProduit(Request $r, Produit $produit): JsonResponse
+    {
+        $donnees = $r->validate([
+            'decision' => ['required', 'in:publie,rejete,retire,en_attente'],
+            'motif'    => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $defavorable = in_array($donnees['decision'], ['rejete', 'retire'], true);
+
+        if ($defavorable && mb_strlen(trim((string) ($donnees['motif'] ?? ''))) < 10) {
+            return response()->json([
+                'message' => 'Un refus ou un retrait doit être motivé — au moins dix caractères. '
+                           . "Le vendeur ne peut pas corriger ce qu'on ne lui dit pas.",
+                'errors'  => ['motif' => ['Motif obligatoire pour cette décision.']],
+            ], 422);
+        }
+
+        if ($produit->statut_moderation === $donnees['decision']) {
+            return response()->json([
+                'message' => "Cette fiche est déjà « {$donnees['decision']} ».",
+            ], 422);
+        }
+
+        $produit->update([
+            'statut_moderation' => $donnees['decision'],
+            // Sur une publication sans commentaire, l'ancien motif est
+            // effacé : garder « photo illisible » sur une fiche corrigée
+            // puis publiée induirait le vendeur en erreur.
+            'motif_moderation'  => $donnees['motif'] ?: null,
+            'modere_par_id'     => $r->user()->id,
+            'modere_le'         => now(),
+        ]);
+
+        return response()->json([
+            'produit' => new ProduitResource($produit->fresh(['boutique', 'categorie', 'variantes', 'medias'])),
+            'message' => match ($donnees['decision']) {
+                'publie'     => 'Fiche publiée : elle est visible en vitrine et achetable.',
+                'rejete'     => 'Fiche refusée. Le motif est visible par la boutique.',
+                'retire'     => 'Fiche retirée du catalogue.',
+                'en_attente' => 'Fiche remise dans la file de modération.',
+            },
+        ]);
     }
 
     // -----------------------------------------------------------------

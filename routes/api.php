@@ -121,6 +121,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('/litiges',                      [AdminController::class, 'litiges']);
     Route::post('/litiges/{litige}/arbitrer',   [AdminController::class, 'arbitrerLitige']);
 
+    // Modération du catalogue. CE CHAÎNON MANQUAIT : un produit créé par
+    // un vendeur naît « en_attente » et rien ne permettait de le publier,
+    // donc aucune fiche nouvelle ne pouvait jamais être vendue.
+    Route::get('/produits',                     [AdminController::class, 'produits']);
+    Route::post('/produits/{produit}/moderer',  [AdminController::class, 'modererProduit']);
+
     // Reversements : LECTURE SEULE. Déclarer un virement « payé » depuis
     // une console reviendrait à affirmer qu'une somme est partie ; cette
     // confirmation doit venir du prestataire, par webhook.

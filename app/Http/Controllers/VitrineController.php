@@ -30,6 +30,21 @@ class VitrineController extends Controller
 
         $produits = Produit::query()
             ->where('actif', true)
+            /*
+             * LA MÊME RÈGLE QUE LE PANIER, ET C'EST LE POINT.
+             *
+             * Ce filtre manquait. La vitrine listait tout produit actif,
+             * y compris ceux qui attendaient encore une validation ; le
+             * panier, lui, exige `statut_moderation = publie`. Résultat :
+             * le catalogue affichait des articles que la mise au panier
+             * refusait ensuite avec « Cet article n'est plus en vente. »
+             *
+             * Un client ne peut pas comprendre ce message : le produit
+             * est sous ses yeux. La règle d'achetabilité doit être la
+             * même partout — ici, dans PanierController::ajouter() et
+             * dans PanierService::creerCommande().
+             */
+            ->where('statut_moderation', 'publie')
             ->whereHas('boutique', fn ($b) => $b->where('statut', 'actif')->where('vend_en_ligne', true))
             // `with()` charge les relations en une seule requête. Sans lui,
             // 24 produits déclenchent 73 requêtes — invisible en local,
@@ -51,9 +66,13 @@ class VitrineController extends Controller
     /** Fiche produit, avec les offres concurrentes. */
     public function produit(string $slug): View
     {
+        // Même règle qu'en liste : une fiche non publiée ne doit pas
+        // être atteignable par son URL, sinon il suffit de connaître le
+        // lien pour contourner la modération.
         $produit = Produit::query()
             ->where('slug', $slug)
             ->where('actif', true)
+            ->where('statut_moderation', 'publie')
             ->with(['boutique', 'categorie', 'variantes', 'medias'])
             ->firstOrFail();
 
@@ -65,6 +84,7 @@ class VitrineController extends Controller
             ->where('id', '!=', $produit->id)
             ->where('nom', $produit->nom)
             ->where('actif', true)
+            ->where('statut_moderation', 'publie')
             ->whereHas('boutique', fn ($b) => $b->where('statut', 'actif')->where('vend_en_ligne', true))
             ->with(['boutique:id,nom,emoji', 'variantes', 'medias'])
             ->get();

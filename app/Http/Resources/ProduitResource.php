@@ -38,6 +38,27 @@ class ProduitResource extends JsonResource
             'tracable'     => (bool) $this->tracable,
             'categorie_id' => (int) $this->categorie_id,
 
+            /*
+             * La boutique et la catégorie ne sont rendues QUE si elles
+             * ont été chargées. L'espace vendeur ne les charge pas — il
+             * sait déjà de quelle boutique il s'agit — mais la console
+             * de modération en a besoin : juger une fiche sans savoir
+             * qui la propose ni dans quel rayon elle atterrit n'a pas
+             * de sens.
+             */
+            'boutique' => $this->whenLoaded('boutique', fn () => [
+                'id'    => $this->boutique->id,
+                'nom'   => $this->boutique->nom,
+                'code'  => $this->boutique->code,
+                'emoji' => $this->boutique->emoji,
+            ]),
+
+            'categorie' => $this->whenLoaded('categorie', fn () => [
+                'id'    => $this->categorie->id,
+                'nom'   => $this->categorie->nom,
+                'emoji' => $this->categorie->emoji,
+            ]),
+
             'moderation' => [
                 'statut'      => $this->statut_moderation,
                 'explication' => self::EXPLICATIONS[$this->statut_moderation] ?? $this->statut_moderation,
