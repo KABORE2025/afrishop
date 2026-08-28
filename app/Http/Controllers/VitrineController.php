@@ -45,7 +45,18 @@ class VitrineController extends Controller
              * dans PanierService::creerCommande().
              */
             ->where('statut_moderation', 'publie')
-            ->whereHas('boutique', fn ($b) => $b->where('statut', 'actif')->where('vend_en_ligne', true))
+            /*
+             * `peutVendre()` et non plus `statut = actif` seulement.
+             *
+             * Une boutique active mais sans compte de reversement
+             * vérifié, ou en congés, ne peut PAS recevoir de commande —
+             * `PanierService` la refuse. Le catalogue affichait pourtant
+             * ses produits, et le client ne l'apprenait qu'à la
+             * validation, après avoir saisi nom, téléphone et adresse.
+             * Même défaut que la modération : deux règles différentes
+             * pour la même question.
+             */
+            ->whereHas('boutique', fn ($b) => $b->peutVendre()->where('vend_en_ligne', true))
             // `with()` charge les relations en une seule requête. Sans lui,
             // 24 produits déclenchent 73 requêtes — invisible en local,
             // fatal dès que le catalogue grossit.
@@ -85,10 +96,22 @@ class VitrineController extends Controller
             ->where('nom', $produit->nom)
             ->where('actif', true)
             ->where('statut_moderation', 'publie')
-            ->whereHas('boutique', fn ($b) => $b->where('statut', 'actif')->where('vend_en_ligne', true))
+            ->whereHas('boutique', fn ($b) => $b->peutVendre()->where('vend_en_ligne', true))
             ->with(['boutique:id,nom,emoji', 'variantes', 'medias'])
             ->get();
 
-        return view('produit', compact('produit', 'offres'));
+        /*
+         * LA FICHE RESTE ACCESSIBLE MÊME SI LA BOUTIQUE NE PEUT PAS
+         * VENDRE, et c'est délibéré. Un client qui a mis le lien en
+         * favori, ou qui l'a reçu par WhatsApp, ne doit pas tomber sur
+         * une erreur 404 parce que le vendeur est en congés trois
+         * jours : il doit lire pourquoi, et quand revenir.
+         *
+         * La fiche disparaît en revanche des LISTES, où afficher un
+         * produit non commandable ne fait perdre du temps à personne.
+         */
+        $indisponible = $produit->boutique->raisonIndisponibilite();
+
+        return view('produit', compact('produit', 'offres', 'indisponible'));
     }
 }

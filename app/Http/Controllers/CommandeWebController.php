@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreerCommandeRequest;
+use App\Http\Requests\CommanderWebRequest;
 use App\Models\Commande;
 use App\Models\Pays;
 use App\Models\Ville;
@@ -58,8 +58,15 @@ class CommandeWebController extends Controller
         ]));
     }
 
-    /** Validation de la commande. */
-    public function enregistrer(CreerCommandeRequest $r): RedirectResponse
+    /**
+     * Validation de la commande.
+     *
+     * `CommanderWebRequest` et non `CreerCommandeRequest` : sur le web,
+     * les articles viennent de la session, pas du formulaire. La
+     * validation échouait autrement sur « articles.required » — donc
+     * « Le panier est vide. » alors qu'il était plein.
+     */
+    public function enregistrer(CommanderWebRequest $r): RedirectResponse
     {
         $articles = $this->panier->articlesPourCommande();
 

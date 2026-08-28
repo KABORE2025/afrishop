@@ -53,6 +53,19 @@
         <div class="carte border-alerte/40 bg-red-50 p-4 text-sm text-alerte" x-text="erreur"></div>
     </template>
 
+    {{--
+      CONFIRMATION APRÈS DÉCISION.
+      Sans elle, publier une fiche la faisait simplement disparaître de
+      la liste : rien ne distinguait « c'est fait » de « ça a planté ».
+      Le message reprend le nom du produit — sur une file de vingt
+      fiches, « Fiche publiée » tout court ne dit pas laquelle.
+    --}}
+    <div x-show="succes" x-transition class="carte mb-4 border-succes/40 bg-green-50 p-4 text-sm"
+         x-cloak>
+        <b class="text-succes" x-text="succes"></b>
+        <button class="ml-2 underline" @click="succes = null">fermer</button>
+    </div>
+
     <div x-show="chargement" class="py-12 text-center text-sm text-gris">Chargement…</div>
 
     <template x-if="!chargement && !erreur && elements.length === 0">
@@ -207,7 +220,7 @@
 <script type="module">
     document.addEventListener('alpine:init', () => {
         Alpine.data('ecranModeration', () => ({
-            elements: [], chargement: true, erreur: null,
+            elements: [], chargement: true, erreur: null, succes: null,
             statut: 'en_attente', recherche: '', enCours: null,
             mot: { p: null, decision: null, motif: '', enCours: false, message: null },
 
@@ -253,9 +266,15 @@
             async decider(p, decision, motif = null) {
                 if (this.enCours) return;
                 this.enCours = p.id;
+                this.erreur = null; this.succes = null;
                 try {
-                    await window.api.post(`/admin/produits/${p.id}/moderer`,
+                    const r = await window.api.post(`/admin/produits/${p.id}/moderer`,
                         motif ? { decision, motif } : { decision });
+
+                    /* Le nom du produit dans le message : sur une file
+                     * de vingt fiches, « Fiche publiée » ne dit pas
+                     * laquelle vient de partir. */
+                    this.succes = `« ${p.nom} » — ${r.message}`;
                     await this.charger(1);
                 } catch (e) { this.erreur = e.message; }
                 finally { this.enCours = null; }
@@ -279,11 +298,13 @@
 
                 this.mot.enCours = true; this.mot.message = null;
                 try {
-                    await window.api.post(`/admin/produits/${this.mot.p.id}/moderer`, {
+                    const nom = this.mot.p.nom;
+                    const r = await window.api.post(`/admin/produits/${this.mot.p.id}/moderer`, {
                         decision: this.mot.decision,
                         motif:    this.mot.motif,
                     });
                     this.mot.p = null;
+                    this.succes = `« ${nom} » — ${r.message}`;
                     await this.charger(1);
                 } catch (e) { this.mot.message = e.message; }
                 finally { this.mot.enCours = false; }

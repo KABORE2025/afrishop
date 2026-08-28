@@ -36,7 +36,26 @@ class CreerCommandeRequest extends FormRequest
             'repere'               => ['nullable', 'string', 'max:255'],
             'mode_livraison'       => ['nullable', 'in:domicile,point_relais,retrait_boutique'],
             'point_relais_id'      => ['nullable', 'integer', 'exists:points_relais,id'],
-            'mode_paiement'        => ['required', 'in:mobile_money,carte,virement,especes_livraison'],
+            /*
+             * PAS DE PAIEMENT À LA LIVRAISON — DÉCISION DE FOND.
+             *
+             * `especes_livraison` a été retiré de la liste autorisée.
+             * La raison n'est pas technique : en paiement à la
+             * livraison, l'argent passe du client au livreur sans
+             * jamais transiter par Afrishop. Il n'y a donc RIEN à
+             * mettre en séquestre, et la protection de l'acheteur —
+             * « les fonds ne sont versés qu'après livraison » — devient
+             * une phrase sans objet. Un colis non conforme payé en
+             * espèces se règle entre le client et la boutique, sans
+             * levier d'arbitrage.
+             *
+             * La colonne en base garde la valeur : les commandes
+             * historiques doivent rester lisibles, et le mode
+             * `especes_comptoir` (paiement au comptoir AVANT expédition)
+             * reste une piste ouverte. Ce qui est fermé, c'est la
+             * création d'une commande payable à l'arrivée.
+             */
+            'mode_paiement'        => ['required', 'in:mobile_money,carte,virement'],
             'cgv_version'          => ['nullable', 'string', 'max:20'],
         ];
     }

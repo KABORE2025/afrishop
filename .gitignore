@@ -36,3 +36,20 @@ Thumbs.db
 npm-debug.log
 yarn-error.log
 auth.json
+
+# Fichiers d'exécution. Ils réapparaissent tout seuls et n'ont rien à
+# faire dans un dépôt : sessions de connexion en clair, vues Blade
+# compilées, caches. Deux fichiers de session sont déjà partis dans le
+# commit ad2feef — les sortir du suivi avec :
+#   git rm -r --cached storage/framework/sessions
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+/storage/app/public/*
+!/storage/**/.gitignore
+!/storage/app/public/.gitkeep
+
+# Dépendances et verrous d'outillage local
+/bootstrap/cache/*.php

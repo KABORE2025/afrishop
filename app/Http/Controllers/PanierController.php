@@ -52,6 +52,25 @@ class PanierController extends Controller
             return back()->with('erreur', "« {$variante->produit->nom} » est en rupture de stock.");
         }
 
+        /*
+         * LA BOUTIQUE PEUT-ELLE ENCAISSER ?
+         *
+         * Contrôlé ICI, à la mise au panier, et pas seulement à la
+         * validation. `PanierService` refusait bien la commande, mais
+         * tout à la fin du tunnel — le client avait déjà saisi son nom,
+         * son téléphone, son quartier et son repère. Faire perdre cinq
+         * minutes pour annoncer un refus connu dès le premier clic est
+         * la façon la plus sûre de ne jamais revoir l'acheteur.
+         *
+         * Le message vient de la boutique elle-même : congés, boutique
+         * suspendue, compte de reversement pas encore vérifié — chacun
+         * appelle une phrase différente, et « ne peut pas recevoir de
+         * commande actuellement » n'en dit aucune.
+         */
+        if ($raison = $variante->produit->boutique->raisonIndisponibilite()) {
+            return back()->with('erreur', $raison);
+        }
+
         $this->panier->ajouter($donnees['variante_id'], $donnees['quantite'] ?? 1);
 
         return redirect()->route('panier')

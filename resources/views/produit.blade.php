@@ -72,6 +72,22 @@
 
     @include('partiels.messages')
 
+    {{--
+      POURQUOI ON NE PEUT PAS COMMANDER, DIT ICI ET PAS AU PAIEMENT.
+      Le client apprenait l'indisponibilité à la dernière étape du
+      tunnel, après avoir saisi son nom, son téléphone et son adresse.
+      Le dire sur la fiche lui épargne cinq minutes pour rien.
+    --}}
+    @if ($indisponible)
+      <div class="note" style="border-left:4px solid var(--rouge)">
+        <b>Commande impossible pour le moment</b>
+        {{ $indisponible }}
+        @if ($offres->isNotEmpty())
+          Le même produit est proposé plus bas par une autre boutique.
+        @endif
+      </div>
+    @endif
+
     <table>
       <tr><th>Déclinaison</th><th>Prix</th><th>Stock</th><th></th></tr>
       @foreach ($produit->variantes as $v)
@@ -89,7 +105,10 @@
             @endif
           </td>
           <td>
-            @if ($v->stock > 0 && $v->actif)
+            {{-- Pas de bouton si la boutique ne peut pas vendre : le
+                 motif est affiché une fois au-dessus du tableau, plutôt
+                 que répété sur chaque ligne. --}}
+            @if (! $indisponible && $v->stock > 0 && $v->actif)
               <form method="post" action="{{ route('panier.ajouter') }}">
                 @csrf
                 <input type="hidden" name="variante_id" value="{{ $v->id }}">

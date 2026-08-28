@@ -328,10 +328,17 @@ class AdminController extends Controller
 
         $produit->update([
             'statut_moderation' => $donnees['decision'],
-            // Sur une publication sans commentaire, l'ancien motif est
-            // effacé : garder « photo illisible » sur une fiche corrigée
-            // puis publiée induirait le vendeur en erreur.
-            'motif_moderation'  => $donnees['motif'] ?: null,
+            /*
+             * `?? null` et non `?:` — `validate()` ne renvoie QUE les
+             * clés effectivement présentes dans la requête. Une
+             * publication sans commentaire n'envoie pas `motif`, et
+             * `$donnees['motif']` levait alors « Undefined array key ».
+             *
+             * Sur une publication sans commentaire, l'ancien motif est
+             * effacé : garder « photo illisible » sur une fiche corrigée
+             * puis publiée induirait le vendeur en erreur.
+             */
+            'motif_moderation'  => ($donnees['motif'] ?? null) ?: null,
             'modere_par_id'     => $r->user()->id,
             'modere_le'         => now(),
         ]);

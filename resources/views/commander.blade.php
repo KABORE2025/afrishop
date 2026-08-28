@@ -101,9 +101,19 @@
       <div class="carte" style="padding:16px">
         <h2 style="font-size:16px;margin:0 0 12px">Paiement</h2>
 
+        {{--
+          LE PAIEMENT SE FAIT TOUJOURS AVANT L'ARRIVÉE DU COLIS.
+
+          « À la livraison » a été retiré, et ce n'est pas un détail
+          d'interface. En paiement à la livraison, l'argent va du client
+          au livreur sans passer par Afrishop : il n'y a rien à mettre
+          en séquestre, et la promesse faite juste en dessous — « la
+          somme est retenue jusqu'à la livraison » — n'aurait aucun
+          sens. Un colis non conforme payé en espèces se règle sans
+          nous, et sans recours.
+        --}}
         @foreach ([
-          'mobile_money'      => ['Mobile Money', 'Orange Money, Moov, Wave. Vous validez sur votre téléphone.'],
-          'especes_livraison' => ['À la livraison', 'Vous payez le livreur en espèces à la remise du colis.'],
+          'mobile_money' => ['Mobile Money', 'Orange Money, Moov, Wave. Vous validez sur votre téléphone.'],
         ] as $code => [$titre, $aide])
           <label style="display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--bord);border-radius:8px;margin-bottom:8px">
             <input type="radio" name="mode_paiement" value="{{ $code }}" required
@@ -122,9 +132,10 @@
         --}}
         <div class="note" style="margin-top:12px">
           <b>Votre argent est protégé</b>
-          En paiement en ligne, la somme est retenue par Afrishop et n'est versée à la
-          boutique qu'après la livraison. Si le colis n'arrive pas ou ne correspond pas,
+          La somme est retenue par Afrishop et n'est versée à la boutique
+          qu'<b>après votre livraison</b>. Si le colis n'arrive pas ou ne correspond pas,
           vous signalez le problème et les fonds restent bloqués le temps de l'arbitrage.
+          C'est précisément ce que le paiement en espèces au livreur ne permet pas.
         </div>
       </div>
     </div>

@@ -108,6 +108,71 @@ class Boutique extends Model
             && ! $this->estFermee();
     }
 
+    /**
+     * La version SQL de `peutVendre()`, pour filtrer une liste.
+     *
+     * POURQUOI ELLE EXISTE. `peutVendre()` s'évalue en PHP, sur une
+     * boutique déjà chargée : parfait pour vérifier une commande,
+     * inutilisable pour construire un catalogue. Sans équivalent SQL,
+     * la vitrine affichait des produits de boutiques incapables de
+     * vendre, et le client ne l'apprenait qu'à la dernière étape du
+     * tunnel — après avoir saisi son nom, son téléphone et son adresse.
+     *
+     * LES DEUX DÉFINITIONS DOIVENT RESTER IDENTIQUES. Toute condition
+     * ajoutée à `peutVendre()` doit l'être ici le même jour, sinon le
+     * catalogue et le paiement se remettent à diverger — exactement le
+     * défaut que ce scope corrige.
+     */
+    public function scopePeutVendre(\Illuminate\Database\Eloquent\Builder $q): \Illuminate\Database\Eloquent\Builder
+    {
+        return $q->where('statut', 'actif')
+            ->whereNotNull('paiement_numero')
+            ->whereNotNull('paiement_verifie_le')
+            // Non fermée : soit aucune fermeture programmée, soit la
+            // période de fermeture ne couvre pas aujourd'hui.
+            ->where(fn ($q) => $q
+                ->whereNull('fermee_du')
+                ->orWhere('fermee_du', '>', now()->toDateString())
+                ->orWhere(fn ($q) => $q
+                    ->whereNotNull('fermee_au')
+                    ->where('fermee_au', '<', now()->toDateString())));
+    }
+
+    /**
+     * Pourquoi cette boutique ne peut pas vendre, en français.
+     *
+     * Renvoie `null` si elle le peut. Le message est destiné au CLIENT,
+     * pas à l'exploitant : il dit ce qui se passe et quand revenir,
+     * sans exposer que le compte de reversement du vendeur n'est pas
+     * vérifié — ce qui ne regarde pas l'acheteur et ferait douter de la
+     * boutique.
+     */
+    public function raisonIndisponibilite(): ?string
+    {
+        if ($this->statut !== 'actif') {
+            return "La boutique « {$this->nom} » ne vend pas sur Afrishop actuellement.";
+        }
+
+        if ($this->estFermee()) {
+            return $this->fermee_au
+                ? "La boutique « {$this->nom} » est fermée jusqu'au "
+                    . $this->fermee_au->format('d/m/Y') . '.'
+                : "La boutique « {$this->nom} » est temporairement fermée.";
+        }
+
+        /*
+         * Compte de reversement non vérifié. C'est la garantie que
+         * l'argent encaissé pourra être rendu au vendeur : encaisser
+         * sans elle, c'est retenir une somme sans savoir à quel numéro
+         * la reverser. Le client n'a pas à connaître ce détail.
+         */
+        if ($this->paiement_numero === null || $this->paiement_verifie_le === null) {
+            return "La boutique « {$this->nom} » n'accepte pas encore les commandes en ligne.";
+        }
+
+        return null;
+    }
+
     /** Congés, deuil, rupture générale. */
     public function estFermee(): bool
     {
