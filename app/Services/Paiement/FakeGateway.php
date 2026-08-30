@@ -37,4 +37,34 @@ class FakeGateway implements PaymentGatewayInterface
     {
         return ! app()->isProduction();
     }
+
+    /**
+     * Format « maison », celui des tests : le webhook de ce driver est
+     * appelé à la main ou par la suite de tests, avec exactement les
+     * trois champs attendus.
+     */
+    public function lireWebhook(Request $requete): ?array
+    {
+        $donnees = $requete->validate([
+            'reference_externe' => ['required', 'string'],
+            'statut'            => ['required', 'in:reussie,echouee'],
+            'motif'             => ['nullable', 'string'],
+        ]);
+
+        return [
+            'reference_externe' => $donnees['reference_externe'],
+            'statut'            => $donnees['statut'],
+            'motif'             => $donnees['motif'] ?? null,
+        ];
+    }
+
+    /**
+     * Ce driver encaisse instantanément : une transaction connue de lui
+     * est forcément acceptée. Renvoyer « indéterminé » ferait tourner
+     * la commande de vérification en boucle sans jamais rien conclure.
+     */
+    public function verifierPaiement(string $referenceExterne): ?array
+    {
+        return ['accepte' => true, 'message' => 'Encaissement simulé (driver fake).'];
+    }
 }

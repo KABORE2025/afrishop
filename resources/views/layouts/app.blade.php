@@ -51,10 +51,57 @@
             @yield('navigation')
         </nav>
 
-        <div x-data="session">
-            <button type="button" @click="deconnecter" class="text-sm font-semibold text-gris hover:text-brun">
-                Se déconnecter
-            </button>
+        {{--
+          QUI EST CONNECTÉ.
+          Le bandeau ne montrait qu'un bouton « Se déconnecter » : rien
+          ne disait sous quel compte on travaillait. Un administrateur
+          renvoyé de /vendeur vers /console n'avait aucun moyen de
+          comprendre pourquoi.
+        --}}
+        <div x-data="session" class="flex items-center gap-3">
+
+            {{-- Pendant le chargement, un gabarit de la bonne taille
+                 plutôt que rien : sans lui, le bandeau saute quand le
+                 nom arrive, et le clic part à côté. --}}
+            <div x-show="chargement" class="h-5 w-28 animate-pulse rounded bg-bord" x-cloak></div>
+
+            <template x-if="!chargement && utilisateur">
+                <div class="flex items-center gap-3">
+                    <div class="text-right leading-tight">
+                        <div class="text-sm font-bold" x-text="utilisateur.nom"></div>
+
+                        {{-- Le rôle, et la boutique quand il y en a une.
+                             Un gérant doit voir laquelle il gère avant de
+                             modifier un prix. --}}
+                        <div class="text-xs text-gris">
+                            <span x-text="libelleRole"></span>
+                            <template x-if="nomBoutique">
+                                <span> — <span class="font-semibold" x-text="nomBoutique"></span></span>
+                            </template>
+                        </div>
+                    </div>
+
+                    {{-- Pastille d'initiale. Repère visuel immédiat quand
+                         on jongle entre un compte admin et un compte
+                         vendeur de test. --}}
+                    <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-extrabold text-white"
+                          :class="estAdmin ? 'bg-brun' : 'bg-brun-clair'"
+                          x-text="(utilisateur.nom || '?').charAt(0).toUpperCase()"></span>
+
+                    <button type="button" @click="deconnecter"
+                            class="text-sm font-semibold text-gris hover:text-brun">
+                        Quitter
+                    </button>
+                </div>
+            </template>
+
+            {{-- Jeton absent ou expiré. Le dire vaut mieux qu'un bouton
+                 « Se déconnecter » sur une session qui n'existe plus. --}}
+            <template x-if="!chargement && !utilisateur">
+                <a href="/vendeur/connexion" class="text-sm font-semibold text-brun hover:underline">
+                    Se connecter
+                </a>
+            </template>
         </div>
     </div>
 </header>

@@ -8,13 +8,59 @@
 
 @section('contenu')
 
-<div class="carte" style="padding:22px;margin:22px 0;border-left:4px solid var(--vert)">
-  <h1 style="font-size:22px;margin:0 0 6px">Commande enregistrée</h1>
+@include('partiels.messages')
+
+@php
+  /*
+    L'ÉTAT DU PAIEMENT DÉCIDE DE TOUT CE QUI SUIT.
+    Cette page annonçait « commande enregistrée » et décrivait la suite
+    comme si l'argent était encaissé — sans jamais regarder
+    `statut_paiement`. Un client dont le prélèvement avait échoué
+    repartait donc convaincu que son colis arrivait.
+  */
+  $paye     = $commande->statut_paiement === 'encaisse';
+  $echoue   = in_array($commande->statut_paiement, ['echoue', 'rembourse'], true);
+  $enCours  = ! $paye && ! $echoue;
+@endphp
+
+<div class="carte" style="padding:22px;margin:22px 0;border-left:4px solid
+     {{ $paye ? 'var(--vert)' : ($echoue ? 'var(--rouge)' : '#a1690f') }}">
+  <h1 style="font-size:22px;margin:0 0 6px">
+    @if ($paye)      Commande confirmée
+    @elseif ($echoue) Paiement non abouti
+    @else            Paiement en attente
+    @endif
+  </h1>
   <p style="margin:0;color:var(--gris)">
     Référence <b style="color:var(--texte);font-size:16px">{{ $commande->reference }}</b> —
     notez-la pour suivre votre colis.
   </p>
 </div>
+
+{{-- Relance. Un paiement peut échouer pour mille raisons passagères :
+     réseau coupé pendant la validation, solde reconstitué depuis. Sans
+     ce bouton, il fallait refaire tout le panier — et la commande
+     restait en base à immobiliser du stock. --}}
+@if (! $paye)
+  <div class="carte" style="padding:16px;margin-bottom:16px;border-left:4px solid var(--brun)">
+    <p style="margin:0 0 10px">
+      @if ($echoue)
+        Le paiement n'a pas abouti et les articles ont été remis en stock.
+        Vous pouvez relancer la demande.
+      @else
+        Validez la demande de paiement sur votre téléphone. Si vous n'avez rien reçu,
+        relancez-la ci-dessous.
+      @endif
+    </p>
+    <form method="post" action="{{ route('commande.payer', $commande->reference) }}">
+      @csrf
+      <button type="submit" class="chip"
+              style="background:var(--brun);color:#fff;border-color:var(--brun);padding:10px 18px">
+        {{ $echoue ? 'Réessayer le paiement' : 'Relancer la demande de paiement' }}
+      </button>
+    </form>
+  </div>
+@endif
 
 {{--
   CE QUI SE PASSE MAINTENANT, EN TROIS PHRASES.
@@ -24,15 +70,17 @@
 --}}
 <div class="note">
   <b>Et maintenant ?</b>
-  @if ($commande->mode_paiement === 'especes_livraison')
-    Vous paierez le livreur en espèces à la remise du colis. Un
-    <b>code à 6 chiffres</b> vous sera envoyé par SMS : donnez-le au livreur,
+  @if ($paye)
+    Votre paiement est encaissé. La somme est <b>retenue par Afrishop</b> et ne sera
+    versée à la boutique qu'après votre livraison. Un <b>code à 6 chiffres</b> vous
+    sera envoyé par SMS à l'expédition : donnez-le au livreur à la remise du colis,
     c'est lui qui atteste que vous avez bien reçu la commande.
+  @elseif ($echoue)
+    Rien ne vous a été prélevé. Tant que le paiement n'aboutit pas, la boutique
+    ne prépare pas le colis.
   @else
-    Le paiement va être demandé sur votre téléphone. Une fois encaissé, la somme est
-    <b>retenue par Afrishop</b> et n'est versée à la boutique qu'après votre livraison.
-    Un <b>code à 6 chiffres</b> vous sera envoyé par SMS à l'expédition : donnez-le au
-    livreur à la remise du colis.
+    La boutique ne préparera votre colis <b>qu'une fois le paiement encaissé</b>.
+    Ensuite, la somme est retenue par Afrishop jusqu'à votre livraison.
   @endif
 </div>
 

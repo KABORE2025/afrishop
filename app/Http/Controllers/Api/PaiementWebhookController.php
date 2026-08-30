@@ -39,11 +39,28 @@ class PaiementWebhookController extends Controller
             return response()->json(['message' => 'Signature invalide.'], 403);
         }
 
-        $data = $r->validate([
-            'reference_externe' => ['required', 'string'],
-            'statut'             => ['required', 'in:reussie,echouee'],
-            'motif'              => ['nullable', 'string'],
-        ]);
+        /*
+         * LA TRADUCTION EST FAITE PAR LA PASSERELLE, PAS ICI.
+         *
+         * Ce contrôleur lisait auparavant `reference_externe` et
+         * `statut` — un format qu'aucun prestataire réel n'envoie.
+         * CinetPay poste `cpm_trans_id`, `cpm_error_message`,
+         * `cpm_amount`… Chaque PSP connaît son propre format ; c'est
+         * donc à lui de le convertir, et à ce contrôleur de ne plus rien
+         * savoir du prestataire branché.
+         */
+        $data = $this->passerelle->lireWebhook($r);
+
+        if ($data === null) {
+            /*
+             * Charge utile inexploitable, ou statut encore indéterminé
+             * chez le prestataire. On répond une erreur EXPRÈS : la
+             * plupart des PSP réessaient tant qu'ils n'ont pas reçu un
+             * 2xx. Acquitter ici ferait perdre définitivement la
+             * notification d'un paiement en cours de validation.
+             */
+            return response()->json(['message' => 'Notification inexploitable pour le moment.'], 422);
+        }
 
         $tx = $this->paiement->trouverParReferenceExterne($data['reference_externe']);
 

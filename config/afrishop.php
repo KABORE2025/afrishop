@@ -37,6 +37,55 @@ return [
     'psp' => [
         'driver'         => env('PSP_DRIVER', 'fake'),
         'webhook_secret' => env('PSP_WEBHOOK_SECRET'),
+
+        /*
+         * CinetPay — Établissement de Paiement agréé BCEAO.
+         *
+         * Les trois secrets viennent du tableau de bord marchand. Ils ne
+         * doivent JAMAIS être écrits ici en dur : `.env` n'est pas
+         * versionné, ce fichier l'est.
+         *
+         * `secret_key` sert uniquement à vérifier le HMAC des webhooks.
+         * Sans elle, aucune notification n'est acceptée — et donc aucun
+         * paiement n'est jamais confirmé. C'est la panne silencieuse la
+         * plus probable de cette intégration.
+         *
+         * `canaux` : ALL, MOBILE_MONEY, CREDIT_CARD ou WALLET.
+         * « ALL » laisse le client choisir sur la page CinetPay ; c'est
+         * ce qui permet de servir un acheteur hors zone, à la carte,
+         * sans intégration supplémentaire.
+         */
+        'cinetpay' => [
+            'api_key'    => env('CINETPAY_API_KEY'),
+            'site_id'    => env('CINETPAY_SITE_ID'),
+            'secret_key' => env('CINETPAY_SECRET_KEY'),
+            'canaux'     => env('CINETPAY_CANAUX', 'ALL'),
+        ],
+
+        /*
+         * PayDunya — Établissement de Paiement agréé BCEAO, lui aussi.
+         *
+         * SON INTÉRÊT PARTICULIER : un vrai bac à sable. `mode = test`
+         * donne des clés préfixées `test_` et une page de paiement
+         * fictive. Toute la chaîne se vérifie donc AVANT tout
+         * engagement commercial, et le passage en production ne change
+         * qu'une variable d'environnement.
+         *
+         * `mode` n'est pas décoratif : la passerelle refuse une
+         * notification dont le mode ne correspond pas. Sans ce contrôle,
+         * une notification de test reçue par l'installation de
+         * production créditerait une vente que personne n'a payée.
+         */
+        'paydunya' => [
+            'mode'         => env('PAYDUNYA_MODE', 'test'),   // test | live
+            'master_key'   => env('PAYDUNYA_MASTER_KEY'),
+            'private_key'  => env('PAYDUNYA_PRIVATE_KEY'),
+            'token'        => env('PAYDUNYA_TOKEN'),
+            /* Le nom affiché sur la page de paiement et sur le reçu :
+             * c'est ce que le client lit au moment de valider. Un nom
+             * qu'il ne reconnaît pas est une raison d'abandonner. */
+            'nom_boutique' => env('PAYDUNYA_NOM_BOUTIQUE', 'Afrishop'),
+        ],
     ],
 
     /*

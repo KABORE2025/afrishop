@@ -67,6 +67,14 @@ Route::get('/commande/{reference}', [CommandeWebController::class, 'confirmee'])
     ->name('commande.confirmee');
 
 /*
+ * Relance d'un paiement en attente ou refusé. En POST, pas en GET : un
+ * lien cliquable relancerait un prélèvement au moindre passage d'un
+ * aspirateur de pages, et un rafraîchissement le rejouerait.
+ */
+Route::post('/commande/{reference}/payer', [CommandeWebController::class, 'payer'])
+    ->name('commande.payer');
+
+/*
 |--------------------------------------------------------------------------
 | ESPACE VENDEUR — coquilles vides remplies par l'API
 |--------------------------------------------------------------------------

@@ -153,10 +153,80 @@ Alpine.data('liste', (chemin, filtresInitiaux = {}) => ({
     appliquerFiltres() { this.charger(1); },
 }));
 
-/* Déconnexion — le jeton est effacé localement même si l'appel échoue :
- * un utilisateur qui clique « se déconnecter » doit être déconnecté,
- * réseau ou pas. */
+/*
+ * =====================================================================
+ *  QUI EST CONNECTÉ — le bandeau d'identité
+ * =====================================================================
+ *  IL N'Y AVAIT AUCUN INDICATEUR. Le bandeau ne montrait qu'un bouton
+ *  « Se déconnecter », donc rien ne disait sous quel compte on
+ *  travaillait. Trois conséquences concrètes, toutes déjà rencontrées :
+ *
+ *   — un administrateur qui ouvre /vendeur ne comprend pas pourquoi il
+ *     est renvoyé ailleurs ;
+ *   — un gérant de plusieurs boutiques ne voit pas laquelle il gère ;
+ *   — un jeton expiré donne des écrans vides, sans un mot.
+ *
+ *  Ce composant appelle `/auth/moi` une fois par page. C'est une
+ *  requête de plus, et elle se paie : en échange, l'écran sait qui il
+ *  sert, et un jeton mort est détecté tout de suite au lieu de
+ *  produire une page blanche.
+ * =====================================================================
+ */
 Alpine.data('session', () => ({
+    utilisateur: null,
+    chargement: true,
+
+    async init() {
+        // Pas de jeton : page de ce gabarit atteinte sans être connecté.
+        // On n'appelle pas l'API pour se l'entendre confirmer.
+        if (!jeton.lire()) {
+            this.chargement = false;
+            return;
+        }
+
+        try {
+            this.utilisateur = await api.get('/auth/moi');
+
+            /* Resynchronisation du rôle mémorisé. Il a pu changer côté
+             * serveur depuis la connexion — un client promu vendeur
+             * après validation de sa candidature, typiquement — et le
+             * navigateur continuerait sinon à l'envoyer au mauvais
+             * espace jusqu'à sa prochaine connexion. */
+            role.ecrire(this.utilisateur.role);
+        } catch (e) {
+            /* `api.js` a déjà effacé le jeton sur un 401. On ne redirige
+             * pas depuis ici : c'est le rôle de `exigerConnexion()`, que
+             * chaque écran appelle. Rediriger aux deux endroits
+             * produirait deux navigations concurrentes. */
+            this.utilisateur = null;
+        } finally {
+            this.chargement = false;
+        }
+    },
+
+    /** Le rôle en toutes lettres. « agent » n'est pas un mot d'interface. */
+    get libelleRole() {
+        return {
+            admin:   'Administrateur',
+            agent:   'Agent Afrishop',
+            vendeur: 'Vendeur',
+            client:  'Client',
+        }[this.utilisateur?.role] ?? this.utilisateur?.role;
+    },
+
+    /** Vrai pour les rôles qui voient la console. */
+    get estAdmin() {
+        return ['admin', 'agent'].includes(this.utilisateur?.role);
+    },
+
+    /** La boutique gérée, s'il y en a une. */
+    get nomBoutique() {
+        return this.utilisateur?.boutique?.nom ?? null;
+    },
+
+    /* Déconnexion — le jeton est effacé localement même si l'appel
+     * échoue : un utilisateur qui clique « se déconnecter » doit être
+     * déconnecté, réseau ou pas. */
     async deconnecter() {
         try { await api.post('/auth/deconnexion'); } catch { /* sans importance */ }
         jeton.effacer();

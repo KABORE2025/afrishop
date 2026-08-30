@@ -16,6 +16,19 @@ use Illuminate\Support\Facades\Schedule;
 // avant les réclamations des vendeurs.
 Schedule::command('afrishop:liberer-fonds')->dailyAt('06:00');
 
+// RATTRAPAGE DES PAIEMENTS SANS NOTIFICATION.
+// Le webhook est le chemin normal, mais il se perd : réseau coupé,
+// pare-feu, serveur redémarré pendant l'appel. La commande reste alors
+// « en attente » pour toujours — et c'est la panne la plus vicieuse du
+// circuit, parce que personne ne la voit : le client a été débité et
+// attend son colis, le vendeur n'a jamais vu la commande.
+// Toutes les cinq minutes : assez rapproché pour qu'un client
+// n'attende pas, assez espacé pour ne pas marteler l'API du
+// prestataire.
+Schedule::command('afrishop:verifier-paiements')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();
+
 // Regroupe les ventes libérées en un reversement par boutique.
 Schedule::command('afrishop:preparer-reversements')->weeklyOn(1, '07:00');
 

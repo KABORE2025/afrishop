@@ -6,6 +6,7 @@ use App\Http\Requests\CommanderWebRequest;
 use App\Models\Commande;
 use App\Models\Pays;
 use App\Models\Ville;
+use App\Services\Paiement\PaiementCommandeService;
 use App\Services\PanierService;
 use App\Services\PanierSession;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,7 @@ class CommandeWebController extends Controller
     public function __construct(
         private PanierSession $panier,
         private PanierService $service,
+        private PaiementCommandeService $paiement,
     ) {}
 
     /** Le formulaire de commande. */
@@ -100,7 +102,91 @@ class CommandeWebController extends Controller
          */
         $this->panier->vider();
 
+        return $this->lancerPaiement($commande);
+    }
+
+    /**
+     * =================================================================
+     *  DÉMARRAGE DE L'ENCAISSEMENT
+     * =================================================================
+     *  CE MAILLON MANQUAIT, et son absence vidait de sens tout le reste.
+     *  `CommandeController::creer()` (l'API) appelait bien
+     *  `demarrerPaiement()` ; le tunnel web, lui, créait la commande et
+     *  s'arrêtait là. La commande naissait donc en
+     *  « attente_encaissement » et y restait pour toujours : aucun
+     *  paiement n'était jamais demandé, aucune somme n'entrait, et le
+     *  séquestre — la promesse centrale d'Afrishop — n'avait rien à
+     *  retenir. Le stock, lui, était bien décrémenté.
+     *
+     *  Trois issues, et chacune mène quelque part :
+     *
+     *   reussie     le prestataire encaisse tout de suite (c'est ce que
+     *               fait FakeGateway) → page de confirmation ;
+     *   en_attente  un vrai PSP renvoie une URL où le client valide sur
+     *               son téléphone → on l'y envoie ;
+     *   echouee     refus immédiat. `PaiementCommandeService` a déjà
+     *               remis le stock et annulé la commande → on le dit.
+     * =================================================================
+     */
+    private function lancerPaiement(Commande $commande): RedirectResponse
+    {
+        try {
+            $resultat = $this->paiement->demarrerPaiement($commande);
+        } catch (\Throwable $e) {
+            /*
+             * La passerelle est injoignable. LA COMMANDE EXISTE DÉJÀ et
+             * le stock est réservé : on ne la perd surtout pas, on
+             * envoie le client sur sa confirmation, d'où il pourra
+             * relancer le paiement. Le message technique reste dans le
+             * journal ; le client lit une phrase qui lui dit quoi faire.
+             */
+            report($e);
+
+            return redirect()->route('commande.confirmee', $commande->reference)
+                ->with('erreur', "Le paiement n'a pas pu être lancé. Votre commande est "
+                    . 'enregistrée : réessayez depuis cette page.');
+        }
+
+        if ($resultat['statut'] === 'en_attente' && ! empty($resultat['url_paiement'])) {
+            // `away()` et non `to()` : la destination est le site du
+            // prestataire, hors de l'application.
+            return redirect()->away($resultat['url_paiement']);
+        }
+
+        if ($resultat['statut'] === 'echouee') {
+            return redirect()->route('commande.confirmee', $commande->reference)
+                ->with('erreur', 'Le paiement a été refusé. Les articles ont été remis en stock.');
+        }
+
         return redirect()->route('commande.confirmee', $commande->reference);
+    }
+
+    /**
+     * Relance d'un paiement resté en attente ou échoué.
+     *
+     * Sans cette porte, un client dont le paiement a échoué — réseau
+     * coupé, solde insuffisant au moment du prélèvement — n'avait aucun
+     * moyen de réessayer : il devait refaire tout son panier. La
+     * commande, elle, restait en base à consommer du stock.
+     *
+     * Aucune authentification : la référence suffit, comme pour la page
+     * de confirmation. Le risque est mesuré — relancer le paiement de la
+     * commande d'un inconnu ne fait que lui redemander SON argent, sur
+     * SON téléphone.
+     */
+    public function payer(string $reference): RedirectResponse
+    {
+        $commande = Commande::where('reference', $reference)->firstOrFail();
+
+        // Déjà encaissée : ne pas redemander l'argent. Le contrôle est
+        // ici parce que rien n'empêche un client de rafraîchir la page
+        // ou de rouvrir un vieux lien reçu par SMS.
+        if ($commande->statut_paiement === 'encaisse') {
+            return redirect()->route('commande.confirmee', $reference)
+                ->with('succes', 'Cette commande est déjà payée.');
+        }
+
+        return $this->lancerPaiement($commande);
     }
 
     /**
