@@ -51,27 +51,39 @@
       <div class="carte" style="padding:16px;margin-bottom:16px">
         <h2 style="font-size:16px;margin:0 0 12px">Livraison</h2>
 
-        <label style="display:block;margin-bottom:10px">
-          <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Pays</span>
-          <select name="pays_id" required
-                  style="width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px">
-            @foreach ($pays as $p)
-              <option value="{{ $p->id }}" @selected(old('pays_id') == $p->id)>{{ $p->nom }}</option>
-            @endforeach
-          </select>
-        </label>
+        {{--
+          UNE SEULE QUESTION POUR LE PAYS ET LA VILLE.
 
+          Le formulaire posait les deux séparément, et rien n'empêchait
+          de répondre « Burkina Faso » puis « Abidjan » : la zone de
+          livraison est cherchée sur le COUPLE, aucune ne correspondait,
+          et le client lisait « Aucune livraison n'est assurée à cette
+          adresse » sans rien comprendre. Il proposait en plus
+          « — Autre ville — », qui ne pouvait mener qu'à un refus,
+          faute de zone sans ville.
+
+          Le pays se déduit maintenant de la ville, côté serveur. Les
+          villes sont groupées par pays : l'information reste à l'écran
+          sans être ressaisie, et les deux ne peuvent plus se
+          contredire.
+
+          Seules les villes RÉELLEMENT desservies sont proposées.
+        --}}
         <label style="display:block;margin-bottom:10px">
-          <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Ville</span>
-          <select name="ville_id"
+          <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Ville de livraison</span>
+          <select name="ville_id" required
                   style="width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px">
-            <option value="">— Autre ville —</option>
-            @foreach ($villes as $v)
-              <option value="{{ $v->id }}" @selected(old('ville_id') == $v->id)>{{ $v->nom }}</option>
+            <option value="">— Choisissez votre ville —</option>
+            @foreach ($villesParPays as $nomPays => $villes)
+              <optgroup label="{{ $nomPays }}">
+                @foreach ($villes as $v)
+                  <option value="{{ $v->id }}" @selected(old('ville_id') == $v->id)>{{ $v->nom }}</option>
+                @endforeach
+              </optgroup>
             @endforeach
           </select>
           <span style="display:block;font-size:12.5px;color:var(--gris);margin-top:3px">
-            Les frais de livraison dépendent de la ville.
+            Seules les villes que nous desservons sont listées. Les frais de livraison en dépendent.
           </span>
         </label>
 

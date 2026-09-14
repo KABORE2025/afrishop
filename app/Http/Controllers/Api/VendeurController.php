@@ -12,15 +12,17 @@ use App\Http\Resources\ProduitResource;
 use App\Http\Resources\ReversementResource;
 use App\Http\Resources\SousCommandeResource;
 use App\Http\Resources\VarianteProduitResource;
+use App\Models\AgentRemiseBoutique;
 use App\Models\Boutique;
-use App\Models\Media;
 use App\Models\Expedition;
+use App\Models\Media;
 use App\Models\Produit;
 use App\Models\Reversement;
 use App\Models\SousCommande;
 use App\Models\VarianteProduit;
 use App\Services\EspecesService;
 use App\Services\MediaService;
+use App\Services\NotificationService;
 use App\Services\TableauBordVendeurService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -40,7 +42,10 @@ use Illuminate\Support\Facades\DB;
  */
 class VendeurController extends Controller
 {
-    public function __construct(private EspecesService $especes) {}
+    public function __construct(
+        private NotificationService $notifications,
+        private EspecesService $especes,
+    ) {}
 
     /** Sous-commandes de la boutique de l'utilisateur connecté, et d'elle seule. */
     public function commandes(Request $r): JsonResponse
@@ -69,7 +74,7 @@ class VendeurController extends Controller
         }
 
         if ($r->filled('recherche')) {
-            $requete->where('reference', 'like', '%' . $r->string('recherche') . '%');
+            $requete->where('reference', 'like', '%'.$r->string('recherche').'%');
         }
 
         return response()->json(
@@ -89,6 +94,17 @@ class VendeurController extends Controller
         return response()->json($service->pour($this->resoudreBoutique($r)));
     }
 
+    /** Livreurs actifs proposés au vendeur lors de l'affectation d'un colis. */
+    public function livreurs(Request $r): JsonResponse
+    {
+        $boutique = $this->resoudreBoutique($r);
+        return response()->json(['data' => $boutique->agentsRemise()
+            ->where('statut', 'actif')->where('autorise_livraison', true)
+            ->with('livreur:id,nom')->get()->map(fn (AgentRemiseBoutique $a) => [
+                'id' => $a->livreur_id, 'nom' => $a->livreur->nom,
+            ])->values()]);
+    }
+
     /**
      * Passage à « expédiée ». Crée l'expédition (code de suivi, code de
      * livraison à usage unique) et, en paiement à la livraison, prépare
@@ -106,19 +122,28 @@ class VendeurController extends Controller
 
         $data = $r->validate([
             'transporteur_id' => ['nullable', 'integer', 'exists:transporteurs,id'],
-            'code_suivi'      => ['nullable', 'string', 'max:60'],
+            'livreur_id' => ['required', 'integer'],
+            'code_suivi' => ['nullable', 'string', 'max:60'],
         ]);
+
+        $autorise = AgentRemiseBoutique::where('boutique_id', $boutique->id)
+            ->where('livreur_id', $data['livreur_id'])->where('statut', 'actif')
+            ->where('autorise_livraison', true)->exists();
+        if (! $autorise) {
+            return response()->json(['message' => 'Cet agent n’est pas autorisé à livrer pour votre boutique.'], 422);
+        }
 
         DB::transaction(function () use ($sousCommande, $data, $r) {
             $expedition = $sousCommande->expedition ?? new Expedition(['sous_commande_id' => $sousCommande->id]);
             $expedition->fill([
                 'transporteur_id' => $data['transporteur_id'] ?? $expedition->transporteur_id,
-                'code_suivi'      => $data['code_suivi'] ?? $expedition->code_suivi,
+                'livreur_id' => $data['livreur_id'],
+                'code_suivi' => $data['code_suivi'] ?? $expedition->code_suivi,
                 // Généré une seule fois : ré-expédier ne doit pas changer
                 // le code déjà communiqué au client par SMS.
-                'code_livraison'  => $expedition->code_livraison ?? (string) random_int(100000, 999999),
-                'statut'          => 'en_cours',
-                'expedie_le'      => now(),
+                'code_livraison' => $expedition->code_livraison ?? (string) random_int(100000, 999999),
+                'statut' => 'en_cours',
+                'expedie_le' => now(),
             ]);
             $expedition->save();
 
@@ -129,52 +154,14 @@ class VendeurController extends Controller
 
             $sousCommande->update(['statut' => 'expediee', 'expedie_le' => now()]);
             $sousCommande->journaliser('expediee', ['code_suivi' => $data['code_suivi'] ?? null], $r->user()->id, 'vendeur');
-        });
 
-        return response()->json(new SousCommandeResource($sousCommande->fresh(['expedition', 'lignes'])));
-    }
-
-    /**
-     * Livraison. En paiement à la livraison, exige le montant réellement
-     * perçu et déclenche l'écriture au grand livre (EspecesService).
-     * En paiement en ligne, les fonds sont déjà en séquestre depuis la
-     * création : il n'y a rien de plus à faire côté argent.
-     */
-    public function livrer(Request $r, SousCommande $sousCommande): JsonResponse
-    {
-        $this->resoudreBoutique($r, $sousCommande);
-
-        if ($sousCommande->statut !== 'expediee') {
-            return response()->json([
-                'message' => "Cette sous-commande est « {$sousCommande->statut} » : elle doit être expédiée avant d'être livrée.",
-            ], 422);
-        }
-
-        $expedition = $sousCommande->expedition;
-        $especesLivraison = $sousCommande->commande->mode_paiement === 'especes_livraison';
-
-        $data = $r->validate([
-            'code_livraison'    => ['required', 'string'],
-            'montant_percu_cfa' => [$especesLivraison ? 'required' : 'nullable', 'integer', 'min:0'],
-        ]);
-
-        if ($expedition->code_livraison !== null && $data['code_livraison'] !== $expedition->code_livraison) {
-            return response()->json(['message' => "Le code de livraison ne correspond pas."], 422);
-        }
-
-        DB::transaction(function () use ($sousCommande, $expedition, $especesLivraison, $data, $r) {
-            $expedition->update(['statut' => 'livree', 'livre_le' => now(), 'code_valide_le' => now()]);
-            $sousCommande->update(['statut' => 'livree', 'livre_le' => now()]);
-
-            if ($especesLivraison) {
-                $encaissement = $expedition->encaissementEspeces;
-                if ($encaissement) {
-                    $this->especes->encaisser($encaissement, (int) $data['montant_percu_cfa']);
-                }
-            }
-
-            $sousCommande->journaliser('livree', [], $r->user()->id, 'vendeur');
-            $sousCommande->commande->rafraichirStatut();
+            // Le SMS est mis en file dans la même transaction que l'expédition :
+            // un code sans notification ne peut jamais être validé à la porte.
+            $this->notifications->envoyer('code_livraison', 'sms', [
+                'client_nom' => $sousCommande->commande->client_nom,
+                'reference' => $sousCommande->reference,
+                'code' => $expedition->code_livraison,
+            ], telephone: $sousCommande->commande->client_telephone);
         });
 
         return response()->json(new SousCommandeResource($sousCommande->fresh(['expedition', 'lignes'])));
@@ -207,15 +194,15 @@ class VendeurController extends Controller
 
         $produit = DB::transaction(function () use ($boutique, $data) {
             $produit = Produit::create([
-                'boutique_id'  => $boutique->id,
+                'boutique_id' => $boutique->id,
                 'categorie_id' => $data['categorie_id'],
-                'reference'    => Produit::prochaineReference($boutique),
-                'nom'          => $data['nom'],
-                'slug'         => Produit::slugUnique($data['nom']),
-                'description'  => $data['description'] ?? null,
+                'reference' => Produit::prochaineReference($boutique),
+                'nom' => $data['nom'],
+                'slug' => Produit::slugUnique($data['nom']),
+                'description' => $data['description'] ?? null,
                 'prix_ttc_cfa' => $data['prix_ttc_cfa'],
-                'poids_g'      => $data['poids_g'] ?? null,
-                'tracable'     => $data['tracable'] ?? false,
+                'poids_g' => $data['poids_g'] ?? null,
+                'tracable' => $data['tracable'] ?? false,
             ]);
 
             $variantes = $data['variantes'] ?? [[
@@ -224,12 +211,12 @@ class VendeurController extends Controller
 
             foreach ($variantes as $i => $v) {
                 $produit->variantes()->create([
-                    'sku'           => $produit->reference . '-V' . ($i + 1),
-                    'libelle'       => $v['libelle'],
-                    'prix_ttc_cfa'  => $v['prix_ttc_cfa'] ?? null,
-                    'stock'         => $v['stock'],
-                    'seuil_alerte'  => $v['seuil_alerte'] ?? 3,
-                    'defaut'        => $i === 0,
+                    'sku' => $produit->reference.'-V'.($i + 1),
+                    'libelle' => $v['libelle'],
+                    'prix_ttc_cfa' => $v['prix_ttc_cfa'] ?? null,
+                    'stock' => $v['stock'],
+                    'seuil_alerte' => $v['seuil_alerte'] ?? 3,
+                    'defaut' => $i === 0,
                 ]);
             }
 
@@ -290,14 +277,14 @@ class VendeurController extends Controller
 
         if ($remoderer) {
             $donnees['statut_moderation'] = 'en_attente';
-            $donnees['motif_moderation']  = 'Fiche modifiée par la boutique — nouvelle validation requise.';
+            $donnees['motif_moderation'] = 'Fiche modifiée par la boutique — nouvelle validation requise.';
         }
 
         $produit->update($donnees);
 
         return response()->json([
-            'produit'     => new ProduitResource($produit->fresh('variantes')),
-            'remodere'    => $remoderer,
+            'produit' => new ProduitResource($produit->fresh('variantes')),
+            'remodere' => $remoderer,
             'information' => $remoderer
                 ? 'La fiche a été modifiée sur le fond : elle repasse en validation et n\'est plus visible en vitrine en attendant.'
                 : null,
@@ -340,11 +327,11 @@ class VendeurController extends Controller
                 'variante' => new VarianteProduitResource($variante),
                 /* Une alerte lisible plutôt qu'un booléen que l'écran
                  * oubliera d'interpréter. */
-                'alerte'   => match (true) {
-                    $variante->stock < 0        => 'Stock négatif : une survente a été constatée sur cette variante.',
-                    $variante->enRupture()      => 'Rupture de stock : la variante n\'est plus achetable.',
-                    $variante->stockCritique()  => 'Stock critique : ' . $variante->stock . ' unité(s) restante(s).',
-                    default                     => null,
+                'alerte' => match (true) {
+                    $variante->stock < 0 => 'Stock négatif : une survente a été constatée sur cette variante.',
+                    $variante->enRupture() => 'Rupture de stock : la variante n\'est plus achetable.',
+                    $variante->stockCritique() => 'Stock critique : '.$variante->stock.' unité(s) restante(s).',
+                    default => null,
                 },
             ]);
         });
@@ -385,9 +372,9 @@ class VendeurController extends Controller
 
         $media = $r->input('type') === 'video'
             ? $medias->ajouterVideo($r->file('fichier'), $r->file('poster'),
-                                    'produit', $produit->id, $r->input('texte_alternatif'))
+                'produit', $produit->id, $r->input('texte_alternatif'))
             : $medias->ajouterImage($r->file('fichier'),
-                                    'produit', $produit->id, $r->input('texte_alternatif'));
+                'produit', $produit->id, $r->input('texte_alternatif'));
 
         return response()->json(new MediaResource($media), 201);
     }

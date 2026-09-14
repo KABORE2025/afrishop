@@ -9,6 +9,7 @@ use App\Services\Paiement\PaymentGatewayInterface;
 use App\Services\Sms\PasserelleJournal;
 use App\Services\Sms\PasserelleOrange;
 use App\Services\Sms\PasserelleSmsInterface;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,9 +25,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PaymentGatewayInterface::class, function () {
             return match (config('afrishop.psp.driver')) {
                 'cinetpay' => new CinetPayGateway(
-                    apiKey:          (string) config('afrishop.psp.cinetpay.api_key'),
-                    siteId:          (string) config('afrishop.psp.cinetpay.site_id'),
-                    secretKey:       (string) config('afrishop.psp.cinetpay.secret_key'),
+                    apiKey: (string) config('afrishop.psp.cinetpay.api_key'),
+                    siteId: (string) config('afrishop.psp.cinetpay.site_id'),
+                    secretKey: (string) config('afrishop.psp.cinetpay.secret_key'),
                     /*
                      * Les deux URL sont construites à partir d'APP_URL.
                      * CinetPay doit pouvoir ATTEINDRE `notify_url` depuis
@@ -37,8 +38,8 @@ class AppServiceProvider extends ServiceProvider
                      * publique dans APP_URL.
                      */
                     urlNotification: url('/api/webhooks/paiement/cinetpay'),
-                    urlRetour:       url('/'),
-                    canaux:          (string) config('afrishop.psp.cinetpay.canaux'),
+                    urlRetour: url('/'),
+                    canaux: (string) config('afrishop.psp.cinetpay.canaux'),
                 ),
                 /*
                  * PayDunya a un vrai bac à sable : c'est le seul
@@ -49,17 +50,17 @@ class AppServiceProvider extends ServiceProvider
                  * sans toucher au code.
                  */
                 'paydunya' => new PayDunyaGateway(
-                    masterKey:       (string) config('afrishop.psp.paydunya.master_key'),
-                    privateKey:      (string) config('afrishop.psp.paydunya.private_key'),
-                    token:           (string) config('afrishop.psp.paydunya.token'),
+                    masterKey: (string) config('afrishop.psp.paydunya.master_key'),
+                    privateKey: (string) config('afrishop.psp.paydunya.private_key'),
+                    token: (string) config('afrishop.psp.paydunya.token'),
                     urlNotification: url('/api/webhooks/paiement/paydunya'),
-                    urlRetour:       url('/'),
-                    urlAnnulation:   url('/panier'),
-                    nomBoutique:     (string) config('afrishop.psp.paydunya.nom_boutique'),
-                    mode:            (string) config('afrishop.psp.paydunya.mode'),
+                    urlRetour: url('/'),
+                    urlAnnulation: url('/panier'),
+                    nomBoutique: (string) config('afrishop.psp.paydunya.nom_boutique'),
+                    mode: (string) config('afrishop.psp.paydunya.mode'),
                 ),
 
-                default => new FakeGateway(),
+                default => new FakeGateway,
             };
         });
 
@@ -72,19 +73,59 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PasserelleSmsInterface::class, function () {
             return match (config('afrishop.sms.driver')) {
                 'orange' => new PasserelleOrange(
-                    clientId:           (string) config('afrishop.sms.client_id'),
-                    clientSecret:       (string) config('afrishop.sms.client_secret'),
-                    adresseExpediteur:  (string) config('afrishop.sms.adresse_expediteur'),
-                    nomExpediteur:      (string) config('afrishop.sms.nom_expediteur'),
-                    coutUnitaireCfa:    (int)    config('afrishop.sms.cout_unitaire_cfa'),
+                    clientId: (string) config('afrishop.sms.client_id'),
+                    clientSecret: (string) config('afrishop.sms.client_secret'),
+                    adresseExpediteur: (string) config('afrishop.sms.adresse_expediteur'),
+                    nomExpediteur: (string) config('afrishop.sms.nom_expediteur'),
+                    coutUnitaireCfa: (int) config('afrishop.sms.cout_unitaire_cfa'),
                 ),
-                default => new PasserelleJournal(),
+                default => new PasserelleJournal,
             };
         });
     }
 
+    /**
+     * =================================================================
+     *  AUTORITÉS DE CERTIFICATION — le fichier qui manquait à PHP
+     * =================================================================
+     *  LE PROBLÈME. Sous Windows, PHP est livré SANS liste d'autorités
+     *  de certification. Il ne peut donc vérifier aucun certificat
+     *  HTTPS et refuse toute connexion sécurisée, avec ce message :
+     *
+     *      cURL error 60: SSL certificate — unable to get local
+     *      issuer certificate
+     *
+     *  Cela bloquait tout appel sortant : PayDunya, CinetPay, l'API SMS
+     *  d'Orange. La commande était créée, le paiement jamais lancé.
+     *
+     *  LA CORRECTION CLASSIQUE est de renseigner `curl.cainfo` dans
+     *  `php.ini`. Elle est bonne, mais elle vit sur le poste et pas
+     *  dans le dépôt : chaque nouvelle machine, chaque serveur, chaque
+     *  collègue retombe sur la même panne.
+     *
+     *  Le paquet est donc embarqué dans `storage/certs/cacert.pem` et
+     *  déclaré ici. La correction voyage avec le code.
+     *
+     *  CE N'EST PAS UNE DÉSACTIVATION DE LA VÉRIFICATION.
+     *  On ne met pas `verify => false` — cela reviendrait à accepter
+     *  n'importe quel certificat, donc à laisser quiconque se placer
+     *  entre le serveur et le prestataire de paiement, lire les clés et
+     *  détourner les confirmations d'encaissement. On FOURNIT la liste
+     *  des autorités de confiance : la vérification reste entière,
+     *  elle sait simplement à quoi se référer.
+     *
+     *  `CA_BUNDLE=` vide dans le `.env` rend la main au système, pour
+     *  un serveur Linux correctement configuré dont le magasin est
+     *  déjà à jour — ce qui est préférable, un paquet versionné
+     *  finissant toujours par vieillir.
+     * =================================================================
+     */
     public function boot(): void
     {
-        //
+        $paquet = (string) config('afrishop.ca_bundle');
+
+        if ($paquet !== '' && is_file($paquet)) {
+            Http::globalOptions(['verify' => $paquet]);
+        }
     }
 }

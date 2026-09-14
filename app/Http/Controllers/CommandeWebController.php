@@ -55,8 +55,7 @@ class CommandeWebController extends Controller
         }
 
         return view('commander', array_merge($detail, [
-            'villes' => Ville::orderBy('nom')->get(['id', 'nom', 'pays_id']),
-            'pays'   => Pays::orderBy('nom')->get(['id', 'nom', 'code_iso2']),
+            'villesParPays' => $this->villesLivrables(),
         ]));
     }
 
@@ -107,6 +106,52 @@ class CommandeWebController extends Controller
 
     /**
      * =================================================================
+     *  LES VILLES RÉELLEMENT LIVRABLES, GROUPÉES PAR PAYS
+     * =================================================================
+     *  DEUX DÉFAUTS CORRIGÉS ICI, ET ILS RENDAIENT LA COMMANDE
+     *  IMPOSSIBLE.
+     *
+     *  1. Le formulaire proposait « — Autre ville — » (`ville_id` vide).
+     *     Or `PanierService::calculerFrais()` cherche une zone de
+     *     livraison, et AUCUNE zone du référentiel n'a `ville_id` à
+     *     NULL. Choisir « autre ville » menait donc invariablement à
+     *     « Aucune livraison n'est assurée à cette adresse ». Une
+     *     option qui ne peut jamais aboutir n'a pas à exister.
+     *
+     *  2. La liste des villes n'était pas filtrée par pays : on pouvait
+     *     choisir « Burkina Faso » et « Abidjan ». La zone existe pour
+     *     Abidjan, mais rattachée à la Côte d'Ivoire — la requête ne
+     *     trouvait rien, avec le même message incompréhensible.
+     *
+     *  La correction supprime le champ « Pays » : LE PAYS SE DÉDUIT DE
+     *  LA VILLE. Un champ de moins, et deux valeurs qui ne peuvent plus
+     *  se contredire. Les villes sont groupées par pays dans le menu,
+     *  ce qui garde l'information à l'écran sans la faire ressaisir.
+     *
+     *  Seules les villes ayant une zone de livraison ACTIVE sont
+     *  proposées : afficher une ville qu'on ne dessert pas, c'est
+     *  laisser un client remplir tout le formulaire pour rien.
+     * =================================================================
+     */
+    private function villesLivrables()
+    {
+        return Ville::query()
+            ->where('villes.active', true)
+            ->whereExists(fn ($q) => $q
+                ->selectRaw(1)
+                ->from('zones_livraison')
+                ->whereColumn('zones_livraison.ville_id', 'villes.id')
+                ->where('zones_livraison.active', true))
+            ->join('pays', 'pays.id', '=', 'villes.pays_id')
+            ->where('pays.ouvert_a_la_vente', true)
+            ->orderBy('pays.nom')
+            ->orderBy('villes.nom')
+            ->get(['villes.id', 'villes.nom', 'villes.pays_id', 'pays.nom as pays_nom'])
+            ->groupBy('pays_nom');
+    }
+
+    /**
+     * =================================================================
      *  DÉMARRAGE DE L'ENCAISSEMENT
      * =================================================================
      *  CE MAILLON MANQUAIT, et son absence vidait de sens tout le reste.
@@ -144,7 +189,7 @@ class CommandeWebController extends Controller
 
             return redirect()->route('commande.confirmee', $commande->reference)
                 ->with('erreur', "Le paiement n'a pas pu être lancé. Votre commande est "
-                    . 'enregistrée : réessayez depuis cette page.');
+                    .'enregistrée : réessayez depuis cette page.');
         }
 
         if ($resultat['statut'] === 'en_attente' && ! empty($resultat['url_paiement'])) {

@@ -36,7 +36,8 @@ window.dateFr = dateFr;
 window.exigerConnexion = function (roleAttendu = null) {
     if (!jeton.lire()) {
         const retour = encodeURIComponent(window.location.pathname);
-        window.location.replace(`/vendeur/connexion?retour=${retour}`);
+        const connexion = roleAttendu === 'livreur' ? '/livreur/connexion' : '/vendeur/connexion';
+        window.location.replace(`${connexion}?retour=${retour}`);
         return false;
     }
 
@@ -55,6 +56,11 @@ window.exigerConnexion = function (roleAttendu = null) {
     }
 
     if (roleAttendu === 'admin' && r && !['admin', 'agent'].includes(r)) {
+        window.location.replace(espaceDe(r));
+        return false;
+    }
+
+    if (roleAttendu === 'livreur' && r && r !== 'livreur') {
         window.location.replace(espaceDe(r));
         return false;
     }
@@ -210,6 +216,7 @@ Alpine.data('session', () => ({
             admin:   'Administrateur',
             agent:   'Agent Afrishop',
             vendeur: 'Vendeur',
+            livreur: 'Livreur',
             client:  'Client',
         }[this.utilisateur?.role] ?? this.utilisateur?.role;
     },

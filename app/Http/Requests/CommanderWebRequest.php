@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Ville;
 use App\Services\PanierSession;
 
 /**
@@ -41,6 +42,45 @@ class CommanderWebRequest extends CreerCommandeRequest
     {
         $this->merge([
             'articles' => app(PanierSession::class)->articlesPourCommande(),
+
+            /*
+             * LE PAYS SE DÉDUIT DE LA VILLE, il n'est plus demandé.
+             *
+             * Le formulaire posait les deux questions séparément, et
+             * rien n'empêchait de répondre « Burkina Faso » puis
+             * « Abidjan ». La zone de livraison est cherchée sur le
+             * COUPLE pays + ville : le couple incohérent n'en trouvait
+             * aucune, et le client lisait « Aucune livraison n'est
+             * assurée à cette adresse » sans comprendre pourquoi.
+             *
+             * Une seule question, une seule réponse, aucune
+             * contradiction possible. `Ville::find()` plutôt que
+             * `findOrFail()` : un `ville_id` inventé doit produire un
+             * message de validation propre, pas une erreur 404.
+             */
+            'pays_id' => Ville::find($this->input('ville_id'))?->pays_id,
+        ]);
+    }
+
+    /**
+     * La ville devient OBLIGATOIRE.
+     *
+     * Elle était facultative, et l'écran offrait même « — Autre
+     * ville — ». Sans ville, aucune zone de livraison ne peut être
+     * trouvée : l'option ne pouvait donc mener qu'à un refus.
+     */
+    public function rules(): array
+    {
+        return array_merge(parent::rules(), [
+            'ville_id' => ['required', 'integer', 'exists:villes,id'],
+        ]);
+    }
+
+    public function messages(): array
+    {
+        return array_merge(parent::messages(), [
+            'ville_id.required' => 'Choisissez votre ville de livraison.',
+            'pays_id.required' => "Cette ville n'est pas reconnue. Choisissez-en une dans la liste.",
         ]);
     }
 }

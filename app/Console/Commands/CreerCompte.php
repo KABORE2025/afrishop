@@ -41,7 +41,7 @@ class CreerCompte extends Command
     protected $signature = 'afrishop:compte
         {telephone : Numéro au format international, ex. +22670112233}
         {--nom= : Nom, requis seulement à la création}
-        {--role=vendeur : client | vendeur | agent | admin}
+        {--role=vendeur : client | vendeur | livreur | agent | admin}
         {--pays=1 : Identifiant du pays, requis seulement à la création}
         {--mot-de-passe= : Mot de passe ; généré automatiquement si absent}';
 
@@ -50,10 +50,11 @@ class CreerCompte extends Command
     public function handle(): int
     {
         $telephone = $this->argument('telephone');
-        $role      = $this->option('role');
+        $role = $this->option('role');
 
-        if (! in_array($role, ['client', 'vendeur', 'agent', 'admin'], true)) {
+        if (! in_array($role, ['client', 'vendeur', 'livreur', 'agent', 'admin'], true)) {
             $this->error("Rôle inconnu : {$role}");
+
             return self::FAILURE;
         }
 
@@ -70,28 +71,29 @@ class CreerCompte extends Command
         if ($utilisateur) {
             $utilisateur->update([
                 'mot_de_passe' => $motDePasse,   // haché par le cast « hashed »
-                'role'         => $role,
+                'role' => $role,
             ]);
             $this->info("Compte mis à jour : {$utilisateur->nom} ({$telephone}) — rôle {$role}.");
         } else {
             if (! $this->option('nom')) {
                 $this->error("Ce numéro n'existe pas : --nom est requis pour créer le compte.");
+
                 return self::FAILURE;
             }
 
             $utilisateur = Utilisateur::create([
-                'pays_id'      => (int) $this->option('pays'),
-                'nom'          => $this->option('nom'),
-                'telephone'    => $telephone,
+                'pays_id' => (int) $this->option('pays'),
+                'nom' => $this->option('nom'),
+                'telephone' => $telephone,
                 'mot_de_passe' => $motDePasse,
-                'role'         => $role,
+                'role' => $role,
             ]);
             $this->info("Compte créé : {$utilisateur->nom} ({$telephone}) — rôle {$role}.");
         }
 
         $this->newLine();
-        $this->line('  Téléphone    : ' . $telephone);
-        $this->line('  Mot de passe : ' . $motDePasse);
+        $this->line('  Téléphone    : '.$telephone);
+        $this->line('  Mot de passe : '.$motDePasse);
         $this->newLine();
 
         // Affiché une seule fois, volontairement : le mot de passe est
@@ -101,7 +103,7 @@ class CreerCompte extends Command
         if (! $utilisateur->boutique && $role === 'vendeur') {
             $this->newLine();
             $this->warn("Ce compte n'a aucune boutique rattachée : l'espace vendeur affichera "
-                . '« votre candidature est en cours d\'examen » tant qu\'une boutique ne lui est pas liée.');
+                .'« votre candidature est en cours d\'examen » tant qu\'une boutique ne lui est pas liée.');
         }
 
         return self::SUCCESS;

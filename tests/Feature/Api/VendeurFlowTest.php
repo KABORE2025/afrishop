@@ -8,13 +8,13 @@ use Tests\Support\CreeDonneesTrait;
 use Tests\TestCase;
 
 /**
- * Bout en bout : commande en espèces → expédition → livraison. C'est le
+ * Bout en bout : commande en espèces → expédition → livraison par livreur. C'est le
  * chemin qui bascule l'état des fonds de « attente_encaissement » à
  * « sequestre » et qui écrit au grand livre (EspecesService).
  */
 class VendeurFlowTest extends TestCase
 {
-    use RefreshDatabase, CreeDonneesTrait;
+    use CreeDonneesTrait, RefreshDatabase;
 
     private function creerContexte(): array
     {
@@ -26,24 +26,26 @@ class VendeurFlowTest extends TestCase
         ['variante' => $variante] = $this->creerProduitAvecVariante($boutique, $categorie, [], ['stock' => 10, 'prix_ttc_cfa' => 5_000]);
 
         $reponse = $this->postJson('/api/commandes', [
-            'pays_id'       => $pays->id,
-            'articles'      => [['variante_id' => $variante->id, 'quantite' => 2]],
-            'nom'           => 'Client Test', 'telephone' => '22670001122',
-            'ville_id'      => $ville->id, 'quartier' => 'Zone 1',
+            'pays_id' => $pays->id,
+            'articles' => [['variante_id' => $variante->id, 'quantite' => 2]],
+            'nom' => 'Client Test', 'telephone' => '22670001122',
+            'ville_id' => $ville->id, 'quartier' => 'Zone 1',
             'mode_paiement' => 'especes_livraison',
         ]);
 
         $sousCommande = SousCommande::where('boutique_id', $boutique->id)->firstOrFail();
 
-        return compact('pays', 'boutique', 'vendeur', 'sousCommande');
+        $livreur = $this->creerUtilisateur($pays, ['role' => 'livreur']);
+
+        return compact('pays', 'boutique', 'vendeur', 'livreur', 'sousCommande');
     }
 
     public function test_expedition_puis_livraison_en_especes_libere_les_ecritures_comptables(): void
     {
-        ['boutique' => $boutique, 'vendeur' => $vendeur, 'sousCommande' => $sc] = $this->creerContexte();
+        ['boutique' => $boutique, 'vendeur' => $vendeur, 'livreur' => $livreur, 'sousCommande' => $sc] = $this->creerContexte();
 
         $reponseExpedier = $this->actingAs($vendeur, 'sanctum')
-            ->postJson("/api/vendeur/commandes/{$sc->id}/expedier", []);
+            ->postJson("/api/vendeur/commandes/{$sc->id}/expedier", ['livreur_id' => $livreur->id]);
         $reponseExpedier->assertOk();
         $this->assertSame('expediee', $sc->fresh()->statut);
 
@@ -54,9 +56,9 @@ class VendeurFlowTest extends TestCase
         // Montant dû : 2 × 5000 + frais de livraison (1500, une seule boutique).
         $montantDu = $sc->fresh()->montant_articles_ttc_cfa + $sc->fresh()->frais_livraison_cfa;
 
-        $reponseLivrer = $this->actingAs($vendeur, 'sanctum')
-            ->postJson("/api/vendeur/commandes/{$sc->id}/livrer", [
-                'code_livraison'    => $codeLivraison,
+        $reponseLivrer = $this->actingAs($livreur, 'sanctum')
+            ->postJson("/api/livreur/commandes/{$sc->id}/livrer", [
+                'code_livraison' => $codeLivraison,
                 'montant_percu_cfa' => $montantDu,
             ]);
         $reponseLivrer->assertOk();
@@ -73,12 +75,12 @@ class VendeurFlowTest extends TestCase
 
     public function test_livraison_avec_un_mauvais_code_est_rejetee(): void
     {
-        ['vendeur' => $vendeur, 'sousCommande' => $sc] = $this->creerContexte();
+        ['vendeur' => $vendeur, 'livreur' => $livreur, 'sousCommande' => $sc] = $this->creerContexte();
 
-        $this->actingAs($vendeur, 'sanctum')->postJson("/api/vendeur/commandes/{$sc->id}/expedier", []);
+        $this->actingAs($vendeur, 'sanctum')->postJson("/api/vendeur/commandes/{$sc->id}/expedier", ['livreur_id' => $livreur->id]);
 
-        $reponse = $this->actingAs($vendeur, 'sanctum')
-            ->postJson("/api/vendeur/commandes/{$sc->id}/livrer", [
+        $reponse = $this->actingAs($livreur, 'sanctum')
+            ->postJson("/api/livreur/commandes/{$sc->id}/livrer", [
                 'code_livraison' => '000000', 'montant_percu_cfa' => 1000,
             ]);
 
@@ -90,9 +92,10 @@ class VendeurFlowTest extends TestCase
     {
         ['pays' => $pays, 'sousCommande' => $sc] = $this->creerContexte();
         ['utilisateur' => $autreVendeur] = $this->creerBoutiqueAvecVendeur($pays);
+        $livreur = $this->creerUtilisateur($pays, ['role' => 'livreur']);
 
         $reponse = $this->actingAs($autreVendeur, 'sanctum')
-            ->postJson("/api/vendeur/commandes/{$sc->id}/expedier", []);
+            ->postJson("/api/vendeur/commandes/{$sc->id}/expedier", ['livreur_id' => $livreur->id]);
 
         $reponse->assertStatus(403);
     }

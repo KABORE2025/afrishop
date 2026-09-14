@@ -3,8 +3,9 @@
 use App\Http\Controllers\Api\VerificationQrController;
 use App\Http\Controllers\CommandeWebController;
 use App\Http\Controllers\ConsoleController;
-use App\Http\Controllers\PanierController;
+use App\Http\Controllers\EspaceLivreurController;
 use App\Http\Controllers\EspaceVendeurController;
+use App\Http\Controllers\PanierController;
 use App\Http\Controllers\VitrineController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,12 +53,12 @@ Route::get('/p/{slug}', [VitrineController::class, 'produit'])->name('produit');
 | Chaque action est un POST suivi d'une redirection : sans cela, un
 | client qui rafraîchit après un ajout se retrouve avec deux articles.
 */
-Route::get('/panier',   [PanierController::class, 'voir'])->name('panier');
-Route::post('/panier/ajouter',  [PanierController::class, 'ajouter'])->name('panier.ajouter');
+Route::get('/panier', [PanierController::class, 'voir'])->name('panier');
+Route::post('/panier/ajouter', [PanierController::class, 'ajouter'])->name('panier.ajouter');
 Route::post('/panier/modifier', [PanierController::class, 'modifier'])->name('panier.modifier');
-Route::post('/panier/vider',    [PanierController::class, 'vider'])->name('panier.vider');
+Route::post('/panier/vider', [PanierController::class, 'vider'])->name('panier.vider');
 
-Route::get('/commander',  [CommandeWebController::class, 'formulaire'])->name('commander');
+Route::get('/commander', [CommandeWebController::class, 'formulaire'])->name('commander');
 Route::post('/commander', [CommandeWebController::class, 'enregistrer'])->name('commander.enregistrer');
 
 // Accessible par la seule référence : un client sans compte doit pouvoir
@@ -97,10 +98,17 @@ Route::post('/commande/{reference}/payer', [CommandeWebController::class, 'payer
 */
 Route::prefix('vendeur')->name('vendeur.')->group(function () {
     Route::get('/connexion', [EspaceVendeurController::class, 'connexion'])->name('connexion');
-    Route::get('/',          [EspaceVendeurController::class, 'tableauDeBord'])->name('tableau');
-    Route::get('/commandes',    [EspaceVendeurController::class, 'commandes'])->name('commandes');
-    Route::get('/produits',     [EspaceVendeurController::class, 'produits'])->name('produits');
+    Route::get('/', [EspaceVendeurController::class, 'tableauDeBord'])->name('tableau');
+    Route::get('/commandes', [EspaceVendeurController::class, 'commandes'])->name('commandes');
+    Route::get('/produits', [EspaceVendeurController::class, 'produits'])->name('produits');
     Route::get('/reversements', [EspaceVendeurController::class, 'reversements'])->name('reversements');
+});
+
+// Espace livreur : même modèle que l'espace vendeur, données chargées
+// exclusivement via l'API protégée par Sanctum et le rôle `livreur`.
+Route::prefix('livreur')->name('livreur.')->group(function () {
+    Route::get('/connexion', [EspaceLivreurController::class, 'connexion'])->name('connexion');
+    Route::get('/', [EspaceLivreurController::class, 'commandes'])->name('commandes');
 });
 
 /*
@@ -111,9 +119,9 @@ Route::prefix('vendeur')->name('vendeur.')->group(function () {
 | côté serveur, l'API fait la garde (`auth:sanctum` + `role:admin`).
 */
 Route::prefix('console')->name('console.')->group(function () {
-    Route::get('/',              [ConsoleController::class, 'tableauDeBord'])->name('tableau');
-    Route::get('/candidatures',  [ConsoleController::class, 'candidatures'])->name('candidatures');
-    Route::get('/produits',      [ConsoleController::class, 'produits'])->name('produits');
-    Route::get('/litiges',       [ConsoleController::class, 'litiges'])->name('litiges');
-    Route::get('/reversements',  [ConsoleController::class, 'reversements'])->name('reversements');
+    Route::get('/', [ConsoleController::class, 'tableauDeBord'])->name('tableau');
+    Route::get('/candidatures', [ConsoleController::class, 'candidatures'])->name('candidatures');
+    Route::get('/produits', [ConsoleController::class, 'produits'])->name('produits');
+    Route::get('/litiges', [ConsoleController::class, 'litiges'])->name('litiges');
+    Route::get('/reversements', [ConsoleController::class, 'reversements'])->name('reversements');
 });

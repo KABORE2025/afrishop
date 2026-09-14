@@ -84,6 +84,11 @@ class Boutique extends Model
         return $this->hasMany(Reversement::class);
     }
 
+    public function agentsRemise(): HasMany
+    {
+        return $this->hasMany(AgentRemiseBoutique::class);
+    }
+
     // ---------------------------------------------------------------
     // Règles métier
     // ---------------------------------------------------------------

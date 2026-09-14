@@ -11,6 +11,24 @@
 return [
 
     /*
+     * Liste des autorités de certification pour les appels sortants.
+     *
+     * PHP sous Windows n'en embarque aucune : sans ce fichier, TOUT
+     * appel HTTPS échoue avec « cURL error 60 — unable to get local
+     * issuer certificate ». Ni PayDunya, ni CinetPay, ni l'API SMS
+     * d'Orange ne sont alors joignables, et la panne est difficile à
+     * relier à sa cause.
+     *
+     * Le paquet est versionné dans `storage/certs/cacert.pem` pour que
+     * la correction suive le code sur toutes les machines.
+     *
+     * SUR UN SERVEUR LINUX BIEN CONFIGURÉ, mettre `CA_BUNDLE=` (vide)
+     * dans le `.env` : le magasin du système est tenu à jour par les
+     * mises à jour de sécurité, alors qu'un fichier versionné vieillit.
+     */
+    'ca_bundle' => env('CA_BUNDLE', storage_path('certs/cacert.pem')),
+
+    /*
      * Délai de confirmation automatique.
      * Une sous-commande marquée « livrée » dont le client ne dit rien
      * pendant ce nombre de jours est réputée acceptée : les fonds sont
@@ -35,7 +53,7 @@ return [
      * rien d'autre dans le code n'a besoin de changer.
      */
     'psp' => [
-        'driver'         => env('PSP_DRIVER', 'fake'),
+        'driver' => env('PSP_DRIVER', 'fake'),
         'webhook_secret' => env('PSP_WEBHOOK_SECRET'),
 
         /*
@@ -56,10 +74,10 @@ return [
          * sans intégration supplémentaire.
          */
         'cinetpay' => [
-            'api_key'    => env('CINETPAY_API_KEY'),
-            'site_id'    => env('CINETPAY_SITE_ID'),
+            'api_key' => env('CINETPAY_API_KEY'),
+            'site_id' => env('CINETPAY_SITE_ID'),
             'secret_key' => env('CINETPAY_SECRET_KEY'),
-            'canaux'     => env('CINETPAY_CANAUX', 'ALL'),
+            'canaux' => env('CINETPAY_CANAUX', 'ALL'),
         ],
 
         /*
@@ -77,10 +95,10 @@ return [
          * production créditerait une vente que personne n'a payée.
          */
         'paydunya' => [
-            'mode'         => env('PAYDUNYA_MODE', 'test'),   // test | live
-            'master_key'   => env('PAYDUNYA_MASTER_KEY'),
-            'private_key'  => env('PAYDUNYA_PRIVATE_KEY'),
-            'token'        => env('PAYDUNYA_TOKEN'),
+            'mode' => env('PAYDUNYA_MODE', 'test'),   // test | live
+            'master_key' => env('PAYDUNYA_MASTER_KEY'),
+            'private_key' => env('PAYDUNYA_PRIVATE_KEY'),
+            'token' => env('PAYDUNYA_TOKEN'),
             /* Le nom affiché sur la page de paiement et sur le reçu :
              * c'est ce que le client lit au moment de valider. Un nom
              * qu'il ne reconnaît pas est une raison d'abandonner. */
@@ -103,12 +121,12 @@ return [
      * celui d'Orange.
      */
     'sms' => [
-        'driver'            => env('SMS_DRIVER', 'journal'),
-        'client_id'         => env('SMS_ORANGE_CLIENT_ID'),
-        'client_secret'     => env('SMS_ORANGE_CLIENT_SECRET'),
-        'adresse_expediteur'=> env('SMS_ORANGE_ADRESSE', '+22600000000'),
+        'driver' => env('SMS_DRIVER', 'journal'),
+        'client_id' => env('SMS_ORANGE_CLIENT_ID'),
+        'client_secret' => env('SMS_ORANGE_CLIENT_SECRET'),
+        'adresse_expediteur' => env('SMS_ORANGE_ADRESSE', '+22600000000'),
         /* 11 caractères alphanumériques maximum, validés par Orange. */
-        'nom_expediteur'    => env('SMS_NOM_EXPEDITEUR', 'AFRISHOP'),
+        'nom_expediteur' => env('SMS_NOM_EXPEDITEUR', 'AFRISHOP'),
         'cout_unitaire_cfa' => (int) env('SMS_COUT_UNITAIRE_CFA', 8),
     ],
 

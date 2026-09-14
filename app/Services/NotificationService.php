@@ -33,8 +33,8 @@ class NotificationService
      * voulu envoyer.
      */
     public function envoyer(string $code, string $canal, array $variables,
-                            ?Utilisateur $destinataire = null, ?string $telephone = null,
-                            string $langue = 'fr'): ?Notification
+        ?Utilisateur $destinataire = null, ?string $telephone = null,
+        string $langue = 'fr'): ?Notification
     {
         $gabarit = GabaritNotification::where('code', $code)->where('canal', $canal)
             ->where('langue', $langue)->where('actif', true)->first()
@@ -43,14 +43,28 @@ class NotificationService
             ?? GabaritNotification::where('code', $code)->where('canal', $canal)
                 ->where('langue', 'fr')->where('actif', true)->first();
 
+        if (! $gabarit && $code === 'code_livraison' && $canal === 'sms') {
+            // Le code de livraison ne doit jamais dépendre d'un gabarit
+            // saisi manuellement : sans lui, le livreur reste bloqué à la porte.
+            return Notification::create([
+                'telephone' => $telephone ?? $destinataire?->telephone,
+                'email' => $destinataire?->email,
+                'canal' => 'sms',
+                'corps_envoye' => "Afrishop : votre code de livraison pour {$variables['reference']} est {$variables['code']}. Donnez-le au livreur après vérification du colis.",
+                'statut' => 'en_file',
+                'nb_segments' => 1,
+            ]);
+        }
+
         if (! $gabarit) {
             logger()->warning('Gabarit de notification introuvable', compact('code', 'canal', 'langue'));
+
             return null;
         }
 
         $corps = $gabarit->corps;
         foreach ($variables as $cle => $valeur) {
-            $corps = str_replace('{' . $cle . '}', (string) $valeur, $corps);
+            $corps = str_replace('{'.$cle.'}', (string) $valeur, $corps);
         }
 
         // Un SMS est facturé par tranche de 160 caractères (70 si le
@@ -58,14 +72,14 @@ class NotificationService
         $segments = $canal === 'sms' ? (int) max(1, ceil(mb_strlen($corps) / 160)) : 1;
 
         return Notification::create([
-            'gabarit_id'      => $gabarit->id,
+            'gabarit_id' => $gabarit->id,
             'destinataire_id' => $destinataire?->id,
-            'telephone'       => $telephone ?? $destinataire?->telephone,
-            'email'           => $destinataire?->email,
-            'canal'           => $canal,
-            'corps_envoye'    => $corps,
-            'statut'          => 'en_file',
-            'nb_segments'     => $segments,
+            'telephone' => $telephone ?? $destinataire?->telephone,
+            'email' => $destinataire?->email,
+            'canal' => $canal,
+            'corps_envoye' => $corps,
+            'statut' => 'en_file',
+            'nb_segments' => $segments,
         ]);
     }
 

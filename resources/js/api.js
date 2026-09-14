@@ -50,6 +50,7 @@ export const role = {
 export function espaceDe(r) {
     if (['admin', 'agent'].includes(r)) return '/console';
     if (r === 'vendeur') return '/vendeur';
+    if (r === 'livreur') return '/livreur';
     return '/';
 }
 

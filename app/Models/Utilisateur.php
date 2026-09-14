@@ -40,6 +40,16 @@ class Utilisateur extends Authenticatable
 
     public function boutique(): HasOne { return $this->hasOne(Boutique::class); }
 
+    public function telephonesRemise()
+    {
+        return $this->hasMany(AgentRemiseTelephone::class, 'livreur_id');
+    }
+
+    public function affiliationsRemise()
+    {
+        return $this->hasMany(AgentRemiseBoutique::class, 'livreur_id');
+    }
+
     public function pays()
     {
         return $this->belongsTo(Pays::class);
