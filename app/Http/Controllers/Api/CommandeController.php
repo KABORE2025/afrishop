@@ -22,10 +22,9 @@ use RuntimeException;
  *
  *  `creer()` s'appuie entièrement sur PanierService::creerCommande(), qui
  *  fait déjà l'éclatement par boutique, la TVA, la commission et la
- *  retenue à la source. Ce contrôleur ne fait que : valider la requête,
- *  répondre pour le paiement à la livraison (rien de plus à faire), et
- *  démarrer l'encaissement pour les autres modes via PaiementCommandeService
- *  — qui isole tout ce qui dépend d'un vrai prestataire de paiement.
+ *  retenue à la source. Ce contrôleur ne fait que valider la requête et
+ *  démarrer l'encaissement via PaiementCommandeService — qui isole tout
+ *  ce qui dépend d'un vrai prestataire de paiement.
  * =====================================================================
  */
 class CommandeController extends Controller
@@ -70,11 +69,8 @@ class CommandeController extends Controller
     }
 
     /**
-     * Crée une commande à partir d'un panier.
-     *
-     * Paiement à la livraison : c'est terminé, rien n'est encaissé (voir
-     * PanierService). Les autres modes démarrent un encaissement dont le
-     * dénouement dépend de la passerelle configurée (App\Services\Paiement).
+     * Crée une commande à partir d'un panier, puis démarre l'encaissement.
+     * Le dénouement dépend de la passerelle configurée (App\Services\Paiement).
      */
     public function creer(CreerCommandeRequest $r): JsonResponse
     {
@@ -99,10 +95,6 @@ class CommandeController extends Controller
             );
         } catch (RuntimeException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
-        }
-
-        if ($data['mode_paiement'] === 'especes_livraison') {
-            return response()->json($commande, 201);
         }
 
         $resultat = $this->paiement->demarrerPaiement($commande);

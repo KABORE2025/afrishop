@@ -13,8 +13,6 @@ class LivreurSousCommandeResource extends JsonResource
         return [
             'id' => $this->id,
             'reference' => $this->reference,
-            'montant_a_encaisser_cfa' => $this->commande->mode_paiement === 'especes_livraison'
-                ? (int) ($this->montant_articles_ttc_cfa + $this->frais_livraison_cfa) : null,
             'client' => [
                 'nom' => $this->commande->client_nom,
                 'telephone' => $this->commande->client_telephone,
@@ -22,9 +20,14 @@ class LivreurSousCommandeResource extends JsonResource
                 'repere' => $this->commande->repere,
             ],
             'expedition' => [
+                'statut'     => $this->expedition?->statut,
                 'code_suivi' => $this->expedition?->code_suivi,
                 'expedie_le' => $this->expedition?->expedie_le?->toIso8601String(),
+                'livre_le'   => $this->expedition?->livre_le?->toIso8601String(),
             ],
+            /* Compté depuis le journal, pas une colonne dédiée — voir
+             * LivreurController::signalerEchec(). */
+            'echecs_signales' => $this->evenements()->where('type', 'livraison_echouee')->count(),
         ];
     }
 }

@@ -51,7 +51,7 @@ class PanierServiceCommandeTest extends TestCase
             client: [
                 'nom' => 'Client Test', 'telephone' => '22670000000',
                 'ville_id' => $ville->id, 'quartier' => 'Zone 1',
-                'mode_livraison' => 'domicile', 'mode_paiement' => 'especes_livraison',
+                'mode_livraison' => 'domicile', 'mode_paiement' => 'mobile_money',
             ],
             pays: $pays,
         );
@@ -70,7 +70,7 @@ class PanierServiceCommandeTest extends TestCase
         $this->assertSame(6_000, $scA->retenue_source_cfa);   // 24 000 × 25 %
         $this->assertSame(15_120, $scA->montant_net_cfa);     // 24 000 − 2 880 − 6 000
         $this->assertSame(1_200, $scA->frais_livraison_cfa);
-        $this->assertSame('attente_encaissement', $scA->etat_fonds->value);
+        $this->assertSame('sequestre', $scA->etat_fonds->value);
 
         $scB = $sousCommandes->firstWhere('boutique_id', $boutiqueB->id);
         $this->assertSame(2_400, $scB->commission_cfa);       // 24 000 × 10 %
@@ -93,7 +93,7 @@ class PanierServiceCommandeTest extends TestCase
         try {
             app(PanierService::class)->creerCommande(
                 articles: [['variante_id' => $variante->id, 'quantite' => 5]],
-                client: ['nom' => 'Client', 'telephone' => '22670000000', 'quartier' => 'Zone 1', 'mode_paiement' => 'especes_livraison'],
+                client: ['nom' => 'Client', 'telephone' => '22670000000', 'quartier' => 'Zone 1', 'mode_paiement' => 'mobile_money'],
                 pays: $pays,
             );
             $this->fail('Une exception RuntimeException était attendue pour stock insuffisant.');

@@ -34,8 +34,7 @@ class PaiementCommandeService
     ) {}
 
     /**
-     * Démarre l'encaissement d'une commande déjà créée (mode_paiement
-     * différent de « especes_livraison »).
+     * Démarre l'encaissement d'une commande déjà créée.
      *
      * @return array{transaction: TransactionPaiement, statut: string, url_paiement: ?string}
      */

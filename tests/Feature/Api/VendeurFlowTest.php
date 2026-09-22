@@ -2,15 +2,18 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\AgentRemiseBoutique;
 use App\Models\SousCommande;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\CreeDonneesTrait;
 use Tests\TestCase;
 
 /**
- * Bout en bout : commande en espèces → expédition → livraison par livreur. C'est le
- * chemin qui bascule l'état des fonds de « attente_encaissement » à
- * « sequestre » et qui écrit au grand livre (EspecesService).
+ * Bout en bout : commande payée en ligne → expédition → livraison par un
+ * livreur rattaché à la boutique (agents-remise, même ville). Le paiement
+ * étant encaissé dès la création (mobile_money via la passerelle « fake »),
+ * l'écriture au grand livre existe déjà avant même l'expédition — seul le
+ * statut logistique de la sous-commande évolue ici.
  */
 class VendeurFlowTest extends TestCase
 {
@@ -22,27 +25,32 @@ class VendeurFlowTest extends TestCase
         $ville = $this->creerVille($pays);
         $this->creerZoneLivraison($pays, $ville);
         $categorie = $this->creerCategorie();
-        ['boutique' => $boutique, 'utilisateur' => $vendeur] = $this->creerBoutiqueAvecVendeur($pays);
+        ['boutique' => $boutique, 'utilisateur' => $vendeur] = $this->creerBoutiqueAvecVendeur($pays, ['ville_id' => $ville->id]);
         ['variante' => $variante] = $this->creerProduitAvecVariante($boutique, $categorie, [], ['stock' => 10, 'prix_ttc_cfa' => 5_000]);
 
-        $reponse = $this->postJson('/api/commandes', [
+        $this->postJson('/api/commandes', [
             'pays_id' => $pays->id,
             'articles' => [['variante_id' => $variante->id, 'quantite' => 2]],
             'nom' => 'Client Test', 'telephone' => '22670001122',
             'ville_id' => $ville->id, 'quartier' => 'Zone 1',
-            'mode_paiement' => 'especes_livraison',
-        ]);
+            'mode_paiement' => 'mobile_money',
+        ])->assertCreated();
 
         $sousCommande = SousCommande::where('boutique_id', $boutique->id)->firstOrFail();
 
-        $livreur = $this->creerUtilisateur($pays, ['role' => 'livreur']);
+        $livreur = $this->creerUtilisateur($pays, ['role' => 'livreur', 'ville_id' => $ville->id]);
+        AgentRemiseBoutique::create([
+            'boutique_id' => $boutique->id, 'livreur_id' => $livreur->id,
+            'statut' => 'actif', 'autorise_livraison' => true,
+            'invite_par_utilisateur_id' => $vendeur->id, 'accepte_le' => now(),
+        ]);
 
         return compact('pays', 'boutique', 'vendeur', 'livreur', 'sousCommande');
     }
 
-    public function test_expedition_puis_livraison_en_especes_libere_les_ecritures_comptables(): void
+    public function test_expedition_puis_livraison_font_passer_la_sous_commande_a_livree(): void
     {
-        ['boutique' => $boutique, 'vendeur' => $vendeur, 'livreur' => $livreur, 'sousCommande' => $sc] = $this->creerContexte();
+        ['vendeur' => $vendeur, 'livreur' => $livreur, 'sousCommande' => $sc] = $this->creerContexte();
 
         $reponseExpedier = $this->actingAs($vendeur, 'sanctum')
             ->postJson("/api/vendeur/commandes/{$sc->id}/expedier", ['livreur_id' => $livreur->id]);
@@ -51,26 +59,25 @@ class VendeurFlowTest extends TestCase
 
         $codeLivraison = $sc->fresh()->expedition->code_livraison;
         $this->assertNotNull($codeLivraison);
-        $this->assertDatabaseHas('encaissements_especes', ['statut' => 'a_encaisser']);
-
-        // Montant dû : 2 × 5000 + frais de livraison (1500, une seule boutique).
-        $montantDu = $sc->fresh()->montant_articles_ttc_cfa + $sc->fresh()->frais_livraison_cfa;
 
         $reponseLivrer = $this->actingAs($livreur, 'sanctum')
-            ->postJson("/api/livreur/commandes/{$sc->id}/livrer", [
-                'code_livraison' => $codeLivraison,
-                'montant_percu_cfa' => $montantDu,
-            ]);
+            ->postJson("/api/livreur/commandes/{$sc->id}/livrer", ['code_livraison' => $codeLivraison]);
         $reponseLivrer->assertOk();
 
-        $frais = $sc->fresh();
-        $this->assertSame('livree', $frais->statut);
-        $this->assertSame('sequestre', $frais->etat_fonds->value);
+        $fraiche = $sc->fresh();
+        $this->assertSame('livree', $fraiche->statut);
+        $this->assertSame('livree', $fraiche->commande->fresh()->statut);
 
+        // Saisir le code prouve que le client l'a bien communiqué : les
+        // fonds sont libérés immédiatement, pas seulement à J+3.
+        $this->assertNotNull($fraiche->confirme_par_client_le);
+        $this->assertSame('reverse', $fraiche->etat_fonds->value);
+
+        // Payée en mobile_money : le grand livre a été écrit dès la
+        // création de la commande, pas à la livraison.
         $this->assertDatabaseHas('mouvements_compte', [
-            'boutique_id' => $boutique->id, 'type' => 'vente', 'sens' => 'credit',
+            'boutique_id' => $fraiche->boutique_id, 'type' => 'vente', 'sens' => 'credit',
         ]);
-        $this->assertDatabaseHas('encaissements_especes', ['statut' => 'encaisse']);
     }
 
     public function test_livraison_avec_un_mauvais_code_est_rejetee(): void
@@ -80,9 +87,7 @@ class VendeurFlowTest extends TestCase
         $this->actingAs($vendeur, 'sanctum')->postJson("/api/vendeur/commandes/{$sc->id}/expedier", ['livreur_id' => $livreur->id]);
 
         $reponse = $this->actingAs($livreur, 'sanctum')
-            ->postJson("/api/livreur/commandes/{$sc->id}/livrer", [
-                'code_livraison' => '000000', 'montant_percu_cfa' => 1000,
-            ]);
+            ->postJson("/api/livreur/commandes/{$sc->id}/livrer", ['code_livraison' => '000000']);
 
         $reponse->assertStatus(422);
         $this->assertSame('expediee', $sc->fresh()->statut);

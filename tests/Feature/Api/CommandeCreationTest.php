@@ -10,7 +10,7 @@ class CommandeCreationTest extends TestCase
 {
     use RefreshDatabase, CreeDonneesTrait;
 
-    public function test_commande_en_especes_a_la_livraison_est_creee_sans_encaissement(): void
+    public function test_commande_en_especes_a_la_livraison_est_refusee(): void
     {
         $pays = $this->creerPays();
         $ville = $this->creerVille($pays);
@@ -29,13 +29,11 @@ class CommandeCreationTest extends TestCase
             'mode_paiement'  => 'especes_livraison',
         ]);
 
-        $reponse->assertCreated();
-        $reponse->assertJsonPath('statut_paiement', 'attente');
-        $reponse->assertJsonPath('sous_commandes.0.etat_fonds', 'attente_encaissement');
+        $reponse->assertStatus(422);
+        $reponse->assertJsonValidationErrors(['mode_paiement']);
 
-        $this->assertSame(8, $variante->fresh()->stock);
-        $this->assertDatabaseCount('commandes', 1);
-        $this->assertDatabaseCount('sous_commandes', 1);
+        $this->assertSame(10, $variante->fresh()->stock);
+        $this->assertDatabaseCount('commandes', 0);
     }
 
     public function test_commande_avec_stock_insuffisant_renvoie_une_erreur_claire(): void
@@ -53,7 +51,7 @@ class CommandeCreationTest extends TestCase
             'nom'            => 'Aminata Client',
             'telephone'      => '22670001122',
             'quartier'       => 'Zone 1',
-            'mode_paiement'  => 'especes_livraison',
+            'mode_paiement'  => 'mobile_money',
         ]);
 
         $reponse->assertStatus(422);

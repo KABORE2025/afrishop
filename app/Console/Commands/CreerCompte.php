@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Utilisateur;
+use App\Models\Ville;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
@@ -34,6 +36,7 @@ use Illuminate\Support\Str;
  *      php artisan afrishop:compte +22670112233
  *      php artisan afrishop:compte +22670000001 --role=admin --nom="Admin Afrishop"
  *      php artisan afrishop:compte +22670112233 --mot-de-passe=monsecret
+ *      php artisan afrishop:compte +22670000000 --role=livreur --nom="Nom Livreur" --ville=1
  * =====================================================================
  */
 class CreerCompte extends Command
@@ -43,6 +46,7 @@ class CreerCompte extends Command
         {--nom= : Nom, requis seulement à la création}
         {--role=vendeur : client | vendeur | livreur | agent | admin}
         {--pays=1 : Identifiant du pays, requis seulement à la création}
+        {--ville= : Identifiant de la ville, obligatoire pour un livreur}
         {--mot-de-passe= : Mot de passe ; généré automatiquement si absent}';
 
     protected $description = 'Crée un compte ou lui attribue un mot de passe';
@@ -58,6 +62,26 @@ class CreerCompte extends Command
             return self::FAILURE;
         }
 
+        $ville = null;
+        if ($this->option('ville') !== null) {
+            $ville = Ville::find($this->option('ville'));
+            if (! $ville) {
+                $this->error('Ville introuvable : '.$this->option('ville'));
+
+                return self::FAILURE;
+            }
+        }
+        if ($role === 'livreur' && ! $ville) {
+            $this->error('Un livreur doit avoir une ville : ajoutez --ville=<id>.');
+
+            return self::FAILURE;
+        }
+        if ($role === 'livreur' && ! Schema::hasColumn('utilisateurs', 'ville_id')) {
+            $this->error('La migration des villes de livreurs n’est pas appliquée. Exécutez d’abord : php artisan migrate');
+
+            return self::FAILURE;
+        }
+
         /*
          * Mot de passe généré par défaut. 12 caractères aléatoires
          * valent mieux qu'un « motdepasse » suggéré par la commande :
@@ -69,10 +93,22 @@ class CreerCompte extends Command
         $utilisateur = Utilisateur::where('telephone', $telephone)->first();
 
         if ($utilisateur) {
-            $utilisateur->update([
-                'mot_de_passe' => $motDePasse,   // haché par le cast « hashed »
-                'role' => $role,
-            ]);
+            if ($ville && $ville->pays_id !== $utilisateur->pays_id) {
+                $this->error('La ville choisie appartient à un autre pays.');
+
+                return self::FAILURE;
+            }
+            $miseAJour = ['role' => $role, 'ville_id' => $ville?->id];
+            // Réexécuter la commande pour renseigner une ville ne doit pas
+            // invalider silencieusement le mot de passe du livreur.
+            if ($this->option('mot-de-passe')) {
+                $miseAJour['mot_de_passe'] = $motDePasse;
+            }
+            // Requête directe : la ville est une donnée d'affectation
+            // opérationnelle et doit être persistée même si le modèle a
+            // des événements ou des attributs modifiés en mémoire.
+            Utilisateur::whereKey($utilisateur->id)->update($miseAJour);
+            $utilisateur->refresh();
             $this->info("Compte mis à jour : {$utilisateur->nom} ({$telephone}) — rôle {$role}.");
         } else {
             if (! $this->option('nom')) {
@@ -80,9 +116,15 @@ class CreerCompte extends Command
 
                 return self::FAILURE;
             }
+            if ($ville && $ville->pays_id !== (int) $this->option('pays')) {
+                $this->error('La ville choisie appartient à un autre pays.');
+
+                return self::FAILURE;
+            }
 
             $utilisateur = Utilisateur::create([
                 'pays_id' => (int) $this->option('pays'),
+                'ville_id' => $ville?->id,
                 'nom' => $this->option('nom'),
                 'telephone' => $telephone,
                 'mot_de_passe' => $motDePasse,
@@ -93,12 +135,13 @@ class CreerCompte extends Command
 
         $this->newLine();
         $this->line('  Téléphone    : '.$telephone);
-        $this->line('  Mot de passe : '.$motDePasse);
+        if (! $utilisateur->wasRecentlyCreated && ! $this->option('mot-de-passe')) {
+            $this->line('  Mot de passe : inchangé');
+        } else {
+            $this->line('  Mot de passe : '.$motDePasse);
+            $this->comment('Notez-le maintenant : il est haché en base et ne sera plus affichable.');
+        }
         $this->newLine();
-
-        // Affiché une seule fois, volontairement : le mot de passe est
-        // haché en base et ne pourra plus être relu.
-        $this->comment('Notez-le maintenant : il est haché en base et ne sera plus affichable.');
 
         if (! $utilisateur->boutique && $role === 'vendeur') {
             $this->newLine();

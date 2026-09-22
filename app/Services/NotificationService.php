@@ -56,6 +56,32 @@ class NotificationService
             ]);
         }
 
+        if (! $gabarit && $code === 'code_retrait' && $canal === 'sms') {
+            // Même garantie que le code de livraison : le client ne doit
+            // jamais rester bloqué au comptoir faute de gabarit configuré.
+            return Notification::create([
+                'telephone' => $telephone ?? $destinataire?->telephone,
+                'email' => $destinataire?->email,
+                'canal' => 'sms',
+                'corps_envoye' => "Afrishop : votre commande {$variables['reference']} est prête. Donnez le code {$variables['code']} en boutique pour la récupérer.",
+                'statut' => 'en_file',
+                'nb_segments' => 1,
+            ]);
+        }
+
+        if (! $gabarit && $code === 'nouvelle_livraison' && $canal === 'sms') {
+            // Sans ce message, le livreur ne découvre une course qu'en
+            // ouvrant l'application de son plein gré — rien ne l'y pousse.
+            return Notification::create([
+                'telephone' => $telephone ?? $destinataire?->telephone,
+                'email' => $destinataire?->email,
+                'canal' => 'sms',
+                'corps_envoye' => "Afrishop : nouvelle livraison {$variables['reference']} à {$variables['quartier']}. Consultez vos livraisons dans l'application.",
+                'statut' => 'en_file',
+                'nb_segments' => 1,
+            ]);
+        }
+
         if (! $gabarit) {
             logger()->warning('Gabarit de notification introuvable', compact('code', 'canal', 'langue'));
 

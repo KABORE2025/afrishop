@@ -19,10 +19,11 @@ use App\Models\Media;
 use App\Models\Produit;
 use App\Models\Reversement;
 use App\Models\SousCommande;
+use App\Models\Utilisateur;
 use App\Models\VarianteProduit;
-use App\Services\EspecesService;
 use App\Services\MediaService;
 use App\Services\NotificationService;
+use App\Services\SequestreService;
 use App\Services\TableauBordVendeurService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -44,7 +45,6 @@ class VendeurController extends Controller
 {
     public function __construct(
         private NotificationService $notifications,
-        private EspecesService $especes,
     ) {}
 
     /** Sous-commandes de la boutique de l'utilisateur connecté, et d'elle seule. */
@@ -58,7 +58,7 @@ class VendeurController extends Controller
 
         $requete = SousCommande::query()
             ->where('boutique_id', $boutiqueId)
-            ->with(['lignes', 'expedition', 'commande:id,reference,cree_le']);
+            ->with(['lignes', 'expedition', 'commande:id,reference,cree_le,mode_livraison']);
 
         /*
          * Filtres — un vendeur cherche « ce que je dois préparer », pas
@@ -98,17 +98,21 @@ class VendeurController extends Controller
     public function livreurs(Request $r): JsonResponse
     {
         $boutique = $this->resoudreBoutique($r);
+        if ($boutique->ville_id === null) {
+            return response()->json(['data' => [], 'message' => 'La ville de la boutique doit être renseignée avant d’affecter un livreur.'], 422);
+        }
+
         return response()->json(['data' => $boutique->agentsRemise()
             ->where('statut', 'actif')->where('autorise_livraison', true)
-            ->with('livreur:id,nom')->get()->map(fn (AgentRemiseBoutique $a) => [
+            ->whereHas('livreur', fn ($q) => $q->where('ville_id', $boutique->ville_id))
+            ->with('livreur:id,nom,ville_id')->get()->map(fn (AgentRemiseBoutique $a) => [
                 'id' => $a->livreur_id, 'nom' => $a->livreur->nom,
             ])->values()]);
     }
 
     /**
      * Passage à « expédiée ». Crée l'expédition (code de suivi, code de
-     * livraison à usage unique) et, en paiement à la livraison, prépare
-     * l'encaissement du livreur.
+     * livraison à usage unique).
      */
     public function expedier(Request $r, SousCommande $sousCommande): JsonResponse
     {
@@ -120,15 +124,25 @@ class VendeurController extends Controller
             ], 422);
         }
 
-        $data = $r->validate([
-            'transporteur_id' => ['nullable', 'integer', 'exists:transporteurs,id'],
-            'livreur_id' => ['required', 'integer'],
-            'code_suivi' => ['nullable', 'string', 'max:60'],
-        ]);
+        // Le retrait en boutique n'a pas de livreur : c'est preparerRetrait()
+        // qui gère ce mode. Sans ce garde-fou, rien n'empêchait d'affecter
+        // un livreur à une commande que le client vient chercher lui-même.
+        if ($sousCommande->commande->mode_livraison === 'retrait_boutique') {
+            return response()->json([
+                'message' => 'Cette commande est en retrait boutique : utilisez « Préparer le retrait », pas l’expédition.',
+            ], 422);
+        }
+
+        $data = $r->validate(['livreur_id' => ['required', 'integer']]);
+
+        if ($boutique->ville_id === null) {
+            return response()->json(['message' => 'La ville de la boutique doit être renseignée avant l’expédition.'], 422);
+        }
 
         $autorise = AgentRemiseBoutique::where('boutique_id', $boutique->id)
             ->where('livreur_id', $data['livreur_id'])->where('statut', 'actif')
-            ->where('autorise_livraison', true)->exists();
+            ->where('autorise_livraison', true)
+            ->whereHas('livreur', fn ($q) => $q->where('ville_id', $boutique->ville_id))->exists();
         if (! $autorise) {
             return response()->json(['message' => 'Cet agent n’est pas autorisé à livrer pour votre boutique.'], 422);
         }
@@ -136,9 +150,7 @@ class VendeurController extends Controller
         DB::transaction(function () use ($sousCommande, $data, $r) {
             $expedition = $sousCommande->expedition ?? new Expedition(['sous_commande_id' => $sousCommande->id]);
             $expedition->fill([
-                'transporteur_id' => $data['transporteur_id'] ?? $expedition->transporteur_id,
                 'livreur_id' => $data['livreur_id'],
-                'code_suivi' => $data['code_suivi'] ?? $expedition->code_suivi,
                 // Généré une seule fois : ré-expédier ne doit pas changer
                 // le code déjà communiqué au client par SMS.
                 'code_livraison' => $expedition->code_livraison ?? (string) random_int(100000, 999999),
@@ -147,13 +159,8 @@ class VendeurController extends Controller
             ]);
             $expedition->save();
 
-            if ($sousCommande->commande->mode_paiement === 'especes_livraison'
-                && ! $expedition->encaissementEspeces()->exists()) {
-                $this->especes->preparer($expedition->fresh());
-            }
-
             $sousCommande->update(['statut' => 'expediee', 'expedie_le' => now()]);
-            $sousCommande->journaliser('expediee', ['code_suivi' => $data['code_suivi'] ?? null], $r->user()->id, 'vendeur');
+            $sousCommande->journaliser('expediee', [], $r->user()->id, 'vendeur');
 
             // Le SMS est mis en file dans la même transaction que l'expédition :
             // un code sans notification ne peut jamais être validé à la porte.
@@ -162,9 +169,114 @@ class VendeurController extends Controller
                 'reference' => $sousCommande->reference,
                 'code' => $expedition->code_livraison,
             ], telephone: $sousCommande->commande->client_telephone);
+
+            // Le livreur aussi : sans ce message, la seule façon pour lui
+            // de savoir qu'une course l'attend est d'ouvrir l'application
+            // de son propre chef, ce qu'il n'a aucune raison de faire.
+            $this->notifications->envoyer('nouvelle_livraison', 'sms', [
+                'reference' => $sousCommande->reference,
+                'quartier'  => $sousCommande->commande->quartier ?? 'destination à consulter',
+            ], telephone: Utilisateur::find($data['livreur_id'])?->telephone);
         });
 
         return response()->json(new SousCommandeResource($sousCommande->fresh(['expedition', 'lignes'])));
+    }
+
+    /**
+     * Passage à « prête » pour un retrait en boutique : génère le code à
+     * usage unique et le fait parvenir au client. Aucune Expedition n'est
+     * créée — il n'y a ni transporteur ni livreur, le client vient
+     * lui-même chercher son colis au comptoir.
+     */
+    public function preparerRetrait(Request $r, SousCommande $sousCommande): JsonResponse
+    {
+        $this->resoudreBoutique($r, $sousCommande);
+        $sousCommande->load('commande');
+
+        if ($sousCommande->commande->mode_livraison !== 'retrait_boutique') {
+            return response()->json(['message' => 'Cette commande n’est pas en retrait boutique.'], 422);
+        }
+        if ($sousCommande->statut !== 'a_preparer') {
+            return response()->json([
+                'message' => "Cette sous-commande est « {$sousCommande->statut} » : elle ne peut plus être préparée.",
+            ], 422);
+        }
+
+        DB::transaction(function () use ($sousCommande, $r) {
+            $code = (string) random_int(100000, 999999);
+
+            $sousCommande->update([
+                'statut' => 'prete',
+                'code_retrait' => $code,
+                'code_retrait_envoye_le' => now(),
+            ]);
+            $sousCommande->journaliser('prete_pour_retrait', [], $r->user()->id, 'vendeur');
+
+            // Même garde que pour la livraison : le SMS part dans la même
+            // transaction que le code, jamais l'un sans l'autre.
+            $this->notifications->envoyer('code_retrait', 'sms', [
+                'reference' => $sousCommande->reference,
+                'code' => $code,
+            ], telephone: $sousCommande->commande->client_telephone);
+        });
+
+        return response()->json(new SousCommandeResource($sousCommande->fresh('lignes')));
+    }
+
+    /**
+     * Remise au comptoir : le vendeur saisit le code que le client lui
+     * présente. Même logique de tentatives limitées que la livraison, pour
+     * la même raison — un code n'a de valeur que s'il ne peut pas être
+     * deviné par force brute.
+     */
+    public function confirmerRetrait(Request $r, SousCommande $sousCommande, SequestreService $sequestre): JsonResponse
+    {
+        $this->resoudreBoutique($r, $sousCommande);
+
+        $data = $r->validate(['code_retrait' => ['required', 'digits:6']]);
+
+        return DB::transaction(function () use ($r, $sousCommande, $data, $sequestre) {
+            $sousCommande = SousCommande::whereKey($sousCommande->id)->lockForUpdate()->firstOrFail();
+
+            if ($sousCommande->statut !== 'prete') {
+                return response()->json(['message' => "Ce retrait n'est plus à valider."], 422);
+            }
+            if ($sousCommande->retrait_tentatives >= 5) {
+                return response()->json(['message' => 'Code bloqué après 5 essais. Contactez le support Afrishop.'], 422);
+            }
+            if (! hash_equals((string) $sousCommande->code_retrait, $data['code_retrait'])) {
+                $tentatives = $sousCommande->retrait_tentatives + 1;
+                $sousCommande->update(['retrait_tentatives' => $tentatives]);
+                $restantes = 5 - $tentatives;
+
+                return response()->json(['message' => "Code incorrect. {$restantes} essai(s) restant(s)."], 422);
+            }
+
+            $sousCommande->update([
+                'statut' => 'livree', 'livre_le' => now(), 'confirme_par_client_le' => now(),
+            ]);
+            $sousCommande->journaliser('retiree_en_boutique', [], $r->user()->id, 'vendeur');
+            $sousCommande->commande->rafraichirStatut();
+
+            /*
+             * Le client vient de confirmer EN PERSONNE, en présentant le
+             * code : c'est la preuve la plus forte que ce système connaît,
+             * plus forte même qu'une confirmation à distance. Attendre le
+             * balayage quotidien (`afrishop:liberer-fonds`) n'aurait aucun
+             * sens ici — et ce balayage ne la trouverait de toute façon
+             * jamais : sa requête ignore délibérément les sous-commandes
+             * où `confirme_par_client_le` est déjà renseigné (voir
+             * SequestreService::libererLesEchues()). Sans cet appel, une
+             * commande retirée en boutique restait donc séquestrée pour
+             * toujours.
+             */
+            $sousCommande->refresh();
+            if ($sequestre->liberables($sousCommande)) {
+                $sequestre->liberer($sousCommande, 'client');
+            }
+
+            return response()->json(new SousCommandeResource($sousCommande->fresh('lignes')));
+        });
     }
 
     /** Produits de la boutique, avec leurs variantes. */

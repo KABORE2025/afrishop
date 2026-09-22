@@ -82,8 +82,13 @@ Route::middleware(['auth:sanctum', 'role:vendeur'])->prefix('vendeur')->group(fu
     Route::get('/commandes', [VendeurController::class, 'commandes']);
     Route::get('/livreurs', [VendeurController::class, 'livreurs']);
     Route::get('/agents-remise', [AgentRemiseController::class, 'index']);
+    Route::post('/agents-remise/rattachements', [AgentRemiseController::class, 'rattacher']);
     Route::post('/agents-remise/invitations', [AgentRemiseController::class, 'inviter']);
     Route::post('/commandes/{sousCommande}/expedier', [VendeurController::class, 'expedier']);
+    // Retrait en boutique : deux temps, comme l'expédition/livraison,
+    // mais sans transporteur ni livreur — le vendeur remet lui-même.
+    Route::post('/commandes/{sousCommande}/preparer-retrait', [VendeurController::class, 'preparerRetrait']);
+    Route::post('/commandes/{sousCommande}/confirmer-retrait', [VendeurController::class, 'confirmerRetrait']);
 
     Route::get('/produits', [VendeurController::class, 'produits']);
     Route::post('/produits', [VendeurController::class, 'creerProduit']);
@@ -109,8 +114,14 @@ Route::middleware(['auth:sanctum', 'role:vendeur'])->prefix('vendeur')->group(fu
 // Le livreur est le seul acteur qui peut présenter et valider le code
 // reçu par le client. Le vendeur ne dispose d'aucune route de validation.
 Route::middleware(['auth:sanctum', 'role:livreur'])->prefix('livreur')->group(function () {
+    Route::get('/tableau-de-bord', [LivreurController::class, 'tableauDeBord']);
+    // ?statut[]=expediee (défaut) pour le travail du jour, ou
+    // ?statut[]=livree&statut[]=retour_expediteur pour l'historique.
     Route::get('/commandes', [LivreurController::class, 'commandes']);
     Route::post('/commandes/{sousCommande}/livrer', [LivreurController::class, 'livrer']);
+    // Échec de remise : client absent, adresse introuvable, colis
+    // refusé. Sans elle, un échec n'avait aucune issue (voir la méthode).
+    Route::post('/commandes/{sousCommande}/echec', [LivreurController::class, 'signalerEchec']);
 });
 
 // ---------------------------------------------------------------------
@@ -132,6 +143,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     // écriture composée à la main.
     Route::get('/litiges', [AdminController::class, 'litiges']);
     Route::post('/litiges/{litige}/arbitrer', [AdminController::class, 'arbitrerLitige']);
+
+    // Codes de remise (livraison/retrait). Motif obligatoire, double
+    // journalisation : ce n'est ni au vendeur ni au livreur que ce code
+    // est destiné, seulement à l'admin pour un client injoignable ou un
+    // litige — voir le commentaire au-dessus des méthodes.
+    Route::get('/sous-commandes/{sousCommande}/code-remise', [AdminController::class, 'codeRemise']);
+    Route::post('/sous-commandes/{sousCommande}/code-remise/renvoyer', [AdminController::class, 'renvoyerCodeRemise']);
 
     // Modération du catalogue. CE CHAÎNON MANQUAIT : un produit créé par
     // un vendeur naît « en_attente » et rien ne permettait de le publier,

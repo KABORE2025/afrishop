@@ -72,8 +72,13 @@ class SousCommandeResource extends JsonResource
             ],
 
             'commande' => $this->whenLoaded('commande', fn () => [
-                'reference' => $this->commande->reference,
-                'passee_le' => $this->commande->cree_le?->toIso8601String(),
+                'reference'      => $this->commande->reference,
+                'passee_le'      => $this->commande->cree_le?->toIso8601String(),
+                /* Détermine, côté front, si la sous-commande se remet via
+                 * un livreur (domicile / point relais) ou au comptoir
+                 * (retrait_boutique) — sans ce champ, l'écran vendeur ne
+                 * peut pas savoir quel bouton proposer. */
+                'mode_livraison' => $this->commande->mode_livraison,
             ]),
 
             'lignes'     => LigneCommandeResource::collection($this->whenLoaded('lignes')),

@@ -32,7 +32,9 @@ class CreerCommandeRequest extends FormRequest
             'nom'                  => ['required', 'string', 'max:120'],
             'telephone'            => ['required', 'string', 'max:20'],
             'ville_id'             => ['nullable', 'integer', 'exists:villes,id'],
-            'quartier'             => ['required', 'string', 'max:120'],
+            // Le quartier sert à trouver un livreur et une zone de frais :
+            // sans livraison à domicile, il n'a plus d'utilité.
+            'quartier'             => ['required_unless:mode_livraison,retrait_boutique', 'nullable', 'string', 'max:120'],
             'repere'               => ['nullable', 'string', 'max:255'],
             'mode_livraison'       => ['nullable', 'in:domicile,point_relais,retrait_boutique'],
             'point_relais_id'      => ['nullable', 'integer', 'exists:points_relais,id'],
@@ -65,6 +67,7 @@ class CreerCommandeRequest extends FormRequest
         return [
             'articles.required'   => 'Le panier est vide.',
             'articles.*.variante_id.exists' => "L'un des articles du panier n'existe plus.",
+            'quartier.required_unless' => 'Indiquez votre quartier, nécessaire pour la livraison à domicile.',
         ];
     }
 }

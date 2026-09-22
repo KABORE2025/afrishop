@@ -46,6 +46,11 @@ class EspaceVendeurController extends Controller
         return view('vendeur.commandes');
     }
 
+    public function livreurs(): View
+    {
+        return view('vendeur.livreurs');
+    }
+
     public function produits(): View
     {
         return view('vendeur.produits');

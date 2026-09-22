@@ -37,10 +37,11 @@
                  placeholder="+226 70 00 00 00"
                  style="width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px">
           {{-- Le téléphone n'est pas un détail administratif : c'est par
-               lui qu'arrive le code de livraison à usage unique, et
-               c'est ce code qui prouve la remise du colis. --}}
+               lui qu'arrive le code à usage unique — de livraison ou de
+               retrait selon le choix ci-dessous — qui prouve la remise
+               du colis. --}}
           <span style="display:block;font-size:12.5px;color:var(--gris);margin-top:3px">
-            C'est à ce numéro que sera envoyé le code de livraison à remettre au livreur.
+            C'est à ce numéro que sera envoyé le code à présenter à la remise de votre commande.
           </span>
         </label>
       </div>
@@ -48,8 +49,43 @@
       {{-- ----------------------------------------------------------
            LIVRAISON
            ---------------------------------------------------------- --}}
+      {{--
+        AUCUN JAVASCRIPT — comme le reste de ce gabarit (voir layout.blade.php).
+        Le bloc adresse (quartier/repère) est masqué en retrait boutique
+        avec le sélecteur CSS `:has()`, pas un script : sur un navigateur
+        qui ne le supporte pas, les champs restent simplement visibles,
+        ce qui reste utilisable — c'est une dégradation, pas une panne.
+      --}}
+      <style>
+        #note-domicile { display:block; }
+        #note-retrait  { display:none; }
+        .carte:has(#ml-retrait:checked) #bloc-adresse,
+        .carte:has(#ml-retrait:checked) #note-domicile { display:none; }
+        .carte:has(#ml-retrait:checked) #note-retrait  { display:block; }
+        form:has(#ml-retrait:checked) #frais-domicile { display:none; }
+        form:has(#ml-retrait:checked) #frais-retrait  { display:inline; }
+        form:has(#ml-retrait:checked) #multi-domicile { display:none; }
+        form:has(#ml-retrait:checked) #multi-retrait  { display:block; }
+      </style>
       <div class="carte" style="padding:16px;margin-bottom:16px">
         <h2 style="font-size:16px;margin:0 0 12px">Livraison</h2>
+
+        <label style="display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--bord);border-radius:8px;margin-bottom:8px">
+          <input type="radio" name="mode_livraison" value="domicile" id="ml-domicile"
+                 @checked(old('mode_livraison', 'domicile') === 'domicile') style="margin-top:3px">
+          <span>
+            <b>Livraison à domicile</b>
+            <span style="display:block;font-size:12.5px;color:var(--gris)">Un livreur vous apporte le colis à l'adresse indiquée.</span>
+          </span>
+        </label>
+        <label style="display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--bord);border-radius:8px;margin-bottom:12px">
+          <input type="radio" name="mode_livraison" value="retrait_boutique" id="ml-retrait"
+                 @checked(old('mode_livraison') === 'retrait_boutique') style="margin-top:3px">
+          <span>
+            <b>Retrait en boutique</b>
+            <span style="display:block;font-size:12.5px;color:var(--gris)">Vous venez chercher vous-même le colis, sans frais de livraison.</span>
+          </span>
+        </label>
 
         {{--
           UNE SEULE QUESTION POUR LE PAYS ET LA VILLE.
@@ -70,7 +106,7 @@
           Seules les villes RÉELLEMENT desservies sont proposées.
         --}}
         <label style="display:block;margin-bottom:10px">
-          <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Ville de livraison</span>
+          <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Ville</span>
           <select name="ville_id" required
                   style="width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px">
             <option value="">— Choisissez votre ville —</option>
@@ -82,29 +118,40 @@
               </optgroup>
             @endforeach
           </select>
-          <span style="display:block;font-size:12.5px;color:var(--gris);margin-top:3px">
-            Seules les villes que nous desservons sont listées. Les frais de livraison en dépendent.
+          <span id="note-domicile" style="display:block;font-size:12.5px;color:var(--gris);margin-top:3px">
+            Seules les villes que nous desservons à domicile sont listées. Les frais de livraison en dépendent.
+          </span>
+          <span id="note-retrait" style="font-size:12.5px;color:var(--gris);margin-top:3px">
+            Sert uniquement à déterminer le pays de votre commande — vous récupérerez le colis directement à la boutique.
           </span>
         </label>
 
-        <label style="display:block;margin-bottom:10px">
-          <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Quartier</span>
-          <input type="text" name="quartier" required maxlength="120" value="{{ old('quartier') }}"
-                 style="width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px">
-        </label>
+        <div id="bloc-adresse">
+          <label style="display:block;margin-bottom:10px">
+            <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Quartier</span>
+            {{-- Pas de `required` : en retrait boutique ce champ ne sert à
+                 rien, et si `:has()` n'est pas supporté par le navigateur,
+                 le bloc reste visible — un `required` bloquerait alors la
+                 validation d'une commande en retrait sans raison. Le
+                 serveur exige déjà ce champ pour la livraison à domicile
+                 (`required_unless` dans CreerCommandeRequest). --}}
+            <input type="text" name="quartier" maxlength="120" value="{{ old('quartier') }}"
+                   style="width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px">
+          </label>
 
-        <label style="display:block">
-          <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Repère</span>
-          <input type="text" name="repere" maxlength="255" value="{{ old('repere') }}"
-                 placeholder="Ex. : en face de la pharmacie du marché"
-                 style="width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px">
-          {{-- Le repère n'est pas facultatif dans les faits : dans la
-               plupart des quartiers, il n'y a ni nom de rue ni numéro,
-               et c'est lui qui permet au livreur de trouver. --}}
-          <span style="display:block;font-size:12.5px;color:var(--gris);margin-top:3px">
-            Très utile : c'est souvent le repère, plus que l'adresse, qui permet au livreur de vous trouver.
-          </span>
-        </label>
+          <label style="display:block">
+            <span style="display:block;font-size:13px;font-weight:700;color:var(--gris);margin-bottom:3px">Repère</span>
+            <input type="text" name="repere" maxlength="255" value="{{ old('repere') }}"
+                   placeholder="Ex. : en face de la pharmacie du marché"
+                   style="width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px">
+            {{-- Le repère n'est pas facultatif dans les faits : dans la
+                 plupart des quartiers, il n'y a ni nom de rue ni numéro,
+                 et c'est lui qui permet au livreur de trouver. --}}
+            <span style="display:block;font-size:12.5px;color:var(--gris);margin-top:3px">
+              Très utile : c'est souvent le repère, plus que l'adresse, qui permet au livreur de vous trouver.
+            </span>
+          </label>
+        </div>
       </div>
 
       {{-- ----------------------------------------------------------
@@ -183,13 +230,18 @@
            de ne rien afficher. --}}
       <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--gris);margin-top:6px">
         <span>Livraison</span>
-        <span>calculée à la validation</span>
+        <span id="frais-domicile">calculée à la validation</span>
+        <span id="frais-retrait" style="display:none">gratuite (retrait en boutique)</span>
       </div>
 
       @if ($par_boutique->count() > 1)
-        <p style="font-size:12.5px;color:var(--gris);margin:10px 0 0">
+        <p id="multi-domicile" style="font-size:12.5px;color:var(--gris);margin:10px 0 0">
           {{ $par_boutique->count() }} boutiques → {{ $par_boutique->count() }} colis,
           donc plusieurs frais de livraison.
+        </p>
+        <p id="multi-retrait" style="display:none;font-size:12.5px;color:var(--gris);margin:10px 0 0">
+          {{ $par_boutique->count() }} boutiques → {{ $par_boutique->count() }} colis
+          à retirer séparément, chacun dans sa boutique.
         </p>
       @endif
 

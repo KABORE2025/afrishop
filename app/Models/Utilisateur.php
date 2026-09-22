@@ -55,6 +55,11 @@ class Utilisateur extends Authenticatable
         return $this->belongsTo(Pays::class);
     }
 
+    public function ville()
+    {
+        return $this->belongsTo(Ville::class);
+    }
+
     /**
      * Un portefeuille non identifié est plafonné à 200 000 FCFA par mois
      * (instruction BCEAO 008-05-2015). Un vendeur doit donc être poussé

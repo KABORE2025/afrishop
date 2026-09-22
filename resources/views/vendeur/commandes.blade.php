@@ -111,8 +111,16 @@
 
                         <td class="text-right">
                             <button type="button" class="btn-secondaire"
-                                    x-show="['a_preparer','prete'].includes(sc.marchandise.statut)"
+                                    x-show="sc.commande.mode_livraison !== 'retrait_boutique' && ['a_preparer','prete'].includes(sc.marchandise.statut)"
                                     @click="ouvrirExpedition(sc)">Expédier</button>
+
+                            <button type="button" class="btn-secondaire"
+                                    x-show="sc.commande.mode_livraison === 'retrait_boutique' && sc.marchandise.statut === 'a_preparer'"
+                                    @click="preparerRetrait(sc)">Préparer le retrait</button>
+
+                            <button type="button" class="btn-secondaire"
+                                    x-show="sc.commande.mode_livraison === 'retrait_boutique' && sc.marchandise.statut === 'prete'"
+                                    @click="ouvrirRetrait(sc)">Confirmer le retrait</button>
 
                             <span x-show="sc.marchandise.statut === 'expediee'" class="text-xs text-gris">
                                 En cours de livraison
@@ -147,16 +155,6 @@
             <p class="mb-4 text-sm text-gris" x-text="expedition.sc?.reference"></p>
 
             <div class="mb-3">
-                <label class="libelle" for="e-transp">Transporteur</label>
-                <select id="e-transp" class="champ" x-model="expedition.transporteur_id">
-                    <option value="">— Non précisé —</option>
-                    <template x-for="t in transporteurs" :key="t.id">
-                        <option :value="t.id" x-text="t.nom + (t.encaisse_especes ? ' (encaisse)' : '')"></option>
-                    </template>
-                </select>
-            </div>
-
-            <div class="mb-3">
                 <label class="libelle" for="e-livreur">Livreur affecté</label>
                 <select id="e-livreur" class="champ" x-model="expedition.livreur_id" required>
                     <option value="">— Choisir le livreur —</option>
@@ -164,11 +162,6 @@
                         <option :value="livreur.id" x-text="livreur.nom"></option>
                     </template>
                 </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="libelle" for="e-suivi">Code de suivi</label>
-                <input id="e-suivi" type="text" class="champ" x-model="expedition.code_suivi" maxlength="60">
             </div>
 
             <div class="note mb-4">
@@ -189,6 +182,36 @@
         </div>
     </div>
 
+    {{-- ------------------------------------------------------------
+         RETRAIT EN BOUTIQUE
+         ------------------------------------------------------------ --}}
+    <div x-show="retrait.sc" class="fixed inset-0 z-20 grid place-items-center bg-black/40 p-4" x-cloak>
+        <div class="carte w-full max-w-md p-5">
+            <h2 class="mb-1 text-lg font-bold">Confirmer le retrait</h2>
+            <p class="mb-4 text-sm text-gris" x-text="retrait.sc?.reference"></p>
+
+            <div class="note mb-3">
+                Le client vous présente son <b>code à 6 chiffres</b> reçu par SMS.
+                Ne remettez le colis qu'après avoir saisi et validé ce code.
+            </div>
+
+            <label class="libelle" for="r-code">Code du client</label>
+            <input id="r-code" inputmode="numeric" maxlength="6"
+                   class="champ montant text-center text-xl tracking-[0.4em]"
+                   x-model="retrait.code" placeholder="••••••">
+
+            <div class="note mt-3" x-show="retrait.message" x-text="retrait.message"></div>
+
+            <div class="mt-4 flex justify-end gap-2">
+                <button class="btn-secondaire" @click="retrait.sc = null">Annuler</button>
+                <button class="btn-primaire" :disabled="retrait.enCours" @click="confirmerRetrait">
+                    <span x-show="!retrait.enCours">Valider</span>
+                    <span x-show="retrait.enCours">Envoi…</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -203,12 +226,12 @@
         Alpine.data('ecranCommandes', () => ({
             elements: [], pagination: null,
             chargement: true, erreur: null, sansBoutique: false,
-            transporteurs: [],
             livreurs: [],
 
             filtres: { statut: '', etat_fonds: '', recherche: '' },
 
-            expedition: { sc: null, transporteur_id: '', code_suivi: '', enCours: false, message: null },
+            expedition: { sc: null, livreur_id: '', enCours: false, message: null },
+            retrait: { sc: null, code: '', enCours: false, message: null },
 
             async init() {
                 if (!window.exigerConnexion()) return;
@@ -219,7 +242,6 @@
                 if (p.get('statut')) this.filtres.statut = p.get('statut');
 
                 this.charger(1);
-                this.chargerTransporteurs();
                 this.chargerLivreurs();
             },
 
@@ -243,16 +265,6 @@
                 }
             },
 
-            async chargerTransporteurs() {
-                try {
-                    const r = await window.api.get('/transporteurs');
-                    this.transporteurs = r.data ?? r;
-                } catch {
-                    /* Le transporteur est facultatif à l'expédition :
-                     * une liste vide ne doit pas bloquer l'écran. */
-                }
-            },
-
             async chargerLivreurs() {
                 try {
                     const r = await window.api.get('/vendeur/livreurs');
@@ -265,7 +277,7 @@
             libelleStatut(s) { return STATUTS[s] ?? s; },
 
             ouvrirExpedition(sc) {
-                this.expedition = { sc, transporteur_id: '', livreur_id: '', code_suivi: '', enCours: false, message: null };
+                this.expedition = { sc, livreur_id: '', enCours: false, message: null };
             },
 
             async expedier() {
@@ -275,9 +287,7 @@
 
                 try {
                     await window.api.post(`/vendeur/commandes/${this.expedition.sc.id}/expedier`, {
-                        transporteur_id: this.expedition.transporteur_id || null,
                         livreur_id: Number(this.expedition.livreur_id),
-                        code_suivi: this.expedition.code_suivi || null,
                     });
                     this.expedition.sc = null;
                     this.charger(this.pagination?.current_page ?? 1);
@@ -287,6 +297,41 @@
                     this.expedition.message = e.message;
                 } finally {
                     this.expedition.enCours = false;
+                }
+            },
+
+            /* Pas de champ à saisir ici : le code est généré côté serveur
+             * et part par SMS. Une confirmation suffit avant l'envoi. */
+            async preparerRetrait(sc) {
+                if (! confirm(`Envoyer le code de retrait par SMS au client pour ${sc.reference} ?`)) return;
+
+                try {
+                    await window.api.post(`/vendeur/commandes/${sc.id}/preparer-retrait`, {});
+                    this.charger(this.pagination?.current_page ?? 1);
+                } catch (e) {
+                    alert(e.message);
+                }
+            },
+
+            ouvrirRetrait(sc) {
+                this.retrait = { sc, code: '', enCours: false, message: null };
+            },
+
+            async confirmerRetrait() {
+                if (this.retrait.enCours) return;
+                this.retrait.enCours = true;
+                this.retrait.message = null;
+
+                try {
+                    await window.api.post(`/vendeur/commandes/${this.retrait.sc.id}/confirmer-retrait`, {
+                        code_retrait: this.retrait.code,
+                    });
+                    this.retrait.sc = null;
+                    this.charger(this.pagination?.current_page ?? 1);
+                } catch (e) {
+                    this.retrait.message = e.message;
+                } finally {
+                    this.retrait.enCours = false;
                 }
             },
 

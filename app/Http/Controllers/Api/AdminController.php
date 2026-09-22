@@ -9,11 +9,14 @@ use App\Http\Resources\ProduitResource;
 use App\Http\Resources\ReversementResource;
 use App\Models\Boutique;
 use App\Models\Candidature;
+use App\Models\JournalAdministration;
 use App\Models\Litige;
 use App\Models\Pays;
 use App\Models\Produit;
 use App\Models\Reversement;
+use App\Models\SousCommande;
 use App\Models\Utilisateur;
+use App\Services\NotificationService;
 use App\Services\SequestreService;
 use App\Services\TableauBordAdminService;
 use Illuminate\Http\JsonResponse;
@@ -248,6 +251,131 @@ class AdminController extends Controller
         });
 
         return response()->json(new LitigeResource($litige->fresh(['sousCommande'])));
+    }
+
+    // -----------------------------------------------------------------
+    //  CODES DE REMISE — livraison à domicile ou retrait boutique
+    // -----------------------------------------------------------------
+    //  Le code n'est JAMAIS exposé au vendeur ni au livreur (voir le
+    //  commentaire d'ExpeditionResource) : celui qui doit prouver la
+    //  remise ne doit pas connaître la réponse à l'avance. L'admin est
+    //  un tiers neutre — lui donner le code n'affaiblit pas ce contrôle
+    //  — mais l'accès reste sensible : d'où le motif obligatoire et la
+    //  double trace (historique de la sous-commande + journal
+    //  d'administration, avec IP hachée).
+    // -----------------------------------------------------------------
+
+    /**
+     * Consultation du code, pour un client injoignable qui a perdu son
+     * téléphone ou pour arbitrer un litige. Ne modifie rien : seule la
+     * consultation est journalisée.
+     */
+    public function codeRemise(Request $r, SousCommande $sousCommande): JsonResponse
+    {
+        $donnees = $r->validate([
+            'motif' => ['required', 'string', 'min:10', 'max:255'],
+        ]);
+
+        $sousCommande->load(['expedition', 'commande']);
+        $modeLivraison = $sousCommande->commande->mode_livraison;
+        $expedition = $sousCommande->expedition;
+
+        $code = $modeLivraison === 'retrait_boutique'
+            ? $sousCommande->code_retrait
+            : $expedition?->code_livraison;
+
+        if ($code === null) {
+            return response()->json([
+                'message' => 'Aucun code n’a encore été généré pour cette sous-commande.',
+            ], 422);
+        }
+
+        $this->journaliserAccesCode($r, $sousCommande, 'code_consulte', $donnees['motif']);
+
+        return response()->json([
+            'mode_livraison' => $modeLivraison,
+            'code'           => $code,
+            'deja_valide'    => $modeLivraison === 'retrait_boutique'
+                ? $sousCommande->statut === 'livree'
+                : $expedition?->statut === 'livree',
+            'tentatives'     => $modeLivraison === 'retrait_boutique'
+                ? $sousCommande->retrait_tentatives
+                : $expedition?->tentatives,
+        ]);
+    }
+
+    /**
+     * Renvoi du SMS — TOUJOURS le code déjà généré, jamais un nouveau.
+     * En émettre un second invaliderait celui que le client a peut-être
+     * déjà noté ailleurs ou confié à un proche venu récupérer le colis
+     * à sa place.
+     */
+    public function renvoyerCodeRemise(Request $r, SousCommande $sousCommande, NotificationService $notifications): JsonResponse
+    {
+        $donnees = $r->validate([
+            'motif' => ['required', 'string', 'min:10', 'max:255'],
+        ]);
+
+        $sousCommande->load(['expedition', 'commande']);
+        $modeLivraison = $sousCommande->commande->mode_livraison;
+
+        if ($modeLivraison === 'retrait_boutique') {
+            if ($sousCommande->code_retrait === null) {
+                return response()->json(['message' => 'Aucun code de retrait à renvoyer.'], 422);
+            }
+            if ($sousCommande->statut === 'livree') {
+                return response()->json(['message' => 'Cette commande a déjà été retirée.'], 422);
+            }
+
+            $notifications->envoyer('code_retrait', 'sms', [
+                'reference' => $sousCommande->reference,
+                'code'      => $sousCommande->code_retrait,
+            ], telephone: $sousCommande->commande->client_telephone);
+
+            $sousCommande->update(['code_retrait_envoye_le' => now()]);
+        } else {
+            $expedition = $sousCommande->expedition;
+
+            if (! $expedition || $expedition->code_livraison === null) {
+                return response()->json(['message' => 'Aucun code de livraison à renvoyer.'], 422);
+            }
+            if ($expedition->statut === 'livree') {
+                return response()->json(['message' => 'Cette commande a déjà été livrée.'], 422);
+            }
+
+            $notifications->envoyer('code_livraison', 'sms', [
+                'client_nom' => $sousCommande->commande->client_nom,
+                'reference'  => $sousCommande->reference,
+                'code'       => $expedition->code_livraison,
+            ], telephone: $sousCommande->commande->client_telephone);
+        }
+
+        $this->journaliserAccesCode($r, $sousCommande, 'code_renvoye', $donnees['motif']);
+
+        return response()->json(['message' => 'Le code a été renvoyé par SMS.']);
+    }
+
+    /**
+     * Double trace pour tout accès à un code de remise : l'historique de
+     * la sous-commande (visible au même endroit que le reste de son
+     * suivi) ET le journal d'administration (audit de sécurité —
+     * `journal_administration` existait depuis la conformité RGPD mais
+     * n'était encore alimenté par personne). Un accès à un code n'est
+     * jamais anodin : il faut pouvoir répondre après coup à « qui a vu
+     * quel code, quand, et pourquoi ».
+     */
+    private function journaliserAccesCode(Request $r, SousCommande $sousCommande, string $type, string $motif): void
+    {
+        $sousCommande->journaliser($type, ['motif' => $motif], $r->user()->id, 'admin');
+
+        JournalAdministration::create([
+            'agent_id'   => $r->user()->id,
+            'action'     => $type,
+            'cible_type' => 'sous_commande',
+            'cible_id'   => $sousCommande->id,
+            'motif'      => $motif,
+            'ip_hachee'  => hash('sha256', $r->ip()),
+        ]);
     }
 
     // -----------------------------------------------------------------

@@ -100,6 +100,7 @@ Route::prefix('vendeur')->name('vendeur.')->group(function () {
     Route::get('/connexion', [EspaceVendeurController::class, 'connexion'])->name('connexion');
     Route::get('/', [EspaceVendeurController::class, 'tableauDeBord'])->name('tableau');
     Route::get('/commandes', [EspaceVendeurController::class, 'commandes'])->name('commandes');
+    Route::get('/livreurs', [EspaceVendeurController::class, 'livreurs'])->name('livreurs');
     Route::get('/produits', [EspaceVendeurController::class, 'produits'])->name('produits');
     Route::get('/reversements', [EspaceVendeurController::class, 'reversements'])->name('reversements');
 });

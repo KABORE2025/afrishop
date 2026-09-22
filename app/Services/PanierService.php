@@ -22,9 +22,7 @@ use RuntimeException;
  *  Nouveautés de cette version :
  *   · les VARIANTES portent le stock et le prix ;
  *   · les PLAFONDS de monnaie électronique sont contrôlés avant de
- *     lancer un paiement qui échouerait ;
- *   · le PAIEMENT À LA LIVRAISON n'encaisse rien : la sous-commande
- *     naît en « attente_encaissement », pas en « séquestre ».
+ *     lancer un paiement qui échouerait.
  * =====================================================================
  */
 class PanierService
@@ -135,8 +133,16 @@ class PanierService
                 $poidsTotal += ($v->poids_g ?? $p->poids_g ?? 0) * $a['quantite'];
             }
 
-            $frais = $this->calculerFrais($pays, $client['ville_id'] ?? null,
-                $client['quartier'] ?? null, count($parBoutique), $poidsTotal);
+            $modeLivraison = $client['mode_livraison'] ?? 'domicile';
+
+            // Le retrait en boutique n'a ni livreur ni transporteur : pas de
+            // frais, et aucune zone de livraison à trouver. Exiger une zone
+            // ici bloquerait des clients dont la ville n'est pas desservie
+            // à domicile mais dont la boutique est bien accessible.
+            $frais = $modeLivraison === 'retrait_boutique' ? 0 : $this->calculerFrais(
+                $pays, $client['ville_id'] ?? null, $client['quartier'] ?? null,
+                count($parBoutique), $poidsTotal
+            );
 
             $totalArticles = array_sum(array_map(
                 fn ($lignes) => array_sum(array_map(
@@ -154,7 +160,7 @@ class PanierService
                 'ville_id'                  => $client['ville_id'] ?? null,
                 'quartier'                  => $client['quartier'],
                 'repere'                    => $client['repere'] ?? null,
-                'mode_livraison'            => $client['mode_livraison'] ?? 'domicile',
+                'mode_livraison'            => $modeLivraison,
                 'mode_paiement'             => $client['mode_paiement'],
                 'statut'                    => 'confirmee',
                 'statut_paiement'           => 'attente',
@@ -163,12 +169,6 @@ class PanierService
                 'cgv_acceptees_le'          => now(),
                 'confirmee_le'              => now(),
             ]);
-
-            // Le paiement à la livraison n'encaisse rien : il n'y a donc
-            // rien à séquestrer. Confondre les deux états rendrait le
-            // grand livre faux dès la première commande en espèces.
-            $etatFonds = $client['mode_paiement'] === 'especes_livraison'
-                ? 'attente_encaissement' : 'sequestre';
 
             // Répartition des frais : le reste de la division entière
             // va à la première boutique. Sinon 1000 F sur 3 boutiques
@@ -206,7 +206,7 @@ class PanierService
                     'boutique_id'              => $boutiqueId,
                     'reference'                => $commande->reference . '-' . $boutique->code,
                     'statut'                   => 'a_preparer',
-                    'etat_fonds'               => $etatFonds,
+                    'etat_fonds'               => 'sequestre',
                     'montant_articles_ttc_cfa' => $montant,
                     'montant_tva_cfa'          => $tva,
                     'frais_livraison_cfa'      => $fraisPart + ($premier ? $reste : 0),

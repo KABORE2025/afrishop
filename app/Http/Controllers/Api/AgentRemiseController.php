@@ -20,19 +20,58 @@ class AgentRemiseController extends Controller
     public function index(Request $r): JsonResponse
     {
         $boutique = $this->boutique($r);
-        $agents = $boutique->agentsRemise()->with('livreur:id,nom')->orderBy('nom')->get()
+        $agents = $boutique->agentsRemise()->with('livreur:id,nom,telephone,ville_id')->get()
+            ->sortBy(fn (AgentRemiseBoutique $a) => $a->livreur->nom)
             ->map(fn (AgentRemiseBoutique $a) => [
-                'id' => $a->livreur_id, 'nom' => $a->livreur->nom, 'statut' => $a->statut,
+                'id' => $a->livreur_id, 'nom' => $a->livreur->nom,
+                'telephone' => $a->livreur->telephone, 'ville_id' => $a->livreur->ville_id,
+                'statut' => $a->statut,
                 'autorise_livraison' => $a->autorise_livraison,
                 'autorise_retrait_boutique' => $a->autorise_retrait_boutique,
-            ]);
+            ])->values();
 
         return response()->json(['data' => $agents]);
     }
 
+    /** Rattache immédiatement à la boutique un livreur déjà activé dans la même ville. */
+    public function rattacher(Request $r): JsonResponse
+    {
+        $boutique = $this->boutiqueAvecVille($r);
+        $data = $r->validate(['livreur_id' => ['required', 'integer', 'exists:utilisateurs,id']]);
+
+        $affiliation = DB::transaction(function () use ($boutique, $data, $r) {
+            $livreur = Utilisateur::whereKey($data['livreur_id'])->lockForUpdate()->firstOrFail();
+
+            if ($livreur->role !== 'livreur') {
+                abort(422, 'Cet identifiant ne correspond pas à un livreur.');
+            }
+            if ($livreur->ville_id !== $boutique->ville_id) {
+                abort(422, 'Ce livreur travaille dans une autre ville et ne peut pas être rattaché à cette boutique.');
+            }
+
+            $affiliation = AgentRemiseBoutique::firstOrNew([
+                'livreur_id' => $livreur->id, 'boutique_id' => $boutique->id,
+            ]);
+            $affiliation->fill([
+                'statut' => 'actif', 'autorise_livraison' => true,
+                'autorise_retrait_boutique' => true,
+                'invite_par_utilisateur_id' => $r->user()->id,
+                'jeton_invitation_hash' => null, 'invitation_expire_le' => null,
+                'accepte_le' => $affiliation->accepte_le ?? now(),
+            ]);
+            $affiliation->save();
+
+            return $affiliation;
+        });
+
+        return response()->json([
+            'message' => 'Livreur rattaché à la boutique.', 'agent_id' => $affiliation->livreur_id,
+        ], 201);
+    }
+
     public function inviter(Request $r): JsonResponse
     {
-        $boutique = $this->boutique($r);
+        $boutique = $this->boutiqueAvecVille($r);
         $data = $r->validate([
             'nom' => ['required', 'string', 'max:120'], 'cnib' => ['required', 'string', 'min:5', 'max:80'],
             'telephone' => ['required', 'string', 'max:20'],
@@ -43,18 +82,18 @@ class AgentRemiseController extends Controller
         $code = (string) random_int(100000, 999999);
 
         $affiliation = DB::transaction(function () use ($boutique, $data, $cnib, $hash, $code, $r) {
-            $livreur = Utilisateur::where('cnib_hash', $hash)->first();
-            if (! $livreur) {
-                if (Utilisateur::where('telephone', $data['telephone'])->exists()) {
-                    abort(422, 'Ce téléphone appartient déjà à un autre compte.');
-                }
-                $livreur = Utilisateur::create([
-                    'pays_id' => $boutique->pays_id, 'nom' => $data['nom'], 'telephone' => $data['telephone'],
-                    'role' => 'livreur', 'cnib_hash' => $hash, 'cnib_chiffree' => Crypt::encryptString($cnib),
-                ]);
-                AgentRemiseTelephone::create(['livreur_id' => $livreur->id, 'telephone' => $data['telephone'], 'est_principal' => true]);
+            if (Utilisateur::where('cnib_hash', $hash)->exists()) {
+                abort(422, 'Ce livreur existe déjà. Rattachez-le avec son identifiant.');
             }
-            if ($livreur->role !== 'livreur') abort(422, 'Cette CNIB appartient à un compte non autorisé comme agent de remise.');
+            if (Utilisateur::where('telephone', $data['telephone'])->exists()) {
+                abort(422, 'Ce téléphone appartient déjà à un autre compte.');
+            }
+            $livreur = Utilisateur::create([
+                'pays_id' => $boutique->pays_id, 'ville_id' => $boutique->ville_id,
+                'nom' => $data['nom'], 'telephone' => $data['telephone'], 'role' => 'livreur',
+                'cnib_hash' => $hash, 'cnib_chiffree' => Crypt::encryptString($cnib),
+            ]);
+            AgentRemiseTelephone::create(['livreur_id' => $livreur->id, 'telephone' => $data['telephone'], 'est_principal' => true]);
 
             $affiliation = AgentRemiseBoutique::firstOrNew(['livreur_id' => $livreur->id, 'boutique_id' => $boutique->id]);
             $affiliation->fill([
@@ -103,6 +142,14 @@ class AgentRemiseController extends Controller
     {
         $boutique = $r->user()?->boutique;
         abort_unless($boutique, 403, 'Aucune boutique rattachée à ce compte.');
+        return $boutique;
+    }
+
+    private function boutiqueAvecVille(Request $r): Boutique
+    {
+        $boutique = $this->boutique($r);
+        abort_if($boutique->ville_id === null, 422, 'Renseignez d’abord la ville de votre boutique avant d’ajouter un livreur.');
+
         return $boutique;
     }
 
