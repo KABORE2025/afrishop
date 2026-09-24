@@ -68,10 +68,10 @@ class VendeurFlowTest extends TestCase
         $this->assertSame('livree', $fraiche->statut);
         $this->assertSame('livree', $fraiche->commande->fresh()->statut);
 
-        // Saisir le code prouve que le client l'a bien communiqué : les
-        // fonds sont libérés immédiatement, pas seulement à J+3.
-        $this->assertNotNull($fraiche->confirme_par_client_le);
-        $this->assertSame('reverse', $fraiche->etat_fonds->value);
+        // Le code prouve la remise, pas la conformité : les fonds restent
+        // en séquestre pendant la fenêtre de protection du client (72 h).
+        $this->assertNull($fraiche->confirme_par_client_le);
+        $this->assertSame('sequestre', $fraiche->etat_fonds->value);
 
         // Payée en mobile_money : le grand livre a été écrit dès la
         // création de la commande, pas à la livraison.

@@ -86,8 +86,7 @@ class PanierService
         if ($montantCfa > $plafond) {
             throw new RuntimeException(
                 "Le montant de " . number_format($montantCfa, 0, ',', ' ') . " FCFA dépasse le plafond "
-                . "des paiements Mobile Money. Choisissez le paiement à la livraison ou un virement, "
-                . "ou passez deux commandes séparées."
+                . "des paiements Mobile Money. Passez deux commandes séparées."
             );
         }
     }
@@ -206,7 +205,12 @@ class PanierService
                     'boutique_id'              => $boutiqueId,
                     'reference'                => $commande->reference . '-' . $boutique->code,
                     'statut'                   => 'a_preparer',
-                    'etat_fonds'               => 'sequestre',
+                    // Rien n'est encaissé à la création : le paiement
+                    // Mobile Money se fait APRÈS, chez le prestataire.
+                    // PaiementCommandeService::finaliserReussie() fait
+                    // passer en « sequestre » à la confirmation — et
+                    // c'est seulement alors que la boutique peut expédier.
+                    'etat_fonds'               => 'attente_encaissement',
                     'montant_articles_ttc_cfa' => $montant,
                     'montant_tva_cfa'          => $tva,
                     'frais_livraison_cfa'      => $fraisPart + ($premier ? $reste : 0),

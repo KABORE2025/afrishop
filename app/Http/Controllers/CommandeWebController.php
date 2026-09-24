@@ -6,6 +6,7 @@ use App\Http\Requests\CommanderWebRequest;
 use App\Models\Commande;
 use App\Models\Pays;
 use App\Models\Ville;
+use App\Services\LitigeService;
 use App\Services\Paiement\PaiementCommandeService;
 use App\Services\PanierService;
 use App\Services\PanierSession;
@@ -231,6 +232,15 @@ class CommandeWebController extends Controller
                 ->with('succes', 'Cette commande est déjà payée.');
         }
 
+        // Annulée (paiement refusé ou délai dépassé) : le stock a été
+        // rendu, les articles sont peut-être déjà repartis chez un autre
+        // client. On ne fait pas payer une commande qui n'existe plus.
+        if ($commande->statut_paiement !== 'attente') {
+            return redirect()->route('commande.confirmee', $reference)
+                ->with('erreur', 'Cette commande a été annulée faute de paiement. '
+                    .'Ajoutez à nouveau les articles au panier pour recommander.');
+        }
+
         return $this->lancerPaiement($commande);
     }
 
@@ -247,9 +257,18 @@ class CommandeWebController extends Controller
     public function confirmee(string $reference): View
     {
         $commande = Commande::where('reference', $reference)
-            ->with(['sousCommandes.boutique', 'sousCommandes.lignes'])
+            ->with(['sousCommandes.boutique', 'sousCommandes.lignes', 'sousCommandes.litiges'])
             ->firstOrFail();
 
-        return view('commande-confirmee', compact('commande'));
+        // Fenêtre de protection : le service décide, la vue ne fait
+        // qu'afficher — sinon la règle des 72 h vivrait à deux endroits.
+        $protection = app(LitigeService::class);
+        $codes = app(\App\Services\CodeRemiseService::class);
+
+        // Téléphone déjà prouvé dans cette session (via /suivi ou un geste
+        // précédent) : les formulaires n'ont plus à le redemander.
+        $verifiee = in_array($reference, (array) session('commandes_verifiees', []), true);
+
+        return view('commande-confirmee', compact('commande', 'protection', 'codes', 'verifiee'));
     }
 }

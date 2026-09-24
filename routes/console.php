@@ -14,7 +14,11 @@ use Illuminate\Support\Facades\Schedule;
 // bloqué dès qu'un client oublie de confirmer réception — c'est-à-dire
 // presque toujours. Si elle cesse de tourner, personne ne le remarque
 // avant les réclamations des vendeurs.
-Schedule::command('afrishop:liberer-fonds')->dailyAt('06:00');
+// Toutes les heures, pas une fois par jour : depuis que le code de remise
+// ne libère plus rien, TOUTE livraison attend la fin de sa fenêtre de
+// protection (72 h). Un passage quotidien y ajoutait jusqu'à 24 h de
+// plus pour le vendeur, sans rien protéger de mieux.
+Schedule::command('afrishop:liberer-fonds')->hourly();
 
 // RATTRAPAGE DES PAIEMENTS SANS NOTIFICATION.
 // Le webhook est le chemin normal, mais il se perd : réseau coupé,

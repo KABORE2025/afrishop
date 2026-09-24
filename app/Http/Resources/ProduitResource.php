@@ -36,6 +36,7 @@ class ProduitResource extends JsonResource
             'poids_g'      => $this->poids_g !== null ? (int) $this->poids_g : null,
             'actif'        => (bool) $this->actif,
             'tracable'     => (bool) $this->tracable,
+            'boutique_id'  => (int) $this->boutique_id,
             'categorie_id' => (int) $this->categorie_id,
 
             /*

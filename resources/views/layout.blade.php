@@ -92,8 +92,9 @@ footer{margin-top:40px;background:var(--surface);border-top:1px solid var(--bord
 <header>
   <div class="wrap bar">
     <a href="{{ route('vitrine') }}" class="logo"><i>A</i>Afrishop</a>
-    <nav style="display:flex;gap:16px">
-      <a href="{{ route('vitrine') }}" class="on">Marketplace</a>
+    <nav style="display:flex;gap:16px;flex-wrap:wrap">
+      <a href="{{ route('vitrine') }}" class="{{ request()->routeIs('suivi*') ? '' : 'on' }}">Marketplace</a>
+      <a href="{{ route('suivi') }}" class="{{ request()->routeIs('suivi*') ? 'on' : '' }}">Suivre ma commande</a>
       <a href="{{ route('panier') }}">
         Panier
         @php $nbPanier = array_sum(session('panier', [])); @endphp

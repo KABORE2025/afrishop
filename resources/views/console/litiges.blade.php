@@ -69,6 +69,18 @@
                     <div class="rounded-lg bg-fond p-3">
                         <p class="tuile-libelle">Version du client</p>
                         <p class="mt-1 text-sm" x-text="l.client.description"></p>
+                        {{-- Clic = photo en grand dans un nouvel onglet. Les
+                             liens expirent en 30 min : recharger la page
+                             si une photo ne s'ouvre plus. --}}
+                        <div class="mt-2 flex flex-wrap gap-2" x-show="l.client.photos?.length">
+                            <template x-for="(p, i) in l.client.photos" :key="i">
+                                <a :href="p.grand" target="_blank" rel="noopener">
+                                    <img :src="p.vignette" alt="Photo jointe par le client"
+                                         class="h-20 w-20 rounded-lg border border-bord object-cover">
+                                </a>
+                            </template>
+                        </div>
+                        <p class="tuile-note" x-show="!l.client.photos?.length">Aucune photo fournie.</p>
                         <p class="tuile-note" x-text="'Ouvert le ' + dateFr(l.client.ouvert_le)"></p>
                     </div>
 

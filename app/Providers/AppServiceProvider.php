@@ -9,8 +9,12 @@ use App\Services\Paiement\PaymentGatewayInterface;
 use App\Services\Sms\PasserelleJournal;
 use App\Services\Sms\PasserelleOrange;
 use App\Services\Sms\PasserelleSmsInterface;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -127,5 +131,61 @@ class AppServiceProvider extends ServiceProvider
         if ($paquet !== '' && is_file($paquet)) {
             Http::globalOptions(['verify' => $paquet]);
         }
+
+        $this->definirLimitesDeTentatives();
+    }
+
+    /**
+     * =================================================================
+     *  LIMITES DE TENTATIVES
+     * =================================================================
+     *  Seule la vérification QR était limitée. Tout le reste acceptait
+     *  un nombre illimité d'essais : mots de passe à la connexion,
+     *  couples référence/téléphone au suivi, et surtout le code à six
+     *  chiffres d'activation des agents — un million de combinaisons,
+     *  qu'un script parcourt en quelques heures.
+     *
+     *  Chaque limite compte PAR ADRESSE IP, et pour les secrets PAR
+     *  CIBLE (téléphone, CNIB) : changer d'IP ne donne pas de nouveaux
+     *  essais sur le même compte. Réponse : HTTP 429 avec l'en-tête
+     *  Retry-After.
+     *
+     *  Les valeurs laissent de la marge aux usages réels : sur un même
+     *  point d'accès (cybercafé, antenne 3G partagée), plusieurs
+     *  clients légitimes sortent par la même IP.
+     * =================================================================
+     */
+    private function definirLimitesDeTentatives(): void
+    {
+        $chiffres = fn (?string $v) => preg_replace('/\D/', '', (string) $v);
+
+        RateLimiter::for('connexion', fn (Request $r) => [
+            Limit::perMinute(5)->by('connexion:'.$chiffres($r->input('telephone')).'|'.$r->ip()),
+            Limit::perHour(20)->by('connexion-compte:'.$chiffres($r->input('telephone'))),
+            Limit::perMinute(30)->by('connexion-ip:'.$r->ip()),
+        ]);
+
+        RateLimiter::for('inscription', fn (Request $r) => Limit::perHour(10)->by('inscription:'.$r->ip()));
+
+        RateLimiter::for('formulaire', fn (Request $r) => Limit::perHour(10)->by('formulaire:'.$r->ip()));
+
+        RateLimiter::for('suivi', fn (Request $r) => [
+            Limit::perMinute(20)->by('suivi:'.$r->ip()),
+            Limit::perHour(10)->by('suivi-ref:'.Str::upper((string) $r->input('reference'))),
+        ]);
+
+        RateLimiter::for('commande', fn (Request $r) => Limit::perMinute(10)->by('commande:'.$r->ip()));
+
+        // Le téléphone vérifie ces gestes : sans limite, on le devinerait
+        // chiffre par chiffre sur une référence connue.
+        RateLimiter::for('protection', fn (Request $r) => [
+            Limit::perMinute(5)->by('protection:'.$r->ip()),
+            Limit::perHour(10)->by('protection-ref:'.Str::upper((string) $r->route('reference'))),
+        ]);
+
+        RateLimiter::for('activation-agent', fn (Request $r) => [
+            Limit::perMinute(5)->by('activation:'.$r->ip()),
+            Limit::perHour(5)->by('activation-cnib:'.Str::upper((string) preg_replace('/[^A-Za-z0-9]/', '', (string) $r->input('cnib')))),
+        ]);
     }
 }

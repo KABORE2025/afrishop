@@ -3,6 +3,11 @@
 namespace Tests\Feature\Api;
 
 use App\Models\AgentRemiseBoutique;
+use App\Models\MouvementCompte;
+use App\Models\RetenueSource;
+use App\Models\TransactionPaiement;
+use App\Services\GrandLivreService;
+use Illuminate\Support\Facades\DB;
 use App\Models\Notification;
 use App\Models\SousCommande;
 use App\Models\VarianteProduit;
@@ -81,27 +86,96 @@ class LivreurEchecTest extends TestCase
             ->assertJsonFragment(['id' => $sc->id]);
     }
 
-    public function test_echec_au_plafond_retourne_le_colis_et_rembourse(): void
+    /** Les déclarations d'échec doivent être espacées : on vieillit la précédente. */
+    private function vieillirDerniersEchecs(SousCommande $sc): void
+    {
+        DB::table('evenements_commande')->where('sous_commande_id', $sc->id)
+            ->where('type', 'livraison_echouee')
+            ->update(['cree_le' => DB::raw('NOW() - INTERVAL 3 HOUR')]);
+    }
+
+    public function test_deux_echecs_trop_rapproches_sont_refuses(): void
+    {
+        ['livreur' => $livreur, 'sousCommande' => $sc] = $this->creerContexte();
+
+        $this->actingAs($livreur, 'sanctum')->postJson("/api/livreur/commandes/{$sc->id}/echec", ['motif' => 'absent'])->assertOk();
+        $this->actingAs($livreur, 'sanctum')->postJson("/api/livreur/commandes/{$sc->id}/echec", ['motif' => 'absent'])
+            ->assertStatus(422);
+
+        $this->assertSame(1, $sc->evenements()->where('type', 'livraison_echouee')->count());
+    }
+
+    public function test_echec_au_plafond_met_en_retour_sans_rembourser(): void
     {
         ['livreur' => $livreur, 'sousCommande' => $sc, 'variante' => $variante] = $this->creerContexte();
         $stockAvant = $variante->fresh()->stock;
 
-        $this->actingAs($livreur, 'sanctum')->postJson("/api/livreur/commandes/{$sc->id}/echec", ['motif' => 'absent'])->assertOk();
-        $this->actingAs($livreur, 'sanctum')->postJson("/api/livreur/commandes/{$sc->id}/echec", ['motif' => 'absent'])->assertOk();
+        foreach (['absent', 'absent'] as $motif) {
+            $this->actingAs($livreur, 'sanctum')->postJson("/api/livreur/commandes/{$sc->id}/echec", ['motif' => $motif])->assertOk();
+            $this->vieillirDerniersEchecs($sc);
+        }
         $reponse = $this->actingAs($livreur, 'sanctum')
             ->postJson("/api/livreur/commandes/{$sc->id}/echec", ['motif' => 'colis_refuse']);
 
         $reponse->assertOk()->assertJson(['statut' => 'retour_expediteur']);
 
+        // Le livreur seul ne rembourse rien et ne remet rien en stock.
         $fraiche = $sc->fresh(['expedition']);
         $this->assertSame('retour_expediteur', $fraiche->expedition->statut);
-        $this->assertSame('rembourse', $fraiche->etat_fonds->value);
-        $this->assertSame($stockAvant + 2, $variante->fresh()->stock);
+        $this->assertSame('sequestre', $fraiche->etat_fonds->value);
+        $this->assertSame($stockAvant, $variante->fresh()->stock);
 
         // Terminal : un quatrième échec ne doit plus rien changer.
+        $this->vieillirDerniersEchecs($sc);
         $this->actingAs($livreur, 'sanctum')
             ->postJson("/api/livreur/commandes/{$sc->id}/echec", ['motif' => 'absent'])
             ->assertStatus(422);
+    }
+
+    public function test_la_boutique_cloture_le_retour_rembourse_et_contrepasse(): void
+    {
+        ['livreur' => $livreur, 'vendeur' => $vendeur, 'boutique' => $boutique,
+         'sousCommande' => $sc, 'variante' => $variante] = $this->creerContexte();
+        $stockAvant = $variante->fresh()->stock;
+        $grandLivre = app(GrandLivreService::class);
+        $this->assertGreaterThan(0, $grandLivre->solde($boutique));
+
+        // Pas de retour déclaré : rien à clôturer.
+        $this->actingAs($vendeur, 'sanctum')
+            ->postJson("/api/vendeur/commandes/{$sc->id}/confirmer-retour")->assertStatus(422);
+
+        foreach (['absent', 'absent', 'colis_refuse'] as $motif) {
+            $this->actingAs($livreur, 'sanctum')->postJson("/api/livreur/commandes/{$sc->id}/echec", ['motif' => $motif])->assertOk();
+            $this->vieillirDerniersEchecs($sc);
+        }
+
+        $this->actingAs($vendeur, 'sanctum')
+            ->postJson("/api/vendeur/commandes/{$sc->id}/confirmer-retour")->assertOk();
+
+        $fraiche = $sc->fresh();
+        $this->assertSame('rembourse', $fraiche->etat_fonds->value);
+        $this->assertSame('retournee', $fraiche->statut);
+        $this->assertSame($stockAvant + 2, $variante->fresh()->stock);
+
+        // Grand livre : la vente, la commission et la retenue sont
+        // contrepassées — la boutique ne doit plus rien toucher, et la
+        // plateforme ne garde pas de commission sur une vente annulée.
+        $this->assertSame(0, $grandLivre->solde($boutique));
+        $this->assertSame(0, (int) MouvementCompte::whereNull('boutique_id')
+            ->selectRaw("COALESCE(SUM(CASE WHEN sens='credit' THEN montant_cfa ELSE -montant_cfa END),0) s")->value('s'));
+        $this->assertSame(0, RetenueSource::where('sous_commande_id', $sc->id)->where('statut', 'a_reverser')->count());
+
+        // L'argent à rendre au client est dans la file de remboursement.
+        $this->assertDatabaseHas('transactions_paiement', [
+            'commande_id' => $sc->commande_id, 'sens' => 'remboursement',
+            'montant_cfa' => $sc->montant_articles_ttc_cfa + $sc->frais_livraison_cfa,
+            'statut' => 'initiee',
+        ]);
+
+        // Rejouer la clôture ne rembourse pas deux fois.
+        $this->actingAs($vendeur, 'sanctum')
+            ->postJson("/api/vendeur/commandes/{$sc->id}/confirmer-retour")->assertStatus(422);
+        $this->assertSame(1, TransactionPaiement::where('sens', 'remboursement')->count());
     }
 
     public function test_un_autre_livreur_ne_peut_pas_signaler_lechec(): void

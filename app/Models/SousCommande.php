@@ -28,8 +28,17 @@ class SousCommande extends Model
             'confirme_par_client_le' => 'datetime',
             'taux_commission_pct'    => 'float',
             'taux_retenue_source_pct'=> 'float',
+            // Chiffré au repos : ce code libère l'argent de la boutique.
+            'code_retrait'           => 'encrypted',
         ];
     }
+
+    /**
+     * Jamais sérialisé. Sans cette liste, `/api/commandes/suivi`
+     * renvoyait le code de retrait à quiconque connaissait la référence
+     * et le téléphone — c'est-à-dire aussi à celui qui a volé le colis.
+     */
+    protected $hidden = ['code_retrait', 'retrait_tentatives'];
 
     public function commande(): BelongsTo { return $this->belongsTo(Commande::class); }
     public function boutique(): BelongsTo { return $this->belongsTo(Boutique::class); }

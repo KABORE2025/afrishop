@@ -20,10 +20,14 @@ class FakeGateway implements PaymentGatewayInterface
 {
     public function initier(int $montantCfa, string $reference, array $meta = []): array
     {
+        // `afrishop.psp.fake.initiation` permet aux tests de simuler un
+        // paiement resté en attente (client qui ferme la page) ou refusé.
+        $statut = (string) config('afrishop.psp.fake.initiation', 'reussie');
+
         return [
-            'statut'            => 'reussie',
+            'statut'            => in_array($statut, ['reussie', 'en_attente', 'echouee'], true) ? $statut : 'reussie',
             'reference_externe' => 'FAKE-' . $reference . '-' . Str::random(8),
-            'url_paiement'      => null,
+            'url_paiement'      => $statut === 'en_attente' ? url('/paiement-simule') : null,
         ];
     }
 
@@ -65,6 +69,12 @@ class FakeGateway implements PaymentGatewayInterface
      */
     public function verifierPaiement(string $referenceExterne): ?array
     {
-        return ['accepte' => true, 'message' => 'Encaissement simulé (driver fake).'];
+        // `afrishop.psp.fake.verification` : « accepte », « refuse » ou
+        // « indetermine » (le prestataire ne sait pas encore).
+        return match ((string) config('afrishop.psp.fake.verification', 'accepte')) {
+            'indetermine' => null,
+            'refuse'      => ['accepte' => false, 'message' => 'Refus simulé (driver fake).'],
+            default       => ['accepte' => true, 'message' => 'Encaissement simulé (driver fake).'],
+        };
     }
 }

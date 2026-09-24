@@ -57,13 +57,12 @@ class RetraitBoutiqueTest extends TestCase
 
         $fraiche = $sc->fresh();
         $this->assertSame('livree', $fraiche->statut);
-        $this->assertNotNull($fraiche->confirme_par_client_le);
+        $this->assertNull($fraiche->confirme_par_client_le);
         $this->assertSame('livree', $fraiche->commande->fresh()->statut);
 
-        // Le client vient de confirmer en personne : les fonds sont
-        // libérés tout de suite, sans attendre le balayage à J+3, qui de
-        // toute façon ignore les sous-commandes déjà confirmées.
-        $this->assertSame('reverse', $fraiche->etat_fonds->value);
+        // Même au comptoir, le client n'a pas encore ouvert le paquet :
+        // les fonds attendent la fin de sa fenêtre de protection (72 h).
+        $this->assertSame('sequestre', $fraiche->etat_fonds->value);
     }
 
     public function test_confirmation_avec_un_mauvais_code_est_rejetee(): void

@@ -8,6 +8,7 @@ use App\Models\Litige;
 use App\Models\Produit;
 use App\Models\Reversement;
 use App\Models\SousCommande;
+use App\Models\TransactionPaiement;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -39,6 +40,16 @@ class TableauBordAdminService
                 'produits_a_moderer'    => (int) Produit::where('statut_moderation', 'en_attente')->count(),
                 'reversements_a_payer'  => (int) Reversement::whereIn('statut', ['a_payer', 'en_cours'])->count(),
                 'reversements_echoues'  => (int) Reversement::where('statut', 'echoue')->count(),
+                // Argent à rendre aux clients : ventes remboursées, paiements
+                // en double ou arrivés après annulation. Tant qu'aucun
+                // remboursement automatique n'est branché chez le
+                // prestataire, c'est une file de travail manuelle.
+                'remboursements_a_effectuer' => (int) TransactionPaiement::where('sens', 'remboursement')
+                    ->whereIn('statut', ['initiee', 'en_attente'])->count(),
+                // Colis déclarés « retour » par le livreur, pas encore
+                // confirmés revenus par la boutique.
+                'retours_a_cloturer' => (int) SousCommande::where('statut', 'expediee')
+                    ->whereHas('expedition', fn ($q) => $q->where('statut', 'retour_expediteur'))->count(),
             ],
 
             /*
@@ -57,6 +68,9 @@ class TableauBordAdminService
             ],
 
             'argent_cfa' => [
+                'a_rembourser_aux_clients' => (int) TransactionPaiement::where('sens', 'remboursement')
+                    ->whereIn('statut', ['initiee', 'en_attente'])->sum('montant_cfa'),
+
                 /* Ce que la plateforme doit aux boutiques, tous pays
                  * confondus. C'est la dette, pas le chiffre d'affaires. */
                 'du_aux_boutiques' => (int) SousCommande::whereIn('etat_fonds', ['sequestre', 'reverse'])

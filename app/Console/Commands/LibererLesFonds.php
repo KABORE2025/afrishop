@@ -6,10 +6,10 @@ use App\Services\SequestreService;
 use Illuminate\Console\Command;
 
 /**
- * Tâche quotidienne : débloque les livraisons non contestées.
+ * Tâche horaire : débloque les livraisons non contestées.
  *
  * À planifier dans routes/console.php :
- *   Schedule::command('afrishop:liberer-fonds')->dailyAt('06:00');
+ *   Schedule::command('afrishop:liberer-fonds')->hourly();
  *
  * Sans cette tâche, l'argent d'un vendeur reste bloqué indéfiniment dès
  * qu'un client oublie de cliquer sur « J'ai bien reçu » — ce qui est le
@@ -24,7 +24,7 @@ class LibererLesFonds extends Command
 
     public function handle(SequestreService $sequestre): int
     {
-        $delai = config('afrishop.delai_confirmation_auto', 3);
+        $delai = (int) parametre('delai_confirmation_auto_jours', 3);
         $this->info("Recherche des livraisons non contestées de plus de {$delai} jours…");
 
         $liberees = $sequestre->libererLesEchues();

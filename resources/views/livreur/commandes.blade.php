@@ -67,7 +67,10 @@
                             <span class="statut" x-text="libelleStatutExpedition(commande.expedition.statut)"></span>
                         </td>
                         <td class="text-right">
-                            <template x-if="onglet === 'encours'">
+                            <template x-if="onglet === 'encours' && commande.expedition.statut === 'retour_expediteur'">
+                                <span class="text-xs text-alerte">À rapporter à la boutique</span>
+                            </template>
+                            <template x-if="onglet === 'encours' && commande.expedition.statut !== 'retour_expediteur'">
                                 <div class="flex justify-end gap-2">
                                     <button class="btn-secondaire" @click="ouvrirEchec(commande)">Échec</button>
                                     <button class="btn-primaire" @click="ouvrir(commande)">Confirmer la remise</button>
@@ -162,7 +165,7 @@ document.addEventListener('alpine:init', () => Alpine.data('ecranLivreur', () =>
         this.chargement = true;
         try {
             const params = this.onglet === 'historique'
-                ? '?statut[]=livree&statut[]=retour_expediteur'
+                ? '?statut[]=livree&statut[]=retournee&statut[]=annulee'
                 : '';
             const r = await window.api.get(`/livreur/commandes${params}`);
             this.commandes = r.data ?? [];

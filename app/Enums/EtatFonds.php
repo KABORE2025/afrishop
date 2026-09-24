@@ -10,23 +10,27 @@ namespace App\Enums;
  */
 enum EtatFonds: string
 {
-    /** Paiement à la livraison : rien n'est encaissé, rien à séquestrer. */
+    /**
+     * État de naissance de toute sous-commande : le client a été envoyé
+     * vers le prestataire, l'encaissement n'est pas encore confirmé.
+     * Rien à séquestrer, et RIEN NE DOIT ÊTRE EXPÉDIÉ dans cet état.
+     */
     case AttenteEncaissement = 'attente_encaissement';
     /** Encaissé, cantonné, attribué à la boutique, pas encore viré. */
     case Sequestre = 'sequestre';
     case Reverse   = 'reverse';
     case Rembourse = 'rembourse';
-    /** Colis refusé à la porte : personne n'a été payé. */
+    /** Commande annulée sans que le paiement ait abouti : personne n'a été payé. */
     case Impaye    = 'impaye';
 
     public function libelle(): string
     {
         return match ($this) {
-            self::AttenteEncaissement => 'En attente d\'encaissement',
+            self::AttenteEncaissement => 'Paiement en attente',
             self::Sequestre           => 'Fonds en séquestre',
             self::Reverse             => 'Reversé à la boutique',
             self::Rembourse           => 'Remboursé au client',
-            self::Impaye              => 'Impayé — colis refusé',
+            self::Impaye              => 'Non payée — commande annulée',
         };
     }
 

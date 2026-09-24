@@ -15,12 +15,14 @@ use App\Http\Resources\VarianteProduitResource;
 use App\Models\AgentRemiseBoutique;
 use App\Models\Boutique;
 use App\Models\Expedition;
+use App\Models\Litige;
 use App\Models\Media;
 use App\Models\Produit;
 use App\Models\Reversement;
 use App\Models\SousCommande;
 use App\Models\Utilisateur;
 use App\Models\VarianteProduit;
+use App\Services\LitigeService;
 use App\Services\MediaService;
 use App\Services\NotificationService;
 use App\Services\SequestreService;
@@ -58,7 +60,7 @@ class VendeurController extends Controller
 
         $requete = SousCommande::query()
             ->where('boutique_id', $boutiqueId)
-            ->with(['lignes', 'expedition', 'commande:id,reference,cree_le,mode_livraison']);
+            ->with(['lignes', 'expedition', 'litiges.photos', 'commande:id,reference,cree_le,mode_livraison']);
 
         /*
          * Filtres — un vendeur cherche « ce que je dois préparer », pas
@@ -118,6 +120,10 @@ class VendeurController extends Controller
     {
         $boutique = $this->resoudreBoutique($r, $sousCommande);
 
+        if ($refus = $this->refusSiNonPayee($sousCommande)) {
+            return $refus;
+        }
+
         if (! in_array($sousCommande->statut, ['a_preparer', 'prete'], true)) {
             return response()->json([
                 'message' => "Cette sous-commande est « {$sousCommande->statut} » : elle ne peut plus être expédiée.",
@@ -168,6 +174,7 @@ class VendeurController extends Controller
                 'client_nom' => $sousCommande->commande->client_nom,
                 'reference' => $sousCommande->reference,
                 'code' => $expedition->code_livraison,
+                'lien' => route('commande.confirmee', $sousCommande->commande->reference),
             ], telephone: $sousCommande->commande->client_telephone);
 
             // Le livreur aussi : sans ce message, la seule façon pour lui
@@ -193,6 +200,10 @@ class VendeurController extends Controller
         $this->resoudreBoutique($r, $sousCommande);
         $sousCommande->load('commande');
 
+        if ($refus = $this->refusSiNonPayee($sousCommande)) {
+            return $refus;
+        }
+
         if ($sousCommande->commande->mode_livraison !== 'retrait_boutique') {
             return response()->json(['message' => 'Cette commande n’est pas en retrait boutique.'], 422);
         }
@@ -217,6 +228,7 @@ class VendeurController extends Controller
             $this->notifications->envoyer('code_retrait', 'sms', [
                 'reference' => $sousCommande->reference,
                 'code' => $code,
+                'lien' => route('commande.confirmee', $sousCommande->commande->reference),
             ], telephone: $sousCommande->commande->client_telephone);
         });
 
@@ -229,13 +241,13 @@ class VendeurController extends Controller
      * la même raison — un code n'a de valeur que s'il ne peut pas être
      * deviné par force brute.
      */
-    public function confirmerRetrait(Request $r, SousCommande $sousCommande, SequestreService $sequestre): JsonResponse
+    public function confirmerRetrait(Request $r, SousCommande $sousCommande): JsonResponse
     {
         $this->resoudreBoutique($r, $sousCommande);
 
         $data = $r->validate(['code_retrait' => ['required', 'digits:6']]);
 
-        return DB::transaction(function () use ($r, $sousCommande, $data, $sequestre) {
+        return DB::transaction(function () use ($r, $sousCommande, $data) {
             $sousCommande = SousCommande::whereKey($sousCommande->id)->lockForUpdate()->firstOrFail();
 
             if ($sousCommande->statut !== 'prete') {
@@ -252,31 +264,39 @@ class VendeurController extends Controller
                 return response()->json(['message' => "Code incorrect. {$restantes} essai(s) restant(s)."], 422);
             }
 
-            $sousCommande->update([
-                'statut' => 'livree', 'livre_le' => now(), 'confirme_par_client_le' => now(),
-            ]);
+            // Même règle que la livraison : le code prouve la remise, pas
+            // la conformité. Les fonds restent en séquestre pendant la
+            // fenêtre de protection du client (LitigeService).
+            $sousCommande->update(['statut' => 'livree', 'livre_le' => now()]);
             $sousCommande->journaliser('retiree_en_boutique', [], $r->user()->id, 'vendeur');
             $sousCommande->commande->rafraichirStatut();
 
-            /*
-             * Le client vient de confirmer EN PERSONNE, en présentant le
-             * code : c'est la preuve la plus forte que ce système connaît,
-             * plus forte même qu'une confirmation à distance. Attendre le
-             * balayage quotidien (`afrishop:liberer-fonds`) n'aurait aucun
-             * sens ici — et ce balayage ne la trouverait de toute façon
-             * jamais : sa requête ignore délibérément les sous-commandes
-             * où `confirme_par_client_le` est déjà renseigné (voir
-             * SequestreService::libererLesEchues()). Sans cet appel, une
-             * commande retirée en boutique restait donc séquestrée pour
-             * toujours.
-             */
-            $sousCommande->refresh();
-            if ($sequestre->liberables($sousCommande)) {
-                $sequestre->liberer($sousCommande, 'client');
-            }
-
             return response()->json(new SousCommandeResource($sousCommande->fresh('lignes')));
         });
+    }
+
+    /**
+     * Le colis que le livreur n'a pas pu remettre est revenu au
+     * comptoir. C'est ce geste — et non la déclaration d'échec du
+     * livreur — qui rembourse le client et remet l'article en stock :
+     * la boutique est la seule à pouvoir constater que la marchandise
+     * est réellement revenue.
+     */
+    public function confirmerRetour(Request $r, SousCommande $sousCommande, SequestreService $sequestre): JsonResponse
+    {
+        $this->resoudreBoutique($r, $sousCommande);
+
+        try {
+            $sequestre->cloturerRetourColis(
+                $sousCommande,
+                'Colis non remis au client, revenu en boutique.',
+                $r->user()->id, 'vendeur'
+            );
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(new SousCommandeResource($sousCommande->fresh(['expedition', 'lignes'])));
     }
 
     /** Produits de la boutique, avec leurs variantes. */
@@ -512,10 +532,52 @@ class VendeurController extends Controller
     }
 
     /**
+     * LE PAIEMENT SE FAIT TOUJOURS AVANT LA LIVRAISON. Tant que le
+     * prestataire n'a pas confirmé l'encaissement, rien ne part : sans
+     * ce contrôle, une commande jamais payée pouvait être expédiée,
+     * livrée, et la boutique payée avec de l'argent jamais reçu.
+     */
+    private function refusSiNonPayee(SousCommande $sousCommande): ?JsonResponse
+    {
+        $sousCommande->loadMissing('commande');
+
+        if ($sousCommande->commande->statut_paiement === 'encaisse'
+            && $sousCommande->etat_fonds->value === 'sequestre') {
+            return null;
+        }
+
+        return response()->json([
+            'message' => 'Paiement non confirmé : ne préparez ni n’expédiez ce colis tant que '
+                .'le client n’a pas payé. La commande apparaîtra comme payée dès la confirmation.',
+        ], 422);
+    }
+
+    /**
      * Boutique de l'utilisateur connecté. Si une sous-commande est
      * fournie, vérifie en plus qu'elle lui appartient — c'est le
      * cloisonnement qui prime sur tout le reste de ce contrôleur.
      */
+    /**
+     * La version de la boutique dans un litige. Une seule réponse, non
+     * modifiable : l'admin arbitre sur ce qu'il a lu (LitigeService).
+     */
+    public function repondreLitige(Request $r, Litige $litige, LitigeService $litiges): JsonResponse
+    {
+        $this->resoudreBoutique($r, $litige->sousCommande);
+
+        $donnees = $r->validate([
+            'argument' => ['required', 'string', 'min:20', 'max:2000'],
+        ]);
+
+        try {
+            $litiges->repondre($litige, $donnees['argument'], $r->user()->id);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['message' => 'Votre version est transmise à Afrishop, qui va trancher.']);
+    }
+
     private function resoudreBoutique(Request $r, ?SousCommande $sousCommande = null): Boutique
     {
         $boutique = $r->user()?->boutique;

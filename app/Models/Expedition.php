@@ -14,8 +14,17 @@ class Expedition extends Model
 
     protected function casts(): array
     {
-        return ['expedie_le' => 'datetime', 'livre_le' => 'datetime', 'code_valide_le' => 'datetime'];
+        return [
+            'expedie_le'     => 'datetime',
+            'livre_le'       => 'datetime',
+            'code_valide_le' => 'datetime',
+            // Chiffré au repos : ce code libère l'argent de la boutique.
+            'code_livraison' => 'encrypted',
+        ];
     }
+
+    /** Jamais sérialisé : seul l'admin le lit, explicitement, avec motif. */
+    protected $hidden = ['code_livraison', 'tentatives'];
 
     public function sousCommande(): BelongsTo { return $this->belongsTo(SousCommande::class); }
     public function livreur(): BelongsTo      { return $this->belongsTo(Utilisateur::class, 'livreur_id'); }

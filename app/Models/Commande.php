@@ -24,6 +24,7 @@ class Commande extends Model
     }
 
     public function sousCommandes(): HasMany { return $this->hasMany(SousCommande::class); }
+    public function transactions(): HasMany  { return $this->hasMany(TransactionPaiement::class); }
 
     /**
      * Recalcule le statut global à partir des sous-commandes.
@@ -51,19 +52,33 @@ class Commande extends Model
     }
 
     /**
-     * Référence lisible, préfixée par le pays : BF-CMD-2026-000042.
+     * Référence lisible, préfixée par le pays : BF-CMD-2026-7KQ4XM.
      * Le préfixe évite toute collision entre pays et permet de savoir
      * d'un coup d'œil où une commande a été passée — utile au support,
      * qui travaille au téléphone.
+     *
+     * LA PARTIE FINALE EST ALÉATOIRE, plus un compteur. Avec un compteur
+     * (000041, 000042…), n'importe qui devinait les références voisines
+     * de la sienne — et la page /commande/{reference} ne demande QUE la
+     * référence. Deux commandes simultanées pouvaient aussi calculer le
+     * même numéro. Six caractères parmi 31 donnent près de 900 millions
+     * de combinaisons ; les lettres ambiguës au téléphone (0/O, 1/I/L)
+     * sont exclues.
      */
     public static function prochaineReference(Pays $pays): string
     {
-        $annee = now()->year;
-        $prefixe = "{$pays->code_iso2}-CMD-{$annee}-";
-        $dernier = static::where('reference', 'like', $prefixe . '%')->max('reference');
-        $numero = $dernier ? ((int) substr($dernier, -6)) + 1 : 1;
+        $prefixe = "{$pays->code_iso2}-CMD-" . now()->year . '-';
+        $alphabet = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 
-        return sprintf('%s%06d', $prefixe, $numero);
+        do {
+            $suffixe = '';
+            for ($i = 0; $i < 6; $i++) {
+                $suffixe .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+            }
+            $reference = $prefixe . $suffixe;
+        } while (static::where('reference', $reference)->exists());
+
+        return $reference;
     }
 
     public function pays(): BelongsTo { return $this->belongsTo(Pays::class); }

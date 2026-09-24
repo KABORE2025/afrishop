@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Commande;
 use App\Models\TransactionPaiement;
 use App\Services\Paiement\PaiementCommandeService;
 use App\Services\Paiement\PaymentGatewayInterface;
@@ -35,6 +36,14 @@ use Illuminate\Console\Command;
  *  c'est le seul moyen de dérouler un paiement de bout en bout : on
  *  paie sur la page du prestataire, on lance cette commande, la
  *  commande passe à « encaisse ».
+ *
+ *  EXPIRATION. Un paiement que le prestataire ne confirme toujours pas
+ *  après `paiement_delai_expiration_minutes` (30 par défaut, 0 pour
+ *  désactiver) est abandonné : la commande est annulée et le stock
+ *  rendu. On n'expire qu'APRÈS avoir redemandé l'état au prestataire
+ *  dans le même passage. Si le client paie malgré tout plus tard,
+ *  l'encaissement crée une transaction de remboursement (voir
+ *  PaiementCommandeService::finaliserReussie()).
  *
  *  UTILISATION :
  *    php artisan afrishop:verifier-paiements
@@ -82,15 +91,15 @@ class VerifierPaiements extends Command
             ->limit((int) $this->option('limite'))
             ->get();
 
+        $encaisses = $indetermines = $echoues = 0;
+        /** Transactions redemandées au prestataire, restées sans réponse. */
+        $sansReponse = [];
+
         if ($transactions->isEmpty()) {
             $this->info('Aucun paiement en attente à vérifier.');
-
-            return self::SUCCESS;
+        } else {
+            $this->info($transactions->count() . ' paiement(s) en attente.');
         }
-
-        $this->info($transactions->count() . ' paiement(s) en attente.');
-
-        $encaisses = $indetermines = $echoues = 0;
 
         foreach ($transactions as $tx) {
             $etat = $passerelle->verifierPaiement($tx->reference_externe);
@@ -100,10 +109,12 @@ class VerifierPaiements extends Command
              * « pending », ou son API est injoignable. Conclure à
              * l'échec annulerait la commande et remettrait le stock
              * alors que le client est peut-être en train de valider.
-             * On ne décide rien et on redemandera au prochain passage.
+             * On ne décide rien — sauf si le délai d'expiration est
+             * dépassé, plus bas.
              */
             if ($etat === null) {
                 $indetermines++;
+                $sansReponse[$tx->id] = true;
                 $this->line(sprintf('  <fg=yellow>?</> %-28s indéterminé', $tx->reference_externe));
                 continue;
             }
@@ -119,9 +130,62 @@ class VerifierPaiements extends Command
             }
         }
 
+        $expirees = $this->expirer($paiement, $sansReponse);
+
         $this->newLine();
-        $this->info("Encaissés : {$encaisses}   Échoués : {$echoues}   Encore indéterminés : {$indetermines}");
+        $this->info("Encaissés : {$encaisses}   Échoués : {$echoues}   Encore indéterminés : {$indetermines}   Expirés : {$expirees}");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Annule les commandes dont AUCUNE tentative de paiement n'a abouti
+     * dans le délai. Une commande n'est expirée que si toutes ses
+     * tentatives en cours sont anciennes (une relance récente la
+     * protège) et ont été redemandées au prestataire dans ce passage.
+     */
+    private function expirer(PaiementCommandeService $paiement, array $sansReponse): int
+    {
+        $delai = (int) parametre('paiement_delai_expiration_minutes', 30);
+
+        if ($delai <= 0) {
+            return 0;
+        }
+
+        $limite = now()->subMinutes($delai);
+        $motif = "Paiement non confirmé dans le délai de {$delai} minutes.";
+
+        $candidates = Commande::query()
+            ->where('statut_paiement', 'attente')
+            ->where('cree_le', '<=', $limite)
+            ->whereDoesntHave('transactions', fn ($q) => $q
+                ->where('sens', 'encaissement')
+                ->whereIn('statut', ['initiee', 'en_attente'])
+                ->where('initiee_le', '>', $limite))
+            ->when($this->option('reference'), fn ($q, $ref) => $q->where('reference', $ref))
+            ->with(['transactions' => fn ($q) => $q
+                ->where('sens', 'encaissement')
+                ->whereIn('statut', ['initiee', 'en_attente'])
+                ->whereNotNull('reference_externe')])
+            ->limit((int) $this->option('limite'))
+            ->get();
+
+        $n = 0;
+
+        foreach ($candidates as $commande) {
+            // Une tentative connue du prestataire mais pas redemandée dans
+            // ce passage (plafond --limite atteint) : on attend le suivant.
+            $nonVerifiee = $commande->transactions->contains(fn ($tx) => ! isset($sansReponse[$tx->id]));
+            if ($nonVerifiee) {
+                continue;
+            }
+
+            if ($paiement->expirer($commande, $motif)) {
+                $n++;
+                $this->line(sprintf('  <fg=red>⌛</> %-28s expirée, stock rendu', $commande->reference));
+            }
+        }
+
+        return $n;
     }
 }

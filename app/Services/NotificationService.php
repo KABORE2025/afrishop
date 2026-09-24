@@ -50,9 +50,10 @@ class NotificationService
                 'telephone' => $telephone ?? $destinataire?->telephone,
                 'email' => $destinataire?->email,
                 'canal' => 'sms',
-                'corps_envoye' => "Afrishop : votre code de livraison pour {$variables['reference']} est {$variables['code']}. Donnez-le au livreur après vérification du colis.",
+                'corps_envoye' => "Afrishop : votre code de livraison pour {$variables['reference']} est {$variables['code']}. Donnez-le au livreur après vérification du colis."
+                    .(isset($variables['lien']) ? " Suivi : {$variables['lien']}" : ''),
                 'statut' => 'en_file',
-                'nb_segments' => 1,
+                'nb_segments' => isset($variables['lien']) ? 2 : 1,
             ]);
         }
 
@@ -63,9 +64,10 @@ class NotificationService
                 'telephone' => $telephone ?? $destinataire?->telephone,
                 'email' => $destinataire?->email,
                 'canal' => 'sms',
-                'corps_envoye' => "Afrishop : votre commande {$variables['reference']} est prête. Donnez le code {$variables['code']} en boutique pour la récupérer.",
+                'corps_envoye' => "Afrishop : votre commande {$variables['reference']} est prête. Donnez le code {$variables['code']} en boutique pour la récupérer."
+                    .(isset($variables['lien']) ? " Suivi : {$variables['lien']}" : ''),
                 'statut' => 'en_file',
-                'nb_segments' => 1,
+                'nb_segments' => isset($variables['lien']) ? 2 : 1,
             ]);
         }
 
@@ -79,6 +81,36 @@ class NotificationService
                 'corps_envoye' => "Afrishop : nouvelle livraison {$variables['reference']} à {$variables['quartier']}. Consultez vos livraisons dans l'application.",
                 'statut' => 'en_file',
                 'nb_segments' => 1,
+            ]);
+        }
+
+        if (! $gabarit && $code === 'litige_ouvert' && $canal === 'sms') {
+            // La boutique a une version à donner avant l'arbitrage : si
+            // elle n'est pas prévenue, on tranche sans l'avoir entendue.
+            return Notification::create([
+                'destinataire_id' => $destinataire?->id,
+                'telephone' => $telephone ?? $destinataire?->telephone,
+                'email' => $destinataire?->email,
+                'canal' => 'sms',
+                'corps_envoye' => "Afrishop : le client de la commande {$variables['reference']} signale un problème ({$variables['litige']}). Donnez votre version dans votre espace vendeur. Les fonds sont gelés jusqu'à la décision.",
+                'statut' => 'en_file',
+                'nb_segments' => 2,
+            ]);
+        }
+
+        if (! $gabarit && $code === 'litige_tranche' && $canal === 'sms') {
+            // Le client doit apprendre la décision sans avoir à la chercher.
+            $corps = $variables['sens'] === 'client'
+                ? "Afrishop : votre signalement {$variables['litige']} est accepté. Vous êtes remboursé de {$variables['montant']} FCFA sur votre compte Mobile Money."
+                : "Afrishop : votre signalement {$variables['litige']} a été examiné et n'a pas été retenu. Motif sur la page de votre commande {$variables['reference']}.";
+
+            return Notification::create([
+                'telephone' => $telephone ?? $destinataire?->telephone,
+                'email' => $destinataire?->email,
+                'canal' => 'sms',
+                'corps_envoye' => $corps,
+                'statut' => 'en_file',
+                'nb_segments' => 2,
             ]);
         }
 

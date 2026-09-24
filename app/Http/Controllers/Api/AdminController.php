@@ -16,13 +16,15 @@ use App\Models\Produit;
 use App\Models\Reversement;
 use App\Models\SousCommande;
 use App\Models\Utilisateur;
-use App\Services\NotificationService;
+use App\Services\CodeRemiseService;
+use App\Services\LitigeService;
 use App\Services\SequestreService;
 use App\Services\TableauBordAdminService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 /**
  * =====================================================================
@@ -189,7 +191,7 @@ class AdminController extends Controller
 
     public function litiges(Request $r): JsonResponse
     {
-        $requete = Litige::query()->with('sousCommande');
+        $requete = Litige::query()->with(['sousCommande', 'photos']);
         $requete->whereIn('statut', (array) $r->input('statut', ['ouvert', 'en_examen']));
 
         return response()->json(
@@ -211,7 +213,7 @@ class AdminController extends Controller
      * chemins pour la même opération finiraient par diverger, et l'écart
      * ne se verrait qu'à l'arrêté de cantonnement.
      */
-    public function arbitrerLitige(Request $r, Litige $litige): JsonResponse
+    public function arbitrerLitige(Request $r, Litige $litige, LitigeService $litiges): JsonResponse
     {
         if (in_array($litige->statut, ['resolu_client', 'resolu_boutique', 'clos'], true)) {
             return response()->json([
@@ -226,31 +228,86 @@ class AdminController extends Controller
 
         $sc = $litige->sousCommande;
 
-        DB::transaction(function () use ($litige, $sc, $donnees, $r) {
-            if ($donnees['sens'] === 'client') {
-                $this->sequestre->rembourser($sc, $donnees['resolution'], $r->user()->id);
-            } else {
-                $this->sequestre->liberer($sc, 'arbitrage');
-            }
+        try {
+            DB::transaction(function () use ($litige, $sc, $donnees, $r) {
+                // Le litige est clos AVANT de toucher à l'argent : tant qu'il
+                // est « ouvert », SequestreService refuse — à juste titre — de
+                // libérer les fonds. Dans l'ordre inverse, un arbitrage en
+                // faveur de la boutique échouait systématiquement. Si l'argent
+                // ne peut pas bouger, la transaction annule aussi la clôture.
+                $litige->update([
+                    'statut'        => $donnees['sens'] === 'client' ? 'resolu_client' : 'resolu_boutique',
+                    'resolution'    => $donnees['resolution'],
+                    'traite_par_id' => $r->user()->id,
+                    'resolu_le'     => now(),
+                ]);
 
-            $litige->update([
-                'statut'        => $donnees['sens'] === 'client' ? 'resolu_client' : 'resolu_boutique',
-                'resolution'    => $donnees['resolution'],
-                'traite_par_id' => $r->user()->id,
-                'resolu_le'     => now(),
-            ]);
+                if ($donnees['sens'] === 'client') {
+                    $this->sequestre->rembourser($sc, $donnees['resolution'], $r->user()->id);
+                } else {
+                    $this->sequestre->liberer($sc, 'arbitrage');
+                }
 
-            // Le journal de la sous-commande doit porter la trace de
-            // l'arbitrage : c'est la pièce à produire si l'une des deux
-            // parties revient dessus.
-            $sc->journaliser('litige_arbitre', [
-                'litige'     => $litige->reference,
-                'sens'       => $donnees['sens'],
-                'resolution' => $donnees['resolution'],
-            ], $r->user()->id, 'admin');
-        });
+                // Le journal de la sous-commande doit porter la trace de
+                // l'arbitrage : c'est la pièce à produire si l'une des deux
+                // parties revient dessus.
+                $sc->journaliser('litige_arbitre', [
+                    'litige'     => $litige->reference,
+                    'sens'       => $donnees['sens'],
+                    'resolution' => $donnees['resolution'],
+                ], $r->user()->id, 'admin');
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
-        return response()->json(new LitigeResource($litige->fresh(['sousCommande'])));
+        // Après la transaction, jamais dedans : un SMS ne se rattrape pas
+        // si l'arbitrage est finalement annulé.
+        $litiges->prevenirClientDeLaDecision($litige->fresh());
+
+        return response()->json(new LitigeResource($litige->fresh(['sousCommande', 'photos'])));
+    }
+
+    /**
+     * Clôture d'un retour à la place de la boutique — quand elle ne le
+     * fait pas alors que le colis est revenu (constat du support, photo,
+     * appel). Motif obligatoire : c'est un remboursement.
+     */
+    public function cloturerRetour(Request $r, SousCommande $sousCommande): JsonResponse
+    {
+        $donnees = $r->validate([
+            'motif' => ['required', 'string', 'min:10', 'max:255'],
+        ]);
+
+        try {
+            $this->sequestre->cloturerRetourColis($sousCommande, $donnees['motif'], $r->user()->id, 'admin');
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['message' => 'Retour clôturé : client remboursé, stock rendu.']);
+    }
+
+    /**
+     * Ouverture d'un litige POUR LE COMPTE du client, quand il a appelé
+     * le support plutôt que d'utiliser sa page de commande. Possible
+     * même après sa confirmation ou la fin du délai, tant que l'argent
+     * est encore en séquestre (voir LitigeService::ouvrir()).
+     */
+    public function ouvrirLitige(Request $r, SousCommande $sousCommande, LitigeService $litiges): JsonResponse
+    {
+        $donnees = $r->validate([
+            'motif'       => ['required', Rule::in(Litige::MOTIFS)],
+            'description' => ['required', 'string', 'min:20', 'max:2000'],
+        ]);
+
+        try {
+            $litige = $litiges->ouvrir($sousCommande, $donnees['motif'], $donnees['description'], 'admin', $r->user()->id);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(new LitigeResource($litige->load('sousCommande')), 201);
     }
 
     // -----------------------------------------------------------------
@@ -305,49 +362,20 @@ class AdminController extends Controller
     }
 
     /**
-     * Renvoi du SMS — TOUJOURS le code déjà généré, jamais un nouveau.
-     * En émettre un second invaliderait celui que le client a peut-être
-     * déjà noté ailleurs ou confié à un proche venu récupérer le colis
-     * à sa place.
+     * Renvoi du SMS — TOUJOURS le code déjà généré, jamais un nouveau,
+     * et toujours vers le téléphone de la commande (CodeRemiseService,
+     * le même chemin que le bouton du client).
      */
-    public function renvoyerCodeRemise(Request $r, SousCommande $sousCommande, NotificationService $notifications): JsonResponse
+    public function renvoyerCodeRemise(Request $r, SousCommande $sousCommande, CodeRemiseService $codes): JsonResponse
     {
         $donnees = $r->validate([
             'motif' => ['required', 'string', 'min:10', 'max:255'],
         ]);
 
-        $sousCommande->load(['expedition', 'commande']);
-        $modeLivraison = $sousCommande->commande->mode_livraison;
-
-        if ($modeLivraison === 'retrait_boutique') {
-            if ($sousCommande->code_retrait === null) {
-                return response()->json(['message' => 'Aucun code de retrait à renvoyer.'], 422);
-            }
-            if ($sousCommande->statut === 'livree') {
-                return response()->json(['message' => 'Cette commande a déjà été retirée.'], 422);
-            }
-
-            $notifications->envoyer('code_retrait', 'sms', [
-                'reference' => $sousCommande->reference,
-                'code'      => $sousCommande->code_retrait,
-            ], telephone: $sousCommande->commande->client_telephone);
-
-            $sousCommande->update(['code_retrait_envoye_le' => now()]);
-        } else {
-            $expedition = $sousCommande->expedition;
-
-            if (! $expedition || $expedition->code_livraison === null) {
-                return response()->json(['message' => 'Aucun code de livraison à renvoyer.'], 422);
-            }
-            if ($expedition->statut === 'livree') {
-                return response()->json(['message' => 'Cette commande a déjà été livrée.'], 422);
-            }
-
-            $notifications->envoyer('code_livraison', 'sms', [
-                'client_nom' => $sousCommande->commande->client_nom,
-                'reference'  => $sousCommande->reference,
-                'code'       => $expedition->code_livraison,
-            ], telephone: $sousCommande->commande->client_telephone);
+        try {
+            $codes->renvoyer($sousCommande);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         }
 
         $this->journaliserAccesCode($r, $sousCommande, 'code_renvoye', $donnees['motif']);

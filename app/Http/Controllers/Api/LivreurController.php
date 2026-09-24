@@ -45,13 +45,13 @@ class LivreurController extends Controller
      * Preuve de remise : le code reste exclusivement chez le client et
      * n'est accepté que du livreur auquel l'expédition a été affectée.
      */
-    public function livrer(Request $r, SousCommande $sousCommande, SequestreService $sequestre): JsonResponse
+    public function livrer(Request $r, SousCommande $sousCommande): JsonResponse
     {
         $data = $r->validate([
             'code_livraison' => ['required', 'digits:6'],
         ]);
 
-        return DB::transaction(function () use ($r, $sousCommande, $data, $sequestre) {
+        return DB::transaction(function () use ($r, $sousCommande, $data) {
             $sousCommande->load(['expedition', 'commande']);
             $expedition = $sousCommande->expedition;
 
@@ -73,20 +73,15 @@ class LivreurController extends Controller
             }
 
             $expedition->update(['statut' => 'livree', 'livre_le' => now(), 'code_valide_le' => now()]);
-            // Saisir CE code prouve que c'est bien le client qui l'a
-            // communiqué : c'est une confirmation de réception aussi
-            // solide qu'un client qui cliquerait « j'ai bien reçu ». La
-            // marquer ainsi évite d'attendre le délai de 3 jours pour
-            // rien — voir la même remarque dans VendeurController::confirmerRetrait().
-            $sousCommande->update(['statut' => 'livree', 'livre_le' => now(), 'confirme_par_client_le' => now()]);
+            // Le code prouve la REMISE, pas la conformité du contenu : le
+            // client découvre un produit cassé en ouvrant le paquet, une
+            // fois le livreur reparti. Les fonds restent donc en séquestre
+            // pendant la fenêtre de protection (LitigeService), et
+            // `confirme_par_client_le` n'est posé que par le client lui-même.
+            $sousCommande->update(['statut' => 'livree', 'livre_le' => now()]);
 
             $sousCommande->journaliser('livree', [], $r->user()->id, 'livreur');
             $sousCommande->commande->rafraichirStatut();
-
-            $sousCommande->refresh();
-            if ($sequestre->liberables($sousCommande)) {
-                $sequestre->liberer($sousCommande, 'client');
-            }
 
             return response()->json(new LivreurSousCommandeResource($sousCommande->fresh(['expedition', 'commande'])));
         });
@@ -99,27 +94,34 @@ class LivreurController extends Controller
      * faire remonter, et la sous-commande restait « expediee » pour
      * toujours.
      *
-     * En dessous du plafond de tentatives, la livraison reste affectée
-     * au même livreur : il peut simplement retenter, avec le même code.
-     * Au plafond, le colis est déclaré retourné et le client remboursé
-     * — via SequestreService, jamais une écriture composée ici — et le
-     * stock est rendu, exactement comme un paiement qui échoue.
+     * En dessous du plafond, la livraison reste affectée au même
+     * livreur : il retente, avec le même code. Deux déclarations doivent
+     * être espacées (paramètre `livraison_intervalle_tentatives_minutes`,
+     * 120 par défaut) : trois « absent » saisis à la suite depuis le
+     * même trottoir ne sont pas trois tentatives.
+     *
+     * Au plafond, le colis est déclaré EN RETOUR vers la boutique — et
+     * c'est tout. Le livreur ne rembourse plus rien et ne remet rien en
+     * stock : c'est la boutique qui, en recevant le colis, clôt le retour
+     * (VendeurController::confirmerRetour(), ou l'admin à sa place). Un
+     * acteur seul ne peut plus déclencher un remboursement par
+     * déclaration.
      *
      * Compte les tentatives depuis le journal (`evenements_commande`)
      * plutôt que d'ajouter une colonne : `Expedition.tentatives` compte
      * déjà autre chose (les essais de CODE, dans `livrer()`) et les
      * mélanger casserait le blocage anti-bruteforce.
      */
-    public function signalerEchec(Request $r, SousCommande $sousCommande, SequestreService $sequestre): JsonResponse
+    public function signalerEchec(Request $r, SousCommande $sousCommande): JsonResponse
     {
         $donnees = $r->validate([
             'motif'       => ['required', 'in:absent,adresse_introuvable,colis_refuse,autre'],
             'commentaire' => ['nullable', 'string', 'max:500'],
         ]);
 
-        return DB::transaction(function () use ($r, $sousCommande, $donnees, $sequestre) {
+        return DB::transaction(function () use ($r, $sousCommande, $donnees) {
             $sousCommande = SousCommande::whereKey($sousCommande->id)->lockForUpdate()->firstOrFail();
-            $sousCommande->load(['expedition', 'commande', 'lignes.variante']);
+            $sousCommande->load(['expedition', 'commande']);
             $expedition = $sousCommande->expedition;
 
             if (! $expedition || $expedition->livreur_id !== $r->user()->id) {
@@ -129,8 +131,21 @@ class LivreurController extends Controller
                 return response()->json(['message' => "Cette livraison n'est plus à traiter."], 422);
             }
 
-            $tentative = $sousCommande->evenements()->where('type', 'livraison_echouee')->count() + 1;
+            $echecs = $sousCommande->evenements()->where('type', 'livraison_echouee');
+            $tentative = (clone $echecs)->count() + 1;
             $max = (int) parametre('livraison_tentatives_max', 3);
+
+            $intervalle = (int) parametre('livraison_intervalle_tentatives_minutes', 120);
+            // Comparé à l'horloge de la base, qui a écrit `cree_le` :
+            // mélanger l'heure PHP et l'heure SQL décale d'un fuseau.
+            $tropRecent = $intervalle > 0 && (clone $echecs)
+                ->whereRaw('cree_le > NOW() - INTERVAL ? MINUTE', [$intervalle])->exists();
+            if ($tropRecent) {
+                return response()->json([
+                    'message' => "Échec déjà signalé il y a moins de {$intervalle} minutes. "
+                        .'Retentez la livraison plus tard avant d’en déclarer un nouveau.',
+                ], 422);
+            }
 
             $sousCommande->journaliser('livraison_echouee', [
                 'motif'       => $donnees['motif'],
@@ -146,18 +161,13 @@ class LivreurController extends Controller
             }
 
             $expedition->update(['statut' => 'retour_expediteur']);
-
-            $sequestre->rembourser(
-                $sousCommande,
-                "Colis retourné après {$tentative} échecs de livraison (dernier motif : {$donnees['motif']})."
-            );
-
-            foreach ($sousCommande->lignes as $ligne) {
-                $ligne->variante?->increment('stock', $ligne->quantite);
-            }
+            $sousCommande->journaliser('retour_expediteur_declare', [
+                'tentatives' => $tentative, 'dernier_motif' => $donnees['motif'],
+            ], $r->user()->id, 'livreur');
 
             return response()->json([
-                'message' => 'Échec définitif : le colis est marqué retourné et le client sera remboursé.',
+                'message' => 'Échec définitif : rapportez le colis à la boutique. Le client sera '
+                    .'remboursé quand la boutique aura confirmé son retour.',
                 'statut'  => 'retour_expediteur',
             ]);
         });

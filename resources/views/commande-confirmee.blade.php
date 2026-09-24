@@ -19,44 +19,82 @@
     repartait donc convaincu que son colis arrivait.
   */
   $paye     = $commande->statut_paiement === 'encaisse';
-  $echoue   = in_array($commande->statut_paiement, ['echoue', 'rembourse'], true);
-  $enCours  = ! $paye && ! $echoue;
+  $rembourse = $commande->statut_paiement === 'rembourse';
+  $echoue   = $commande->statut_paiement === 'echoue';
+  $enCours  = ! $paye && ! $echoue && ! $rembourse;
 @endphp
 
 <div class="carte" style="padding:22px;margin:22px 0;border-left:4px solid
      {{ $paye ? 'var(--vert)' : ($echoue ? 'var(--rouge)' : '#a1690f') }}">
   <h1 style="font-size:22px;margin:0 0 6px">
     @if ($paye)      Commande confirmée
+    @elseif ($rembourse) Commande remboursée
     @elseif ($echoue) Paiement non abouti
     @else            Paiement en attente
     @endif
   </h1>
   <p style="margin:0;color:var(--gris)">
     Référence <b style="color:var(--texte);font-size:16px">{{ $commande->reference }}</b> —
-    notez-la pour suivre votre colis.
+    notez-la : avec votre téléphone, elle permet de revenir ici depuis
+    <a href="{{ route('suivi') }}">« Suivre ma commande »</a>.
   </p>
 </div>
 
-{{-- Relance. Un paiement peut échouer pour mille raisons passagères :
-     réseau coupé pendant la validation, solde reconstitué depuis. Sans
-     ce bouton, il fallait refaire tout le panier — et la commande
-     restait en base à immobiliser du stock. --}}
-@if (! $paye)
+@php
+  $champ = 'width:100%;padding:9px;border:1px solid var(--bord);border-radius:8px;font:inherit';
+  $etiquetteTel = 'display:block;font-size:13px;color:var(--gris)';
+@endphp
+
+{{-- REÇU PDF — seulement une fois le paiement encaissé : un reçu pour un
+     paiement non abouti attesterait d'un paiement qui n'a pas eu lieu. --}}
+@if ($paye)
+  <div class="carte" style="padding:14px 16px;margin-bottom:16px">
+    @if ($verifiee)
+      <a href="{{ route('commande.recu', $commande->reference) }}" class="chip"
+         style="display:inline-block;padding:10px 18px">Télécharger le reçu (PDF)</a>
+    @else
+      <form method="post" action="{{ route('commande.recu', $commande->reference) }}"
+            style="display:flex;flex-wrap:wrap;gap:8px;align-items:end">
+        @csrf
+        <label style="flex:1;min-width:200px">
+          <span style="{{ $etiquetteTel }}">Téléphone utilisé pour la commande</span>
+          <input name="telephone" inputmode="tel" required value="{{ old('telephone') }}" style="{{ $champ }}">
+        </label>
+        <button type="submit" class="chip" style="padding:10px 18px">Télécharger le reçu (PDF)</button>
+      </form>
+    @endif
+    <p style="margin:6px 0 0;font-size:12px;color:var(--gris)">Reçu de paiement — il ne vaut pas facture.</p>
+  </div>
+@endif
+
+{{-- Relance d'un paiement EN ATTENTE uniquement. Une commande dont
+     le paiement a échoué ou expiré est annulée et son stock rendu :
+     la faire payer encaisserait des articles peut-être déjà revendus
+     (CommandeWebController::payer() le refuse aussi). --}}
+@if ($echoue)
   <div class="carte" style="padding:16px;margin-bottom:16px;border-left:4px solid var(--brun)">
     <p style="margin:0 0 10px">
-      @if ($echoue)
-        Le paiement n'a pas abouti et les articles ont été remis en stock.
-        Vous pouvez relancer la demande.
-      @else
-        Validez la demande de paiement sur votre téléphone. Si vous n'avez rien reçu,
-        relancez-la ci-dessous.
-      @endif
+      Le paiement n'a pas abouti dans le délai : la commande est annulée et les
+      articles ont été remis en vente. Pour les obtenir, ajoutez-les de nouveau au panier.
+    </p>
+    <a href="{{ route('vitrine') }}" class="chip"
+       style="background:var(--brun);color:#fff;border-color:var(--brun);padding:10px 18px;display:inline-block">
+      Retour à la boutique
+    </a>
+  </div>
+@elseif ($enCours)
+  <div class="carte" style="padding:16px;margin-bottom:16px;border-left:4px solid var(--brun)">
+    <p style="margin:0 0 10px">
+      Validez la demande de paiement sur votre téléphone. Si vous n'avez rien reçu,
+      relancez-la ci-dessous. Sans paiement confirmé sous
+      {{ (int) parametre('paiement_delai_expiration_minutes', 30) }} minutes,
+      la commande est annulée.
     </p>
     <form method="post" action="{{ route('commande.payer', $commande->reference) }}">
       @csrf
       <button type="submit" class="chip"
               style="background:var(--brun);color:#fff;border-color:var(--brun);padding:10px 18px">
-        {{ $echoue ? 'Réessayer le paiement' : 'Relancer la demande de paiement' }}
+        Relancer la demande de paiement
       </button>
     </form>
   </div>
@@ -73,8 +111,13 @@
   @if ($paye)
     Votre paiement est encaissé. La somme est <b>retenue par Afrishop</b> et ne sera
     versée à la boutique qu'après votre livraison. Un <b>code à 6 chiffres</b> vous
-    sera envoyé par SMS à l'expédition : donnez-le au livreur à la remise du colis,
-    c'est lui qui atteste que vous avez bien reçu la commande.
+    sera envoyé par SMS à l'expédition : donnez-le au livreur à la remise du colis.
+    Vous aurez ensuite <b>{{ (int) parametre('delai_confirmation_auto_jours', 3) * 24 }} heures</b>
+    pour vérifier le contenu et, si besoin, signaler un problème sur cette page :
+    la boutique n'est payée qu'après ce délai.
+  @elseif ($rembourse)
+    Cette commande a été annulée après paiement : le montant vous est remboursé
+    sur le compte Mobile Money qui a servi à payer.
   @elseif ($echoue)
     Rien ne vous a été prélevé. Tant que le paiement n'aboutit pas, la boutique
     ne prépare pas le colis.
@@ -123,6 +166,157 @@
         </tr>
       @endforeach
     </table>
+
+    {{-- RENVOI DU CODE : le même code, vers le téléphone de la commande —
+         jamais vers un numéro saisi ici (CodeRemiseService). --}}
+    @if ($paye && $codes->codeEnAttente($sc))
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bord);font-size:14px">
+        <p style="margin:0 0 8px">
+          @if ($commande->mode_livraison === 'retrait_boutique')
+            Votre colis est prêt : présentez en boutique le <b>code reçu par SMS</b>.
+          @else
+            Votre colis est en route : donnez au livreur le <b>code reçu par SMS</b>, après avoir vérifié le colis.
+          @endif
+        </p>
+        <form method="post" action="{{ route('commande.renvoyer-code', [$commande->reference, $sc->reference]) }}"
+              style="display:flex;flex-wrap:wrap;gap:8px;align-items:end">
+          @csrf
+          @unless ($verifiee)
+            <label style="flex:1;min-width:200px">
+              <span style="{{ $etiquetteTel }}">Téléphone utilisé pour la commande</span>
+              <input name="telephone" inputmode="tel" required value="{{ old('telephone') }}" style="{{ $champ }}">
+            </label>
+          @endunless
+          <button type="submit" class="chip" style="padding:10px 18px">Je n'ai pas reçu mon code — le renvoyer</button>
+        </form>
+        <p style="margin:6px 0 0;font-size:12px;color:var(--gris)">
+          Le code est renvoyé au numéro de la commande, 3 fois par jour au plus.
+        </p>
+      </div>
+    @endif
+
+    {{--
+      FENÊTRE DE PROTECTION. Le code prouve que le colis a été remis,
+      pas que son contenu est conforme : c'est ici, après ouverture du
+      paquet, que le client confirme ou signale. Les deux formulaires
+      demandent le téléphone de la commande — la page, elle, s'ouvre
+      avec la seule référence.
+    --}}
+    @php
+      $litigeOuvert  = $sc->litiges->first(fn ($l) => $l->estOuvert());
+      $litigeTranche = $sc->litiges->sortByDesc('id')->first(fn ($l) => ! $l->estOuvert());
+      $fin = $protection->finProtection($sc);
+    @endphp
+
+    @if ($sc->statut === 'livree')
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bord);font-size:14px">
+        @if ($litigeOuvert)
+          <p style="margin:0;color:#a1690f">
+            <b>Signalement {{ $litigeOuvert->reference }} en cours d'examen.</b>
+            Le paiement de la boutique est bloqué jusqu'à la décision d'Afrishop.
+          </p>
+        @elseif ($litigeTranche)
+          <p style="margin:0">
+            <b>Signalement {{ $litigeTranche->reference }} traité</b>
+            — {{ $litigeTranche->statut === 'resolu_client' ? 'en votre faveur : vous êtes remboursé.' : 'en faveur de la boutique.' }}
+            @if ($litigeTranche->resolution)
+              <span style="display:block;color:var(--gris)">{{ $litigeTranche->resolution }}</span>
+            @endif
+          </p>
+        @elseif ($sc->confirme_par_client_le)
+          <p style="margin:0;color:var(--vert)">
+            Vous avez confirmé la bonne réception le {{ $sc->confirme_par_client_le->format('d/m/Y') }}. Merci !
+          </p>
+        @elseif ($protection->peutAgir($sc))
+          <p style="margin:0 0 10px">
+            Colis remis le {{ $sc->livre_le->format('d/m/Y à H:i') }}.
+            Vérifiez le contenu : vous avez jusqu'au <b>{{ $fin->format('d/m/Y à H:i') }}</b>
+            pour signaler un problème. Passé ce délai, la boutique est payée.
+          </p>
+
+          <details style="margin-bottom:8px">
+            <summary class="chip" style="cursor:pointer;display:inline-block;background:var(--vert);color:#fff;border-color:var(--vert)">
+              Tout est conforme
+            </summary>
+            <form method="post" action="{{ route('commande.confirmer', [$commande->reference, $sc->reference]) }}"
+                  style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:end">
+              @csrf
+              @unless ($verifiee)
+              <label style="flex:1;min-width:200px">
+                <span style="display:block;font-size:13px;color:var(--gris)">Téléphone utilisé pour la commande</span>
+                <input name="telephone" inputmode="tel" required value="{{ old('telephone') }}" style="{{ $champ }}">
+              </label>
+              @endunless
+              <button type="submit" class="chip" style="background:var(--vert);color:#fff;border-color:var(--vert);padding:10px 18px">
+                Confirmer la bonne réception
+              </button>
+            </form>
+            <p style="margin:6px 0 0;font-size:12px;color:var(--gris)">
+              La boutique est alors payée tout de suite : vous ne pourrez plus signaler de problème sur ce colis.
+            </p>
+          </details>
+
+          <details @if (old('motif')) open @endif>
+            <summary class="chip" style="cursor:pointer;display:inline-block;border-color:var(--rouge);color:var(--rouge)">
+              Signaler un problème
+            </summary>
+            <form method="post" action="{{ route('commande.signaler', [$commande->reference, $sc->reference]) }}"
+                  enctype="multipart/form-data" style="margin-top:10px;display:grid;gap:8px">
+              @csrf
+              @unless ($verifiee)
+              <label>
+                <span style="display:block;font-size:13px;color:var(--gris)">Téléphone utilisé pour la commande</span>
+                <input name="telephone" inputmode="tel" required value="{{ old('telephone') }}" style="{{ $champ }}">
+              </label>
+              @endunless
+              <label>
+                <span style="display:block;font-size:13px;color:var(--gris)">Le problème</span>
+                <select name="motif" required style="{{ $champ }}">
+                  @foreach ([
+                    'non_recu'     => "Je n'ai pas reçu le colis",
+                    'endommage'    => 'Le produit est endommagé',
+                    'non_conforme' => "Ce n'est pas le produit commandé",
+                    'incomplet'    => 'Il manque des articles',
+                    'contrefacon'  => 'Je soupçonne une contrefaçon',
+                    'autre'        => 'Autre problème',
+                  ] as $valeur => $libelle)
+                    <option value="{{ $valeur }}" @selected(old('motif') === $valeur)>{{ $libelle }}</option>
+                  @endforeach
+                </select>
+              </label>
+              <label>
+                <span style="display:block;font-size:13px;color:var(--gris)">Ce que vous avez constaté</span>
+                <textarea name="description" rows="4" required minlength="20" maxlength="2000" style="{{ $champ }}"
+                          placeholder="Ex. : l'écran est fissuré à l'ouverture du carton, la boîte était intacte.">{{ old('description') }}</textarea>
+              </label>
+              {{-- Facultatif. La photo qui compte dépend du problème :
+                   le produit abîmé et son carton, l'étiquette du produit
+                   reçu, tout le contenu étalé, le logo ou le numéro de série. --}}
+              <label>
+                <span style="display:block;font-size:13px;color:var(--gris)">
+                  Photos (facultatif, 2 au plus) — le produit et son étiquette ou le carton
+                </span>
+                <input type="file" name="photos[]" accept="image/*" multiple style="{{ $champ }}"
+                       data-photos-litige data-max="{{ \App\Models\Litige::PHOTOS_MAX }}">
+                <span data-photos-etat style="display:block;font-size:12px;color:var(--gris);margin-top:4px"></span>
+              </label>
+              <p style="margin:0;font-size:12px;color:var(--gris)">
+                Le paiement de la boutique sera bloqué. Elle donnera sa version, puis Afrishop tranchera.
+              </p>
+              <div>
+                <button type="submit" class="chip" style="background:var(--rouge);color:#fff;border-color:var(--rouge);padding:10px 18px">
+                  Envoyer le signalement
+                </button>
+              </div>
+            </form>
+          </details>
+        @elseif ($fin && $fin->isPast())
+          <p style="margin:0;color:var(--gris)">
+            Délai de vérification écoulé : pour un problème, contactez le support Afrishop.
+          </p>
+        @endif
+      </div>
+    @endif
   </div>
 @endforeach
 
@@ -142,5 +336,104 @@
 <p style="margin:22px 0">
   <a href="{{ route('vitrine') }}" class="chip">← Continuer mes achats</a>
 </p>
+
+{{--
+  RÉDUCTION DES PHOTOS AVANT L'ENVOI.
+  Un téléphone produit des photos de 3 à 5 Mo ; les réduire sur le
+  serveur ne sert à rien pour le client, qui a déjà payé l'envoi en
+  data. On les ramène ici à 1600 px en JPEG (≈ 150 à 300 Ko), assez
+  pour lire une étiquette ou voir une fissure.
+
+  Bonus de confidentialité : le JPEG recréé ne contient plus les
+  métadonnées EXIF, dont la position GPS du domicile.
+
+  Si le navigateur ne sait pas faire (très vieux Android), la photo
+  part telle quelle : le serveur la réduira comme avant. Rien n'est
+  bloqué, c'est seulement plus lourd.
+--}}
+@if ($commande->sousCommandes->contains(fn ($sc) => $protection->peutAgir($sc)))
+<script>
+(function () {
+  var COTE_MAX = 1600, QUALITE = 0.75;
+
+  var ko = function (octets) { return Math.round(octets / 1024) + ' Ko'; };
+
+  function reduire(fichier) {
+    return new Promise(function (resolve) {
+      if (!/^image\//.test(fichier.type) || !window.HTMLCanvasElement) return resolve(fichier);
+
+      var url = URL.createObjectURL(fichier);
+      var img = new Image();
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(fichier); };
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var ratio = Math.min(1, COTE_MAX / Math.max(img.naturalWidth, img.naturalHeight));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.naturalWidth * ratio);
+        canvas.height = Math.round(img.naturalHeight * ratio);
+        var ctx = canvas.getContext('2d');
+        // Fond blanc : un PNG transparent deviendrait noir en JPEG.
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        if (!canvas.toBlob) return resolve(fichier);
+        canvas.toBlob(function (blob) {
+          // On ne garde la version réduite que si elle est plus légère.
+          if (!blob || blob.size >= fichier.size) return resolve(fichier);
+          var nom = fichier.name.replace(/\.[^.]+$/, '') + '.jpg';
+          resolve(new File([blob], nom, { type: 'image/jpeg' }));
+        }, 'image/jpeg', QUALITE);
+      };
+      img.src = url;
+    });
+  }
+
+  document.querySelectorAll('[data-photos-litige]').forEach(function (champ) {
+    var etat = champ.parentNode.querySelector('[data-photos-etat]');
+    var bouton = champ.form.querySelector('[type=submit]');
+    var max = parseInt(champ.dataset.max, 10) || 2;
+    // Sans DataTransfer, impossible de remplacer les fichiers du champ.
+    var possible = typeof DataTransfer === 'function';
+
+    champ.addEventListener('change', function () {
+      var fichiers = Array.prototype.slice.call(champ.files || []);
+      var avertissement = '';
+
+      if (fichiers.length > max) {
+        avertissement = 'Seules les ' + max + ' premières photos sont gardées. ';
+        fichiers = fichiers.slice(0, max);
+      }
+      if (!fichiers.length) { etat.textContent = ''; return; }
+
+      if (!possible) {
+        var total0 = fichiers.reduce(function (s, f) { return s + f.size; }, 0);
+        etat.textContent = avertissement + fichiers.length + ' photo(s) — ' + ko(total0) + ' à envoyer.';
+        return;
+      }
+
+      // Pendant la réduction, on empêche d'envoyer les originaux.
+      bouton.disabled = true;
+      etat.textContent = 'Préparation des photos…';
+
+      Promise.all(fichiers.map(reduire)).then(function (reduits) {
+        var dt = new DataTransfer();
+        reduits.forEach(function (f) { dt.items.add(f); });
+        champ.files = dt.files;
+
+        var avant = fichiers.reduce(function (s, f) { return s + f.size; }, 0);
+        var apres = reduits.reduce(function (s, f) { return s + f.size; }, 0);
+        etat.textContent = avertissement + reduits.length + ' photo(s) prête(s) — ' + ko(apres)
+          + (apres < avant ? ' à envoyer au lieu de ' + ko(avant) + '.' : ' à envoyer.');
+      }).catch(function () {
+        etat.textContent = avertissement;
+      }).then(function () {
+        bouton.disabled = false;
+      });
+    });
+  });
+})();
+</script>
+@endif
 
 @endsection

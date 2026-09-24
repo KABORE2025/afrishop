@@ -45,7 +45,31 @@ class SousCommandeResource extends JsonResource
             'argent' => [
                 'etat'    => $this->etat_fonds?->value,
                 'libelle' => $this->etat_fonds?->libelle(),
+                /* Colis remis, argent retenu : jusqu'à quand le client
+                 * peut-il encore signaler un problème ? */
+                'fin_protection_le' => $this->statut === 'livree' && $this->etat_fonds?->value === 'sequestre'
+                    ? $this->livre_le?->copy()->addDays((int) parametre('delai_confirmation_auto_jours', 3))->toIso8601String()
+                    : null,
             ],
+
+            /* Le litige le plus récent. La version du client est montrée
+             * à la boutique : elle ne peut pas répondre à ce qu'elle ne lit pas. */
+            'litige' => $this->whenLoaded('litiges', function () {
+                $l = $this->litiges->sortByDesc('id')->first();
+
+                return $l ? [
+                    'id'          => $l->id,
+                    'reference'   => $l->reference,
+                    'motif'       => $l->motif,
+                    'statut'      => $l->statut,
+                    'ouvert'      => $l->estOuvert(),
+                    'description' => $l->description,
+                    'photos'      => app(\App\Services\LitigeService::class)->urlsPhotos($l),
+                    'a_repondu'   => $l->argument_boutique !== null,
+                    'argument'    => $l->argument_boutique,
+                    'resolution'  => $l->resolution,
+                ] : null;
+            }),
 
             /*
              * Montants tous en francs CFA entiers. Aucun flottant nulle

@@ -34,6 +34,10 @@ class LitigeResource extends JsonResource
 
             'client' => [
                 'description' => $this->description,
+                /* Liens signés, 30 min. Une liste vide est une information :
+                 * l'écran dit « aucune photo fournie ». */
+                'photos'      => $this->whenLoaded('photos',
+                    fn () => app(\App\Services\LitigeService::class)->urlsPhotos($this->resource), []),
                 'ouvert_le'   => $this->ouvert_le
                     ? \Illuminate\Support\Carbon::parse($this->ouvert_le)->toIso8601String()
                     : null,

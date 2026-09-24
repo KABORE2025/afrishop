@@ -70,7 +70,9 @@ class PanierServiceCommandeTest extends TestCase
         $this->assertSame(6_000, $scA->retenue_source_cfa);   // 24 000 × 25 %
         $this->assertSame(15_120, $scA->montant_net_cfa);     // 24 000 − 2 880 − 6 000
         $this->assertSame(1_200, $scA->frais_livraison_cfa);
-        $this->assertSame('sequestre', $scA->etat_fonds->value);
+        // Rien n'est encaissé à la création : l'argent n'entre en
+        // séquestre qu'à la confirmation du prestataire.
+        $this->assertSame('attente_encaissement', $scA->etat_fonds->value);
 
         $scB = $sousCommandes->firstWhere('boutique_id', $boutiqueB->id);
         $this->assertSame(2_400, $scB->commission_cfa);       // 24 000 × 10 %

@@ -1,11 +1,15 @@
 <?php
 
 use App\Http\Controllers\Api\VerificationQrController;
+use App\Http\Controllers\BoiteSmsTestController;
 use App\Http\Controllers\CommandeWebController;
+use App\Http\Controllers\ProtectionClientController;
+use App\Http\Controllers\SuiviCommandeController;
 use App\Http\Controllers\ConsoleController;
 use App\Http\Controllers\EspaceLivreurController;
 use App\Http\Controllers\EspaceVendeurController;
 use App\Http\Controllers\PanierController;
+use App\Http\Controllers\PhotoLitigeController;
 use App\Http\Controllers\VitrineController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,7 +63,8 @@ Route::post('/panier/modifier', [PanierController::class, 'modifier'])->name('pa
 Route::post('/panier/vider', [PanierController::class, 'vider'])->name('panier.vider');
 
 Route::get('/commander', [CommandeWebController::class, 'formulaire'])->name('commander');
-Route::post('/commander', [CommandeWebController::class, 'enregistrer'])->name('commander.enregistrer');
+Route::post('/commander', [CommandeWebController::class, 'enregistrer'])
+    ->middleware('throttle:commande')->name('commander.enregistrer');
 
 // Accessible par la seule référence : un client sans compte doit pouvoir
 // y revenir depuis son SMS. En contrepartie, cette page ne montre rien
@@ -73,7 +78,35 @@ Route::get('/commande/{reference}', [CommandeWebController::class, 'confirmee'])
  * aspirateur de pages, et un rafraîchissement le rejouerait.
  */
 Route::post('/commande/{reference}/payer', [CommandeWebController::class, 'payer'])
-    ->name('commande.payer');
+    ->middleware('throttle:commande')->name('commande.payer');
+
+/*
+ * Fenêtre de protection (72 h après la remise) : confirmer la bonne
+ * réception ou signaler un problème. Le téléphone de la commande est
+ * exigé en plus de la référence — voir ProtectionClientController.
+ */
+Route::post('/commande/{reference}/colis/{colis}/signaler', [ProtectionClientController::class, 'signaler'])
+    ->middleware('throttle:protection')->name('commande.signaler');
+Route::post('/commande/{reference}/colis/{colis}/confirmer', [ProtectionClientController::class, 'confirmer'])
+    ->middleware('throttle:protection')->name('commande.confirmer');
+
+/*
+ * Suivi sans compte : numéro de commande + téléphone. Le téléphone
+ * prouvé est retenu en session pour cette commande (VerifieTelephoneCommande).
+ */
+Route::get('/suivi', [SuiviCommandeController::class, 'formulaire'])->name('suivi');
+Route::post('/suivi', [SuiviCommandeController::class, 'rechercher'])
+    ->middleware('throttle:suivi')->name('suivi.rechercher');
+Route::post('/commande/{reference}/colis/{colis}/renvoyer-code', [SuiviCommandeController::class, 'renvoyerCode'])
+    ->middleware('throttle:protection')->name('commande.renvoyer-code');
+// En POST : le formulaire porte le téléphone quand la session ne l'a pas encore.
+Route::match(['get', 'post'], '/commande/{reference}/recu', [SuiviCommandeController::class, 'recu'])
+    ->middleware('throttle:protection')->name('commande.recu');
+
+// Photos d'un litige : disque privé, lien signé et temporaire (30 min)
+// émis par l'API admin ou vendeur. Voir PhotoLitigeController.
+Route::get('/litiges/photos/{media}/{taille}', PhotoLitigeController::class)
+    ->middleware('signed')->name('litige.photo');
 
 /*
 |--------------------------------------------------------------------------
@@ -124,5 +157,21 @@ Route::prefix('console')->name('console.')->group(function () {
     Route::get('/candidatures', [ConsoleController::class, 'candidatures'])->name('candidatures');
     Route::get('/produits', [ConsoleController::class, 'produits'])->name('produits');
     Route::get('/litiges', [ConsoleController::class, 'litiges'])->name('litiges');
+    Route::get('/commandes', [ConsoleController::class, 'commandes'])->name('commandes');
+    Route::get('/sequestre', [ConsoleController::class, 'sequestre'])->name('sequestre');
     Route::get('/reversements', [ConsoleController::class, 'reversements'])->name('reversements');
 });
+
+/*
+|--------------------------------------------------------------------------
+| BOÎTE SMS DE TEST — développement uniquement
+|--------------------------------------------------------------------------
+| Affiche les SMS simulés, codes de livraison compris. En production, ces
+| routes ne sont PAS déclarées ; ailleurs, le contrôleur exige en plus
+| APP_ENV=local, SMS_DRIVER=journal et un accès depuis la machine elle-même
+| (voir BoiteSmsTestController).
+*/
+if (! app()->isProduction()) {
+    Route::get('/dev/sms', [BoiteSmsTestController::class, 'index'])->name('dev.sms');
+    Route::post('/dev/sms/envoyer', [BoiteSmsTestController::class, 'envoyer'])->name('dev.sms.envoyer');
+}

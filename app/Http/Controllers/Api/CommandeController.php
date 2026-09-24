@@ -65,7 +65,35 @@ class CommandeController extends Controller
             return response()->json(['message' => 'Commande introuvable.'], 404);
         }
 
-        return response()->json($commande);
+        /*
+         * RÉPONSE COMPOSÉE CHAMP PAR CHAMP, jamais le modèle brut. Le
+         * modèle brut renvoyait tout ce que contient la table — dont le
+         * code de retrait, c'est-à-dire la clé qui fait remettre le
+         * colis et libère l'argent de la boutique. Une colonne ajoutée
+         * demain ne doit pas apparaître ici sans qu'on l'ait décidé.
+         */
+        return response()->json([
+            'reference'       => $commande->reference,
+            'statut'          => $commande->statut,
+            'statut_paiement' => $commande->statut_paiement,
+            'mode_livraison'  => $commande->mode_livraison,
+            'total_a_payer_cfa' => (int) $commande->total_a_payer_cfa,
+            'passee_le'       => $commande->cree_le?->toIso8601String(),
+            'colis'           => $commande->sousCommandes->map(fn ($sc) => [
+                'reference'  => $sc->reference,
+                'boutique'   => $sc->boutique?->nom,
+                'statut'     => $sc->statut,
+                'argent'     => $sc->etat_fonds?->libelle(),
+                'expedie_le' => $sc->expedie_le?->toIso8601String(),
+                'livre_le'   => $sc->livre_le?->toIso8601String(),
+                'articles'   => $sc->lignes->map(fn ($l) => [
+                    'nom'       => $l->nom_produit,
+                    'variante'  => $l->libelle_variante,
+                    'quantite'  => (int) $l->quantite,
+                    'total_cfa' => (int) $l->total_ttc_cfa,
+                ])->values(),
+            ])->values(),
+        ]);
     }
 
     /**

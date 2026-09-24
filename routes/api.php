@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminSuiviController;
 use App\Http\Controllers\Api\AgentRemiseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogueController;
@@ -37,8 +38,10 @@ use Illuminate\Support\Facades\Route;
 // ---------------------------------------------------------------------
 // Un compte créé via /auth/inscription est toujours un CLIENT : devenir
 // vendeur passe par /candidatures, traitée par un administrateur.
-Route::post('/auth/inscription', [AuthController::class, 'inscrire']);
-Route::post('/auth/connexion', [AuthController::class, 'connecter']);
+// Limites de tentatives (définies dans AppServiceProvider) : sans elles,
+// rien n'empêchait d'essayer des milliers de mots de passe par minute.
+Route::post('/auth/inscription', [AuthController::class, 'inscrire'])->middleware('throttle:inscription');
+Route::post('/auth/connexion', [AuthController::class, 'connecter'])->middleware('throttle:connexion');
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/deconnexion', [AuthController::class, 'deconnecter']);
     Route::get('/auth/moi', [AuthController::class, 'moi']);
@@ -52,10 +55,12 @@ Route::get('/boutiques', [CatalogueController::class, 'boutiques']);
 Route::get('/produits', [CatalogueController::class, 'produits']);
 Route::get('/produits/{produit}/offres', [CatalogueController::class, 'offres']);
 
-Route::post('/commandes', [CommandeController::class, 'creer']);
-Route::get('/commandes/suivi', [CommandeController::class, 'suivi']);   // ?telephone=...&reference=...
-Route::post('/candidatures', [CommandeController::class, 'candidater']);
-Route::post('/agents-remise/activer', [AgentRemiseController::class, 'activer']);
+Route::post('/commandes', [CommandeController::class, 'creer'])->middleware('throttle:commande');
+Route::get('/commandes/suivi', [CommandeController::class, 'suivi'])   // ?telephone=...&reference=...
+    ->middleware('throttle:suivi');
+Route::post('/candidatures', [CommandeController::class, 'candidater'])->middleware('throttle:formulaire');
+// Code à 6 chiffres : limité par IP ET par CNIB, sinon on le devine.
+Route::post('/agents-remise/activer', [AgentRemiseController::class, 'activer'])->middleware('throttle:activation-agent');
 
 // Référentiel des transporteurs — alimente le choix du transporteur à
 // l'expédition. Réservé aux comptes connectés : la liste des partenaires
@@ -89,6 +94,12 @@ Route::middleware(['auth:sanctum', 'role:vendeur'])->prefix('vendeur')->group(fu
     // mais sans transporteur ni livreur — le vendeur remet lui-même.
     Route::post('/commandes/{sousCommande}/preparer-retrait', [VendeurController::class, 'preparerRetrait']);
     Route::post('/commandes/{sousCommande}/confirmer-retrait', [VendeurController::class, 'confirmerRetrait']);
+    // Colis revenu après un échec de livraison définitif : c'est ce geste
+    // — pas la déclaration du livreur — qui rembourse et rend le stock.
+    Route::post('/commandes/{sousCommande}/confirmer-retour', [VendeurController::class, 'confirmerRetour']);
+    // Litige ouvert par le client : la boutique donne SA version avant
+    // l'arbitrage. Une seule réponse, non modifiable.
+    Route::post('/litiges/{litige}/repondre', [VendeurController::class, 'repondreLitige']);
 
     Route::get('/produits', [VendeurController::class, 'produits']);
     Route::post('/produits', [VendeurController::class, 'creerProduit']);
@@ -148,8 +159,19 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     // journalisation : ce n'est ni au vendeur ni au livreur que ce code
     // est destiné, seulement à l'admin pour un client injoignable ou un
     // litige — voir le commentaire au-dessus des méthodes.
+    // Suivi (LECTURE SEULE) : recherche d'une commande, fiche avec l'état
+    // du code (jamais sa valeur) et des fonds, et vue du séquestre. Pas
+    // de route « libérer » : voir le commentaire d'AdminSuiviController.
+    Route::get('/sous-commandes', [AdminSuiviController::class, 'recherche']);
+    Route::get('/sous-commandes/{sousCommande}', [AdminSuiviController::class, 'fiche']);
+    Route::get('/sequestre', [AdminSuiviController::class, 'sequestre']);
+
     Route::get('/sous-commandes/{sousCommande}/code-remise', [AdminController::class, 'codeRemise']);
     Route::post('/sous-commandes/{sousCommande}/code-remise/renvoyer', [AdminController::class, 'renvoyerCodeRemise']);
+    // Clôture d'un retour de colis à la place de la boutique (motif requis).
+    Route::post('/sous-commandes/{sousCommande}/cloturer-retour', [AdminController::class, 'cloturerRetour']);
+    // Litige ouvert pour le compte d'un client qui a appelé le support.
+    Route::post('/sous-commandes/{sousCommande}/litiges', [AdminController::class, 'ouvrirLitige']);
 
     // Modération du catalogue. CE CHAÎNON MANQUAIT : un produit créé par
     // un vendeur naît « en_attente » et rien ne permettait de le publier,
