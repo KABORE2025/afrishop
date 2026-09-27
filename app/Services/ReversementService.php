@@ -37,14 +37,23 @@ class ReversementService
             ->chunkById(100, function ($boutiques) use ($debut, $fin, $minimum, $plafond, &$prepares) {
                 foreach ($boutiques as $boutique) {
 
-                    // Ventes éligibles : fonds libérés, sur la période,
-                    // et PAS DÉJÀ rattachées à un reversement. Le
-                    // whereNotExists est la première protection contre
-                    // le double paiement ; l'index unique en base est le
-                    // filet de sécurité si celle-ci échoue.
+                    // Ventes éligibles : fonds libérés, livrées avant la
+                    // fin de période, et PAS DÉJÀ rattachées à un
+                    // reversement. Le whereNotExists est la première
+                    // protection contre le double paiement ; l'index
+                    // unique en base est le filet de sécurité.
+                    //
+                    // PAS DE BORNE DE DÉBUT, et c'est voulu. Avec une
+                    // fenêtre « 7 derniers jours », une vente livrée un
+                    // vendredi et libérée le lundi après 72 h ratait le
+                    // passage du lundi matin, puis sortait de la fenêtre
+                    // la semaine suivante : jamais versée. Idem pour une
+                    // vente sous le seuil minimum (« on attend le cycle
+                    // suivant »… qui ne la voyait plus) ou gelée plus
+                    // d'une semaine par un litige.
                     $ventes = SousCommande::where('boutique_id', $boutique->id)
                         ->where('etat_fonds', 'reverse')
-                        ->whereBetween('livre_le', [$debut, $fin])
+                        ->where('livre_le', '<=', $fin)
                         ->whereNotExists(fn ($q) => $q->selectRaw(1)->from('reversement_lignes')
                             ->whereColumn('reversement_lignes.sous_commande_id', 'sous_commandes.id'))
                         ->get();

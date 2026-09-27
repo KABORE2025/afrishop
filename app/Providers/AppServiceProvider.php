@@ -176,6 +176,11 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('commande', fn (Request $r) => Limit::perMinute(10)->by('commande:'.$r->ip()));
 
+        // Saisie du code de livraison : 10 essais par minute et par livreur.
+        // Largement assez pour une vraie remise, trop peu pour deviner.
+        RateLimiter::for('code-livraison', fn (Request $r) => Limit::perMinute(10)
+            ->by('code-livraison:'.($r->user()?->id ?? $r->ip())));
+
         // Le téléphone vérifie ces gestes : sans limite, on le devinerait
         // chiffre par chiffre sur une référence connue.
         RateLimiter::for('protection', fn (Request $r) => [

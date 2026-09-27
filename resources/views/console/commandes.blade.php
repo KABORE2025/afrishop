@@ -164,6 +164,15 @@
                     </button>
                 </div>
 
+                {{-- Sans code, aucun bouton : le dire, sinon on croit l'écran incomplet. --}}
+                <p class="note mt-3" x-show="!fiche.code.genere">
+                    <b>Pas encore de code.</b>
+                    <span x-text="fiche.code.type === 'retrait'
+                        ? 'Il est créé et envoyé au client quand la boutique prépare le retrait.'
+                        : 'Il est créé et envoyé au client quand la boutique expédie le colis.'"></span>
+                    Les boutons « Renvoyer » et « Voir le code » apparaîtront à ce moment-là.
+                </p>
+
                 <p class="tuile-note" x-show="codeAffiche === null && fiche.actions.peut_voir_code">
                     À réserver au support (client injoignable, téléphone perdu) et aux litiges. Chaque consultation est journalisée.
                 </p>

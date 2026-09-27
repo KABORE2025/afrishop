@@ -33,40 +33,120 @@ class AgentRemiseController extends Controller
         return response()->json(['data' => $agents]);
     }
 
-    /** Rattache immédiatement à la boutique un livreur déjà activé dans la même ville. */
+    /**
+     * Proposer à un livreur EXISTANT de livrer pour la boutique.
+     *
+     * Ce n'est plus un rattachement immédiat : le livreur doit ACCEPTER
+     * dans son espace (invitationsLivreur / repondreInvitation). Avant,
+     * n'importe quel vendeur de la ville pouvait s'attacher un livreur
+     * sans son accord, lui affecter des courses et lui faire voir
+     * l'adresse et le téléphone de ses clients.
+     *
+     * Un seul message d'erreur, quel que soit le cas (identifiant
+     * inconnu, pas livreur, autre ville) : des messages distincts
+     * permettaient de deviner, en essayant des numéros, qui est livreur.
+     */
     public function rattacher(Request $r): JsonResponse
     {
         $boutique = $this->boutiqueAvecVille($r);
-        $data = $r->validate(['livreur_id' => ['required', 'integer', 'exists:utilisateurs,id']]);
+        $data = $r->validate(['livreur_id' => ['required', 'integer', 'min:1']]);
 
-        $affiliation = DB::transaction(function () use ($boutique, $data, $r) {
-            $livreur = Utilisateur::whereKey($data['livreur_id'])->lockForUpdate()->firstOrFail();
+        $resultat = DB::transaction(function () use ($boutique, $data, $r) {
+            $livreur = Utilisateur::whereKey($data['livreur_id'])->lockForUpdate()->first();
 
-            if ($livreur->role !== 'livreur') {
-                abort(422, 'Cet identifiant ne correspond pas à un livreur.');
-            }
-            if ($livreur->ville_id !== $boutique->ville_id) {
-                abort(422, 'Ce livreur travaille dans une autre ville et ne peut pas être rattaché à cette boutique.');
+            if (! $livreur || $livreur->role !== 'livreur' || $livreur->ville_id !== $boutique->ville_id) {
+                abort(422, 'Aucun livreur de votre ville ne porte cet identifiant. Vérifiez-le auprès du livreur : '
+                    .'il le trouve en haut de son espace livreur.');
             }
 
             $affiliation = AgentRemiseBoutique::firstOrNew([
                 'livreur_id' => $livreur->id, 'boutique_id' => $boutique->id,
             ]);
+
+            if ($affiliation->exists && $affiliation->statut === 'actif') {
+                return 'deja';
+            }
+            if ($affiliation->exists && $affiliation->statut === 'suspendu') {
+                abort(422, 'Ce livreur est suspendu pour votre boutique : appelez le service client Afrishop au '.telephone_support().'.');
+            }
+
             $affiliation->fill([
-                'statut' => 'actif', 'autorise_livraison' => true,
+                'statut' => 'en_attente', 'autorise_livraison' => true,
                 'autorise_retrait_boutique' => true,
                 'invite_par_utilisateur_id' => $r->user()->id,
-                'jeton_invitation_hash' => null, 'invitation_expire_le' => null,
-                'accepte_le' => $affiliation->accepte_le ?? now(),
+                // Pas de code : le livreur a déjà un compte, il accepte
+                // connecté, dans son espace. Le code reste réservé à
+                // l'activation d'un NOUVEAU livreur (activer()).
+                'jeton_invitation_hash' => null,
+                'invitation_expire_le' => now()->addDays(7),
+                'accepte_le' => null,
             ]);
             $affiliation->save();
 
-            return $affiliation;
+            Notification::create([
+                'destinataire_id' => $livreur->id, 'telephone' => $livreur->telephone, 'canal' => 'sms',
+                'corps_envoye' => "Afrishop : {$boutique->nom} vous propose de livrer pour elle. "
+                    .'Acceptez ou refusez dans votre espace livreur (valable 7 jours).',
+                'statut' => 'en_file', 'nb_segments' => 1,
+            ]);
+
+            return 'invite';
         });
 
+        if ($resultat === 'deja') {
+            return response()->json(['message' => 'Ce livreur livre déjà pour votre boutique.']);
+        }
+
         return response()->json([
-            'message' => 'Livreur rattaché à la boutique.', 'agent_id' => $affiliation->livreur_id,
-        ], 201);
+            'message' => 'Invitation envoyée. Le livreur doit l’accepter dans son espace avant de pouvoir recevoir vos colis.',
+        ], 202);
+    }
+
+    /** Côté livreur : les boutiques qui lui proposent de livrer pour elles. */
+    public function invitationsLivreur(Request $r): JsonResponse
+    {
+        $invitations = AgentRemiseBoutique::where('livreur_id', $r->user()->id)
+            ->where('statut', 'en_attente')
+            // Les invitations avec code concernent l'activation d'un
+            // nouveau compte : elles se valident par activer(), pas ici.
+            ->whereNull('jeton_invitation_hash')
+            ->where('invitation_expire_le', '>=', now())
+            ->with('boutique:id,nom,ville_id,telephone')
+            ->get()
+            ->map(fn (AgentRemiseBoutique $a) => [
+                'boutique_id' => $a->boutique_id,
+                'boutique'    => $a->boutique?->nom,
+                'telephone'   => $a->boutique?->telephone,
+                'expire_le'   => $a->invitation_expire_le?->toIso8601String(),
+            ])->values();
+
+        return response()->json(['data' => $invitations, 'mon_identifiant' => $r->user()->id]);
+    }
+
+    /** Côté livreur : accepter ou refuser. Rien n'est actif sans ce geste. */
+    public function repondreInvitation(Request $r, Boutique $boutique): JsonResponse
+    {
+        $data = $r->validate(['reponse' => ['required', 'in:accepter,refuser']]);
+
+        $affiliation = AgentRemiseBoutique::where('livreur_id', $r->user()->id)
+            ->where('boutique_id', $boutique->id)->where('statut', 'en_attente')
+            ->whereNull('jeton_invitation_hash')->where('invitation_expire_le', '>=', now())
+            ->first();
+
+        abort_unless($affiliation, 404, 'Cette invitation n’existe plus ou a expiré.');
+
+        $accepte = $data['reponse'] === 'accepter';
+        $affiliation->update([
+            'statut'               => $accepte ? 'actif' : 'refuse',
+            'accepte_le'           => $accepte ? now() : null,
+            'invitation_expire_le' => null,
+        ]);
+
+        return response()->json([
+            'message' => $accepte
+                ? "Vous livrez maintenant pour {$boutique->nom}."
+                : "Invitation de {$boutique->nom} refusée.",
+        ]);
     }
 
     public function inviter(Request $r): JsonResponse

@@ -102,6 +102,21 @@ class PanierService
             throw new RuntimeException('Le panier est vide.');
         }
 
+        // Un même article (même variante, donc même boutique et même
+        // stock) répété sur plusieurs lignes est regroupé AVANT tout
+        // contrôle. Sans cela, « 5 + 5 » sur un stock de 6 passait ligne
+        // par ligne et le stock finissait à −4 : des articles vendus qui
+        // n'existent pas. Le panier du site regroupe déjà ; l'API non.
+        $regroupes = [];
+        foreach ($articles as $a) {
+            $id = (int) $a['variante_id'];
+            $regroupes[$id] = [
+                'variante_id' => $id,
+                'quantite'    => ($regroupes[$id]['quantite'] ?? 0) + (int) $a['quantite'],
+            ];
+        }
+        $articles = array_values($regroupes);
+
         return DB::transaction(function () use ($articles, $client, $pays, $utilisateurId) {
 
             // Verrou pessimiste : sans lui, deux clients achetant le

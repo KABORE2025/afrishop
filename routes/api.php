@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminSuiviController;
+use App\Http\Controllers\Api\AdministrateurController;
 use App\Http\Controllers\Api\AgentRemiseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogueController;
@@ -125,11 +126,18 @@ Route::middleware(['auth:sanctum', 'role:vendeur'])->prefix('vendeur')->group(fu
 // Le livreur est le seul acteur qui peut présenter et valider le code
 // reçu par le client. Le vendeur ne dispose d'aucune route de validation.
 Route::middleware(['auth:sanctum', 'role:livreur'])->prefix('livreur')->group(function () {
+    // Invitations des boutiques : un livreur n'est rattaché qu'après
+    // avoir ACCEPTÉ (voir AgentRemiseController::rattacher()).
+    Route::get('/invitations', [AgentRemiseController::class, 'invitationsLivreur']);
+    Route::post('/invitations/{boutique}', [AgentRemiseController::class, 'repondreInvitation']);
     Route::get('/tableau-de-bord', [LivreurController::class, 'tableauDeBord']);
     // ?statut[]=expediee (défaut) pour le travail du jour, ou
     // ?statut[]=livree&statut[]=retour_expediteur pour l'historique.
     Route::get('/commandes', [LivreurController::class, 'commandes']);
-    Route::post('/commandes/{sousCommande}/livrer', [LivreurController::class, 'livrer']);
+    // Limitée par livreur : même verrouillée, la saisie du code ne doit
+    // pas pouvoir être martelée (voir RateLimiter « code-livraison »).
+    Route::post('/commandes/{sousCommande}/livrer', [LivreurController::class, 'livrer'])
+        ->middleware('throttle:code-livraison');
     // Échec de remise : client absent, adresse introuvable, colis
     // refusé. Sans elle, un échec n'avait aucune issue (voir la méthode).
     Route::post('/commandes/{sousCommande}/echec', [LivreurController::class, 'signalerEchec']);
@@ -138,51 +146,68 @@ Route::middleware(['auth:sanctum', 'role:livreur'])->prefix('livreur')->group(fu
 // ---------------------------------------------------------------------
 // 3. ADMINISTRATION AFRISHOP
 // ---------------------------------------------------------------------
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+/*
+ * DEUX NIVEAUX DE PERSONNEL.
+ *   · AGENT (support) : aide les clients et les vendeurs — chercher une
+ *     commande, renvoyer ou consulter un code, ouvrir un litige pour un
+ *     client qui appelle, lire les candidatures et les produits.
+ *   · ADMIN : tout ce qui déplace de l'argent ou donne un accès —
+ *     trancher un litige, clôturer un retour, accepter une boutique,
+ *     modérer, voir les versements et le séquestre, créer du personnel.
+ * `role:agent` laisse passer l'admin aussi (VerifierRole) ; `role:admin`
+ * ne laisse passer que l'admin.
+ */
+Route::middleware(['auth:sanctum', 'role:agent'])->prefix('admin')->group(function () {
 
     // Ce qui attend une décision humaine — pas un chiffre d'affaires.
     Route::get('/tableau-de-bord', [AdminController::class, 'tableauDeBord']);
 
+    // Lecture : candidatures, litiges, produits en attente.
+    Route::get('/candidatures', [AdminController::class, 'candidatures']);
+    Route::get('/litiges', [AdminController::class, 'litiges']);
+    Route::get('/produits', [AdminController::class, 'produits']);
+
+    // Suivi d'une commande : recherche, fiche (l'état du code, jamais sa
+    // valeur), puis les gestes du support.
+    Route::get('/sous-commandes', [AdminSuiviController::class, 'recherche']);
+    Route::get('/sous-commandes/{sousCommande}', [AdminSuiviController::class, 'fiche']);
+
+    // Codes de remise : motif obligatoire, double journalisation — voir
+    // le commentaire au-dessus des méthodes.
+    Route::get('/sous-commandes/{sousCommande}/code-remise', [AdminController::class, 'codeRemise']);
+    Route::post('/sous-commandes/{sousCommande}/code-remise/renvoyer', [AdminController::class, 'renvoyerCodeRemise']);
+
+    // Litige ouvert pour le compte d'un client qui a appelé le support.
+    // Il GÈLE des fonds mais n'en déplace aucun : le trancher reste admin.
+    Route::post('/sous-commandes/{sousCommande}/litiges', [AdminController::class, 'ouvrirLitige']);
+});
+
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+
+    // Comptes du personnel (admin ou agent). Compte neuf uniquement,
+    // trace au journal d'administration.
+    Route::get('/administrateurs', [AdministrateurController::class, 'index']);
+    Route::post('/administrateurs', [AdministrateurController::class, 'creer']);
+
     // Candidatures. Accepter CRÉE la boutique et rattache son gérant ;
     // refuser exige un motif, parce qu'un refus muet est incontestable.
-    Route::get('/candidatures', [AdminController::class, 'candidatures']);
     Route::post('/candidatures/{candidature}/accepter', [AdminController::class, 'accepterCandidature']);
     Route::post('/candidatures/{candidature}/refuser', [AdminController::class, 'refuserCandidature']);
 
-    // Litiges. L'arbitrage est le SEUL endroit de la console qui déplace
-    // de l'argent, et il le fait par SequestreService — jamais par une
-    // écriture composée à la main.
-    Route::get('/litiges', [AdminController::class, 'litiges']);
+    // L'arbitrage déplace de l'argent, par SequestreService — jamais par
+    // une écriture composée à la main.
     Route::post('/litiges/{litige}/arbitrer', [AdminController::class, 'arbitrerLitige']);
 
-    // Codes de remise (livraison/retrait). Motif obligatoire, double
-    // journalisation : ce n'est ni au vendeur ni au livreur que ce code
-    // est destiné, seulement à l'admin pour un client injoignable ou un
-    // litige — voir le commentaire au-dessus des méthodes.
-    // Suivi (LECTURE SEULE) : recherche d'une commande, fiche avec l'état
-    // du code (jamais sa valeur) et des fonds, et vue du séquestre. Pas
-    // de route « libérer » : voir le commentaire d'AdminSuiviController.
-    Route::get('/sous-commandes', [AdminSuiviController::class, 'recherche']);
-    Route::get('/sous-commandes/{sousCommande}', [AdminSuiviController::class, 'fiche']);
-    Route::get('/sequestre', [AdminSuiviController::class, 'sequestre']);
-
-    Route::get('/sous-commandes/{sousCommande}/code-remise', [AdminController::class, 'codeRemise']);
-    Route::post('/sous-commandes/{sousCommande}/code-remise/renvoyer', [AdminController::class, 'renvoyerCodeRemise']);
-    // Clôture d'un retour de colis à la place de la boutique (motif requis).
+    // Clôture d'un retour à la place de la boutique : c'est un remboursement.
     Route::post('/sous-commandes/{sousCommande}/cloturer-retour', [AdminController::class, 'cloturerRetour']);
-    // Litige ouvert pour le compte d'un client qui a appelé le support.
-    Route::post('/sous-commandes/{sousCommande}/litiges', [AdminController::class, 'ouvrirLitige']);
 
-    // Modération du catalogue. CE CHAÎNON MANQUAIT : un produit créé par
-    // un vendeur naît « en_attente » et rien ne permettait de le publier,
-    // donc aucune fiche nouvelle ne pouvait jamais être vendue.
-    Route::get('/produits', [AdminController::class, 'produits']);
-    Route::post('/produits/{produit}/moderer', [AdminController::class, 'modererProduit']);
-
-    // Reversements : LECTURE SEULE. Déclarer un virement « payé » depuis
-    // une console reviendrait à affirmer qu'une somme est partie ; cette
-    // confirmation doit venir du prestataire, par webhook.
+    // Où est l'argent : séquestre (lecture seule, pas de route « libérer »)
+    // et versements (lecture seule : « payé » vient du prestataire).
+    Route::get('/sequestre', [AdminSuiviController::class, 'sequestre']);
     Route::get('/reversements', [AdminController::class, 'reversements']);
+
+    // Modération du catalogue : publier ou refuser une fiche produit.
+    Route::post('/produits/{produit}/moderer', [AdminController::class, 'modererProduit']);
 
     Route::post('/lots-qr', [LotQrController::class, 'creer']);
     Route::get('/lots-qr/{lot}/planche', [LotQrController::class, 'planche'])->name('admin.lots.planche');

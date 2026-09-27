@@ -9,4 +9,9 @@ class JournalAdministration extends Model
     protected $table = 'journal_administration';
     protected $guarded = ['id'];
     public $timestamps = false;
+
+    protected function casts(): array
+    {
+        return ['avant' => 'array', 'apres' => 'array'];
+    }
 }

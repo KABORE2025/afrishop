@@ -26,4 +26,5 @@ class ConsoleController extends Controller
     public function reversements(): View  { return view('console.reversements'); }
     public function commandes(): View     { return view('console.commandes'); }
     public function sequestre(): View     { return view('console.sequestre'); }
+    public function administrateurs(): View { return view('console.administrateurs'); }
 }

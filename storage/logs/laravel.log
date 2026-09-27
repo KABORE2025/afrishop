@@ -13610,3 +13610,90 @@ Did you mean one of these?
 [2026-09-24 16:54:19] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
 [2026-09-24 16:54:19] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
 [2026-09-24 16:54:19] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-24 18:15:49] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-9KUURV","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-24 18:15:49] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-494A87-BF-V733","statut":"expediee"} 
+[2026-09-24 18:15:50] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-ZTZFJV","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-24 18:15:51] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-24 18:15:52] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-24 18:15:52] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-23","prestataires":1} 
+[2026-09-24 18:15:52] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-23","prestataires":1} 
+[2026-09-26 20:47:28] local.ERROR: Maximum execution time of 30 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 30 seconds exceeded at F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Collections/LazyCollection.php:26)
+[stacktrace]
+#0 {main}
+"} 
+[2026-09-26 21:01:00] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-6HQGY8","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-26 21:01:00] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-9ZKFWZ-BF-V885","statut":"expediee"} 
+[2026-09-26 21:01:01] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-PSYQYG","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-26 21:01:05] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-26 21:01:05] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-26 21:01:05] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-25","prestataires":1} 
+[2026-09-26 21:01:06] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-25","prestataires":1} 
+[2026-09-26 21:02:10] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-26 21:02:11] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:02:11] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-26 21:02:11] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-26 21:02:11] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:02:42] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-26 21:02:42] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:02:42] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-26 21:02:42] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:06:49] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-4EVJWH","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-26 21:06:49] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-VWTYB6-BF-V556","statut":"expediee"} 
+[2026-09-26 21:06:50] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-WEGQWQ","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-26 21:06:51] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-26 21:06:51] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:06:51] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-26 21:06:51] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-26 21:06:51] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:06:54] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-26 21:06:56] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-26 21:06:56] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-25","prestataires":1} 
+[2026-09-26 21:06:56] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-25","prestataires":1} 
+[2026-09-26 21:08:12] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-3YCTET","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-26 21:08:12] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-DDKAXJ-BF-V372","statut":"expediee"} 
+[2026-09-26 21:08:13] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-9SMBZ7","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-26 21:08:15] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-26 21:08:15] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:08:15] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-26 21:08:15] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-26 21:08:15] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:08:18] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-26 21:08:20] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-26 21:08:20] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-25","prestataires":1} 
+[2026-09-26 21:08:20] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-25","prestataires":1} 
+[2026-09-26 21:10:10] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-YX6JZD","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-26 21:10:10] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-KCCWN8-BF-V395","statut":"expediee"} 
+[2026-09-26 21:10:11] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-2KXA9V","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-26 21:10:13] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-26 21:10:13] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:10:13] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-26 21:10:13] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-26 21:10:13] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-26 21:10:16] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-26 21:10:18] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-26 21:10:18] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-25","prestataires":1} 
+[2026-09-26 21:10:18] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-25","prestataires":1} 
+[2026-09-27 09:18:08] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-9CNRQP","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-27 09:18:09] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-5RBGN8-BF-V232","statut":"expediee"} 
+[2026-09-27 09:18:09] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-M4XNPX","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-27 09:18:10] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-27 09:18:10] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-27 09:18:10] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-27 09:18:10] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-27 09:18:10] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-27 09:18:14] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-27 09:18:15] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-27 09:18:15] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
+[2026-09-27 09:18:15] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
+[2026-09-27 09:18:54] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-TKGXR5","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-27 09:18:54] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-V27MY2-BF-V863","statut":"expediee"} 
+[2026-09-27 09:18:54] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-DXWKKP","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-27 09:18:55] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-27 09:18:55] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-27 09:18:55] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-27 09:18:55] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-27 09:18:55] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-27 09:18:58] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-27 09:19:00] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-27 09:19:00] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
+[2026-09-27 09:19:00] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 

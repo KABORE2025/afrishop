@@ -312,7 +312,8 @@
           </details>
         @elseif ($fin && $fin->isPast())
           <p style="margin:0;color:var(--gris)">
-            Délai de vérification écoulé : pour un problème, contactez le support Afrishop.
+            Délai de vérification écoulé : pour un problème, appelez le service client Afrishop au
+            <a href="{{ telephone_support(true) }}" style="font-weight:700;color:var(--brun)">{{ telephone_support() }}</a>.
           </p>
         @endif
       </div>

@@ -93,8 +93,9 @@ footer{margin-top:40px;background:var(--surface);border-top:1px solid var(--bord
   <div class="wrap bar">
     <a href="{{ route('vitrine') }}" class="logo"><i>A</i>Afrishop</a>
     <nav style="display:flex;gap:16px;flex-wrap:wrap">
-      <a href="{{ route('vitrine') }}" class="{{ request()->routeIs('suivi*') ? '' : 'on' }}">Marketplace</a>
+      <a href="{{ route('vitrine') }}" class="{{ request()->routeIs('suivi*', 'devenir-vendeur*') ? '' : 'on' }}">Marketplace</a>
       <a href="{{ route('suivi') }}" class="{{ request()->routeIs('suivi*') ? 'on' : '' }}">Suivre ma commande</a>
+      <a href="{{ route('devenir-vendeur') }}" class="{{ request()->routeIs('devenir-vendeur*') ? 'on' : '' }}">Ouvrir ma boutique</a>
       <a href="{{ route('panier') }}">
         Panier
         @php $nbPanier = array_sum(session('panier', [])); @endphp
@@ -111,6 +112,8 @@ footer{margin-top:40px;background:var(--surface);border-top:1px solid var(--bord
 <footer>
   <div class="wrap">
     <b>Afrishop</b> — place de marché multi-boutiques d'Afrique de l'Ouest.<br>
+    <b>Service client :</b>
+    <a href="{{ telephone_support(true) }}" style="font-weight:700;color:var(--brun)">{{ telephone_support() }}</a><br>
     Afrishop est un intermédiaire technique : les produits sont vendus par les
     boutiques référencées, qui en répondent.<br>
     <b>Transport international et douane :</b> non pris en charge. Le colis est

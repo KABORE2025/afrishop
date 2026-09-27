@@ -10,7 +10,11 @@ class AgentRemiseTest extends TestCase
 {
     use CreeDonneesTrait, RefreshDatabase;
 
-    public function test_rattache_un_livreur_existant_de_la_meme_ville(): void
+    /**
+     * Revue du 24/09 : un livreur existant n'est plus rattaché d'office.
+     * Il reçoit une invitation, et rien n'est actif tant qu'il n'a pas accepté.
+     */
+    public function test_un_livreur_existant_doit_accepter_l_invitation(): void
     {
         $pays = $this->creerPays();
         $ville = $this->creerVille($pays);
@@ -19,11 +23,66 @@ class AgentRemiseTest extends TestCase
 
         $this->actingAs($vendeur, 'sanctum')
             ->postJson('/api/vendeur/agents-remise/rattachements', ['livreur_id' => $livreur->id])
-            ->assertCreated();
+            ->assertStatus(202);
+
+        $this->assertDatabaseHas('agents_remise_boutiques', [
+            'boutique_id' => $boutique->id, 'livreur_id' => $livreur->id, 'statut' => 'en_attente',
+        ]);
+        $this->assertDatabaseHas('notifications', ['destinataire_id' => $livreur->id, 'canal' => 'sms']);
+
+        // Pas encore accepté : la boutique ne peut pas le choisir.
+        $this->actingAs($vendeur, 'sanctum')->getJson('/api/vendeur/livreurs')
+            ->assertOk()->assertJsonCount(0, 'data');
+
+        // Le livreur voit l'invitation et son identifiant, puis accepte.
+        $this->actingAs($livreur, 'sanctum')->getJson('/api/livreur/invitations')
+            ->assertOk()
+            ->assertJsonPath('mon_identifiant', $livreur->id)
+            ->assertJsonPath('data.0.boutique_id', $boutique->id);
+
+        $this->actingAs($livreur, 'sanctum')
+            ->postJson("/api/livreur/invitations/{$boutique->id}", ['reponse' => 'accepter'])
+            ->assertOk();
 
         $this->assertDatabaseHas('agents_remise_boutiques', [
             'boutique_id' => $boutique->id, 'livreur_id' => $livreur->id, 'statut' => 'actif',
         ]);
+        $this->actingAs($vendeur, 'sanctum')->getJson('/api/vendeur/livreurs')
+            ->assertOk()->assertJsonPath('data.0.id', $livreur->id);
+    }
+
+    public function test_un_livreur_peut_refuser(): void
+    {
+        $pays = $this->creerPays();
+        $ville = $this->creerVille($pays);
+        ['boutique' => $boutique, 'utilisateur' => $vendeur] = $this->creerBoutiqueAvecVendeur($pays, ['ville_id' => $ville->id]);
+        $livreur = $this->creerUtilisateur($pays, ['role' => 'livreur', 'ville_id' => $ville->id]);
+
+        $this->actingAs($vendeur, 'sanctum')
+            ->postJson('/api/vendeur/agents-remise/rattachements', ['livreur_id' => $livreur->id]);
+        $this->actingAs($livreur, 'sanctum')
+            ->postJson("/api/livreur/invitations/{$boutique->id}", ['reponse' => 'refuser'])
+            ->assertOk();
+
+        $this->assertDatabaseHas('agents_remise_boutiques', [
+            'boutique_id' => $boutique->id, 'livreur_id' => $livreur->id, 'statut' => 'refuse',
+        ]);
+    }
+
+    /** Même message pour « inconnu », « pas livreur », « autre ville » : on ne devine plus qui est livreur. */
+    public function test_le_message_ne_revele_pas_qui_est_livreur(): void
+    {
+        $pays = $this->creerPays();
+        $ville = $this->creerVille($pays);
+        ['utilisateur' => $vendeur] = $this->creerBoutiqueAvecVendeur($pays, ['ville_id' => $ville->id]);
+        $client = $this->creerUtilisateur($pays, ['role' => 'client', 'ville_id' => $ville->id]);
+
+        $inconnu = $this->actingAs($vendeur, 'sanctum')
+            ->postJson('/api/vendeur/agents-remise/rattachements', ['livreur_id' => 999999])->assertStatus(422)->json('message');
+        $pasLivreur = $this->actingAs($vendeur, 'sanctum')
+            ->postJson('/api/vendeur/agents-remise/rattachements', ['livreur_id' => $client->id])->assertStatus(422)->json('message');
+
+        $this->assertSame($inconnu, $pasLivreur);
     }
 
     public function test_refuse_un_livreur_d_une_autre_ville(): void

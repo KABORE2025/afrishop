@@ -21,6 +21,13 @@ window.fcfa = fcfa;
 window.dateFr = dateFr;
 
 /*
+ * Administrateur « plein » (par opposition à l'agent de support).
+ * Sert UNIQUEMENT à masquer les boutons qu'un agent ne peut pas utiliser :
+ * la barrière réelle est côté serveur (`role:admin` dans routes/api.php).
+ */
+window.estAdminPlein = () => role.lire() === 'admin';
+
+/*
  * Garde d'accès côté navigateur.
  *
  * Les pages de l'espace vendeur sont servies SANS contrôle côté serveur,

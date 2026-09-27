@@ -64,9 +64,12 @@
                 <p class="tuile-note text-alerte" x-show="c.motif_refus"
                    x-text="'Motif du refus : ' + c.motif_refus"></p>
 
-                <div class="mt-3 flex gap-2" x-show="['en_attente','en_verification'].includes(c.statut)">
+                <div class="mt-3 flex gap-2" x-show="['en_attente','en_verification'].includes(c.statut) && window.estAdminPlein()">
                     <button class="btn-primaire" @click="ouvrirAcceptation(c)">Accepter</button>
                     <button class="btn-secondaire" @click="ouvrirRefus(c)">Refuser</button>
+                </div>
+                <div x-show="['en_attente','en_verification'].includes(c.statut) && !window.estAdminPlein()">
+                    <p class="tuile-note">Décision réservée à un administrateur.</p>
                 </div>
             </div>
         </template>

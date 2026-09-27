@@ -75,7 +75,7 @@ class SuiviCommandeController extends Controller
             $heures = max(1, (int) ceil(RateLimiter::availableIn($cle) / 3600));
 
             return back()->with('erreur', " — le code a déjà été renvoyé ".self::RENVOIS_PAR_JOUR." fois aujourd'hui. "
-                ."Réessayez dans {$heures} h, ou contactez le support Afrishop.");
+                ."Réessayez dans {$heures} h, ou appelez le service client Afrishop au ".telephone_support().'.');
         }
 
         try {

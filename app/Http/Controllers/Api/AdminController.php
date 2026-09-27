@@ -98,6 +98,22 @@ class AdminController extends Controller
             'niveau'          => ['nullable', 'in:nouveau,verifie,interne'],
         ]);
 
+        // Le formulaire de candidature est PUBLIC : n'importe qui peut y
+        // saisir le numéro d'un livreur, d'un vendeur ou d'un membre du
+        // personnel. Accepter aurait alors transformé ce compte en
+        // « vendeur » — un livreur perdait ses livraisons, un admin son
+        // accès. Seul un simple compte client peut devenir vendeur.
+        $existant = Utilisateur::where('telephone', $candidature->telephone)->first();
+        if ($existant && $existant->role !== 'client') {
+            $libelle = ['vendeur' => 'd’un vendeur', 'livreur' => 'd’un livreur',
+                'agent' => 'd’un agent Afrishop', 'admin' => 'd’un administrateur'][$existant->role] ?? 'd’un autre compte';
+
+            return response()->json([
+                'message' => "Ce téléphone est déjà celui {$libelle}. Refusez la candidature, ou demandez "
+                    .'au candidat un autre numéro : un compte existant ne change jamais de rôle.',
+            ], 422);
+        }
+
         $resultat = DB::transaction(function () use ($candidature, $donnees) {
 
             // Un compte existe peut-être déjà avec ce numéro : le

@@ -98,8 +98,11 @@
 
                 <p class="tuile-note" x-show="l.resolution" x-text="'Résolution : ' + l.resolution"></p>
 
-                <div class="mt-3" x-show="['ouvert','en_examen'].includes(l.statut)">
+                <div class="mt-3" x-show="['ouvert','en_examen'].includes(l.statut) && window.estAdminPlein()">
                     <button class="btn-primaire" @click="ouvrirArbitrage(l)">Arbitrer</button>
+                </div>
+                <div class="mt-3" x-show="['ouvert','en_examen'].includes(l.statut) && !window.estAdminPlein()">
+                    <p class="tuile-note">Décision réservée à un administrateur.</p>
                 </div>
             </div>
         </template>

@@ -110,6 +110,13 @@
     @yield('contenu')
 </main>
 
+{{-- Le numéro du service client, sur tous les espaces connectés : c'est
+     là qu'un vendeur ou un livreur lit « code bloqué, appelez-nous ». --}}
+<footer class="mx-auto max-w-6xl px-4 pb-8 text-sm text-gris">
+    Service client Afrishop :
+    <a href="{{ telephone_support(true) }}" class="font-semibold text-brun">{{ telephone_support() }}</a>
+</footer>
+
 {{--
   Repli sans JavaScript. Il ne cherche pas à faire fonctionner l'écran
   sans JS — l'espace vendeur en a besoin — mais à DIRE POURQUOI la page

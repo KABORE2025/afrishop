@@ -128,7 +128,7 @@
   Le montant payé est retenu par Afrishop et n'est versé à chaque boutique qu'après la livraison de son colis
   et un délai de vérification de {{ (int) parametre('delai_confirmation_auto_jours', 3) * 24 }} heures,
   pendant lequel vous pouvez signaler un problème depuis la page de votre commande.<br>
-  Suivi : {{ route('suivi') }}
+  Suivi : {{ route('suivi') }} — Service client : {{ telephone_support() }}
 </div>
 
 </body>

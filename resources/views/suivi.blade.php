@@ -37,6 +37,10 @@
     Sur la page de votre commande, vous pourrez suivre chaque colis, renvoyer votre code de
     livraison, télécharger votre reçu et, après la livraison, confirmer la réception ou signaler un problème.
   </p>
+  <p style="margin:10px 0 0;font-size:13px;color:var(--gris)">
+    Numéro de commande perdu ? Appelez le service client :
+    <a href="{{ telephone_support(true) }}" style="font-weight:700;color:var(--brun)">{{ telephone_support() }}</a>
+  </p>
 </div>
 
 @endsection

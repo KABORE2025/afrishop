@@ -79,7 +79,7 @@ class AdminSuiviController extends Controller
     //  FICHE
     // -----------------------------------------------------------------
 
-    public function fiche(SousCommande $sousCommande): JsonResponse
+    public function fiche(Request $r, SousCommande $sousCommande): JsonResponse
     {
         $sc = $sousCommande->load([
             'commande', 'boutique:id,nom', 'expedition.livreur:id,nom',
@@ -141,7 +141,9 @@ class AdminSuiviController extends Controller
                     ? $sc->code_retrait !== null && $sc->statut !== 'livree'
                     : $exp?->code_livraison !== null && $exp->statut !== 'livree',
                 'peut_voir_code' => $retrait ? $sc->code_retrait !== null : $exp?->code_livraison !== null,
-                'peut_cloturer_retour' => $sc->statut === 'expediee' && $exp?->statut === 'retour_expediteur',
+                // Clôturer rembourse : réservé à l'admin (routes/api.php).
+                'peut_cloturer_retour' => $r->user()->role === 'admin'
+                    && $sc->statut === 'expediee' && $exp?->statut === 'retour_expediteur',
                 'peut_ouvrir_litige'   => $sc->etat_fonds?->value === 'sequestre'
                     && ! $sc->litiges->contains(fn ($l) => $l->estOuvert()),
             ],

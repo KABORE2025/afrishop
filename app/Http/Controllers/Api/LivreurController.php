@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LivreurSousCommandeResource;
+use App\Models\Expedition;
 use App\Models\SousCommande;
-use App\Services\SequestreService;
 use App\Services\TableauBordLivreurService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -52,8 +52,13 @@ class LivreurController extends Controller
         ]);
 
         return DB::transaction(function () use ($r, $sousCommande, $data) {
-            $sousCommande->load(['expedition', 'commande']);
-            $expedition = $sousCommande->expedition;
+            // VERROU sur la sous-commande ET l'expédition, comme au retrait
+            // en boutique. Sans lui, des saisies envoyées en même temps
+            // lisaient toutes « 0 tentative » : la limite de 5 essais ne
+            // tenait plus, et un code à 6 chiffres devenait devinable.
+            $sousCommande = SousCommande::whereKey($sousCommande->id)->lockForUpdate()->firstOrFail();
+            $sousCommande->load('commande');
+            $expedition = Expedition::where('sous_commande_id', $sousCommande->id)->lockForUpdate()->first();
 
             if (! $expedition || $expedition->livreur_id !== $r->user()->id) {
                 abort(403, 'Cette livraison ne vous est pas affectée.');
@@ -62,7 +67,7 @@ class LivreurController extends Controller
                 return response()->json(['message' => "Cette livraison n'est plus à valider."], 422);
             }
             if ($expedition->tentatives >= 5) {
-                return response()->json(['message' => 'Code bloqué après 5 essais. Contactez le support Afrishop.'], 422);
+                return response()->json(['message' => 'Code bloqué après 5 essais. Appelez le service client Afrishop au '.telephone_support().'.'], 422);
             }
             if (! hash_equals((string) $expedition->code_livraison, $data['code_livraison'])) {
                 $tentatives = (int) $expedition->tentatives + 1;

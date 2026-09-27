@@ -107,6 +107,15 @@ return [
     ],
 
     /*
+     * Service client — le numéro que les clients, vendeurs et livreurs
+     * appellent. Affiché partout où l'on dit « contactez le support ».
+     * Dans .env pour le changer sans toucher au code.
+     */
+    'support' => [
+        'telephone' => env('SUPPORT_TELEPHONE', '+22676921202'),
+    ],
+
+    /*
      * Passerelle SMS.
      * Le SMS porte le code de livraison à usage unique : sans envoi,
      * le parcours de livraison ne peut pas se terminer.

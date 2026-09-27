@@ -7,6 +7,29 @@
     <h1 class="mb-1 text-2xl font-extrabold">Mes livraisons</h1>
     <p class="mb-5 text-sm text-gris">Demandez le code seulement après vérification et remise du colis.</p>
 
+    {{-- L'identifiant se donne à une boutique pour qu'elle vous invite.
+         Aucune boutique ne peut vous confier de colis sans votre accord. --}}
+    <p class="mb-3 text-sm" x-show="monId">
+        Votre identifiant livreur : <b class="text-lg" x-text="monId"></b>
+        <span class="text-gris">— à donner à une boutique qui veut travailler avec vous.</span>
+    </p>
+
+    <template x-for="inv in invitations" :key="inv.boutique_id">
+        <div class="carte mb-3 border-brun-clair p-4">
+            <p class="font-semibold">
+                <span x-text="inv.boutique"></span> vous propose de livrer pour elle.
+            </p>
+            <p class="mb-3 text-xs text-gris">
+                Tant que vous n'avez pas accepté, elle ne peut pas vous confier de colis.
+                <span x-show="inv.telephone" x-text="'Boutique : ' + inv.telephone"></span>
+            </p>
+            <div class="flex gap-2">
+                <button type="button" class="btn-primaire" :disabled="enCoursInvitation" @click="repondre(inv, 'accepter')">Accepter</button>
+                <button type="button" class="btn-secondaire" :disabled="enCoursInvitation" @click="repondre(inv, 'refuser')">Refuser</button>
+            </div>
+        </div>
+    </template>
+
     {{-- ------------------------------------------------------------
          TABLEAU DE BORD — compteurs d'activité, aucun montant : le
          livreur n'est aujourd'hui rémunéré par personne pour aucune
@@ -145,10 +168,33 @@ document.addEventListener('alpine:init', () => Alpine.data('ecranLivreur', () =>
     commandes: [], bord: null, onglet: 'encours', chargement: true, erreur: null,
     livraison: null, code: '', message: null, enCours: false,
     echec: null, motifEchec: 'absent', commentaireEchec: '', messageEchec: null, enCoursEchec: false,
+    invitations: [], monId: null, enCoursInvitation: false,
 
     async init() {
         if (!window.exigerConnexion('livreur')) return;
-        await Promise.all([this.charger(), this.chargerBord()]);
+        await Promise.all([this.charger(), this.chargerBord(), this.chargerInvitations()]);
+    },
+
+    async chargerInvitations() {
+        try {
+            const r = await window.api.get('/livreur/invitations');
+            this.invitations = r.data ?? [];
+            this.monId = r.mon_identifiant ?? null;
+        } catch { this.invitations = []; }
+    },
+
+    async repondre(inv, reponse) {
+        if (reponse === 'refuser' && !confirm(`Refuser l’invitation de ${inv.boutique} ?`)) return;
+        this.enCoursInvitation = true;
+        try {
+            const r = await window.api.post(`/livreur/invitations/${inv.boutique_id}`, { reponse });
+            window.alert(r.message);
+            await this.chargerInvitations();
+        } catch (e) {
+            window.alert(e.message);
+        } finally {
+            this.enCoursInvitation = false;
+        }
     },
 
     async chargerBord() {

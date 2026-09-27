@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\VerificationQrController;
 use App\Http\Controllers\BoiteSmsTestController;
+use App\Http\Controllers\CandidatureWebController;
 use App\Http\Controllers\CommandeWebController;
 use App\Http\Controllers\ProtectionClientController;
 use App\Http\Controllers\SuiviCommandeController;
@@ -95,6 +96,11 @@ Route::post('/commande/{reference}/colis/{colis}/confirmer', [ProtectionClientCo
  * prouvé est retenu en session pour cette commande (VerifieTelephoneCommande).
  */
 Route::get('/suivi', [SuiviCommandeController::class, 'formulaire'])->name('suivi');
+
+// Candidature vendeur : traitée à la main dans la console (Candidatures).
+Route::get('/ouvrir-ma-boutique', [CandidatureWebController::class, 'formulaire'])->name('devenir-vendeur');
+Route::post('/ouvrir-ma-boutique', [CandidatureWebController::class, 'enregistrer'])
+    ->middleware('throttle:formulaire')->name('devenir-vendeur.enregistrer');
 Route::post('/suivi', [SuiviCommandeController::class, 'rechercher'])
     ->middleware('throttle:suivi')->name('suivi.rechercher');
 Route::post('/commande/{reference}/colis/{colis}/renvoyer-code', [SuiviCommandeController::class, 'renvoyerCode'])
@@ -159,6 +165,7 @@ Route::prefix('console')->name('console.')->group(function () {
     Route::get('/litiges', [ConsoleController::class, 'litiges'])->name('litiges');
     Route::get('/commandes', [ConsoleController::class, 'commandes'])->name('commandes');
     Route::get('/sequestre', [ConsoleController::class, 'sequestre'])->name('sequestre');
+    Route::get('/administrateurs', [ConsoleController::class, 'administrateurs'])->name('administrateurs');
     Route::get('/reversements', [ConsoleController::class, 'reversements'])->name('reversements');
 });
 

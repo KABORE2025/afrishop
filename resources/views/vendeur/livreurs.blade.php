@@ -26,7 +26,7 @@
             <thead><tr class="border-b"><th class="p-3">ID</th><th class="p-3">Nom</th><th class="p-3">Téléphone</th><th class="p-3">Statut</th></tr></thead>
             <tbody>
                 <template x-for="agent in agents" :key="agent.id">
-                    <tr class="border-b last:border-0"><td class="p-3" x-text="agent.id"></td><td class="p-3" x-text="agent.nom"></td><td class="p-3" x-text="agent.telephone"></td><td class="p-3" x-text="agent.statut"></td></tr>
+                    <tr class="border-b last:border-0"><td class="p-3" x-text="agent.id"></td><td class="p-3" x-text="agent.nom"></td><td class="p-3" x-text="agent.telephone"></td><td class="p-3" x-text="libelleStatut(agent.statut)"></td></tr>
                 </template>
             </tbody>
         </table>
@@ -37,18 +37,22 @@
             <template x-if="mode === 'choix'">
                 <div>
                     <h2 class="mb-4 text-lg font-bold">Ajouter un livreur</h2>
-                    <button class="btn-primaire mb-3 w-full" @click="mode = 'existant'">Rattacher un livreur existant</button>
+                    <button class="btn-primaire mb-3 w-full" @click="mode = 'existant'">Inviter un livreur déjà inscrit</button>
                     <button class="btn-secondaire w-full" @click="mode = 'nouveau'">Créer un nouveau livreur</button>
                 </div>
             </template>
 
             <template x-if="mode === 'existant'">
                 <form @submit.prevent="rattacher">
-                    <h2 class="mb-2 text-lg font-bold">Rattacher un livreur existant</h2>
-                    <p class="mb-4 text-sm text-gris">Saisissez l’identifiant Afrishop du livreur. Sa ville doit être celle de votre boutique.</p>
+                    <h2 class="mb-2 text-lg font-bold">Inviter un livreur déjà inscrit</h2>
+                    <p class="mb-4 text-sm text-gris">
+                        Demandez-lui son identifiant : il l’a en haut de son espace livreur. Sa ville doit être celle
+                        de votre boutique. Il recevra un SMS et devra <b>accepter</b> votre invitation avant de
+                        pouvoir recevoir vos colis.
+                    </p>
                     <label class="libelle" for="livreur-id">ID du livreur</label>
                     <input id="livreur-id" class="champ mb-4" type="number" min="1" required x-model="existant.livreur_id">
-                    <div class="flex justify-end gap-2"><button type="button" class="btn-secondaire" @click="modal = false">Annuler</button><button class="btn-primaire" :disabled="enCours">Rattacher</button></div>
+                    <div class="flex justify-end gap-2"><button type="button" class="btn-secondaire" @click="modal = false">Annuler</button><button class="btn-primaire" :disabled="enCours">Envoyer l’invitation</button></div>
                 </form>
             </template>
 
@@ -84,6 +88,9 @@ document.addEventListener('alpine:init', () => {
             finally { this.chargement = false; }
         },
         ouvrir(mode) { this.mode = mode; this.modal = true; this.message = null; },
+        libelleStatut(s) {
+            return { actif: 'Actif', en_attente: 'Invitation en attente', refuse: 'A refusé', suspendu: 'Suspendu' }[s] ?? s;
+        },
         async rattacher() {
             this.enCours = true;
             try { const r = await window.api.post('/vendeur/agents-remise/rattachements', { livreur_id: Number(this.existant.livreur_id) }); this.message = r.message; this.modal = false; await this.charger(); }

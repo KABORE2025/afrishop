@@ -254,7 +254,7 @@ class VendeurController extends Controller
                 return response()->json(['message' => "Ce retrait n'est plus à valider."], 422);
             }
             if ($sousCommande->retrait_tentatives >= 5) {
-                return response()->json(['message' => 'Code bloqué après 5 essais. Contactez le support Afrishop.'], 422);
+                return response()->json(['message' => 'Code bloqué après 5 essais. Appelez le service client Afrishop au '.telephone_support().'.'], 422);
             }
             if (! hash_equals((string) $sousCommande->code_retrait, $data['code_retrait'])) {
                 $tentatives = $sousCommande->retrait_tentatives + 1;
