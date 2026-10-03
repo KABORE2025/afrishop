@@ -13697,3 +13697,213 @@ Did you mean one of these?
 [2026-09-27 09:19:00] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
 [2026-09-27 09:19:00] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
 [2026-09-27 09:19:00] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
+[2026-09-27 16:13:30] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-44V89B","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-27 16:13:30] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-C4R7WE-BF-V255","statut":"expediee"} 
+[2026-09-27 16:13:31] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-VANJ7K","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-27 16:13:33] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-27 16:13:33] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-27 16:13:33] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-27 16:13:33] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-27 16:13:33] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-27 16:13:39] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-27 16:13:41] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-27 16:13:42] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
+[2026-09-27 16:13:42] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
+[2026-09-27 16:14:53] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-DR9ZSP","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-09-27 16:14:53] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-4WGVQT-BF-V135","statut":"expediee"} 
+[2026-09-27 16:14:54] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-HKQ8EM","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-09-27 16:14:56] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-09-27 16:14:56] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-27 16:14:56] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-09-27 16:14:56] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-27 16:14:56] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-09-27 16:15:01] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-09-27 16:15:03] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-09-27 16:15:03] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
+[2026-09-27 16:15:03] testing.INFO: afrishop:reconcilier-psp {"date":"2026-09-26","prestataires":1} 
+[2026-10-03 14:10:46] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-84XK3M","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-10-03 14:10:46] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-YGHJJD-BF-V540","statut":"expediee"} 
+[2026-10-03 14:10:47] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-33DSG8","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-10-03 14:10:48] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-10-03 14:10:48] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-10-03 14:10:48] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-10-03 14:10:48] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-10-03 14:10:48] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-10-03 14:10:51] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-10-03 14:10:53] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-10-03 14:10:53] testing.INFO: afrishop:reconcilier-psp {"date":"2026-10-02","prestataires":1} 
+[2026-10-03 14:10:53] testing.INFO: afrishop:reconcilier-psp {"date":"2026-10-02","prestataires":1} 
+[2026-10-03 14:17:07] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-ZR8E6U","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-10-03 14:17:07] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-TB4KFM-BF-V882","statut":"expediee"} 
+[2026-10-03 14:17:08] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-X82TGU","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-10-03 14:17:09] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-10-03 14:17:09] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-10-03 14:17:09] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-10-03 14:17:09] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-10-03 14:17:09] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-10-03 14:17:13] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-10-03 14:17:15] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-10-03 14:17:15] testing.INFO: afrishop:reconcilier-psp {"date":"2026-10-02","prestataires":1} 
+[2026-10-03 14:17:15] testing.INFO: afrishop:reconcilier-psp {"date":"2026-10-02","prestataires":1} 
+[2026-10-03 14:19:47] testing.ERROR: Call to undefined method Endroid\QrCode\Builder\Builder::create() {"userId":6,"exception":"[object] (Error(code: 0): Call to undefined method Endroid\\QrCode\\Builder\\Builder::create() at F:/Afrishop/Afrishop/3-Backend-laravel/app/Http/Controllers/Api/LotQrController.php:155)
+[stacktrace]
+#0 [internal function]: App/Http/Controllers/Api/LotQrController->{closure:App/Http/Controllers/Api/LotQrController::planche():154}(Object(App/Models/CodeQr), 0)
+#1 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Collections/Arr.php(856): array_map(Object(Closure), Array, Array)
+#2 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Collections/Collection.php(831): Illuminate/Support/Arr::map(Array, Object(Closure))
+#3 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Collection.php(421): Illuminate/Support/Collection->map(Object(Closure))
+#4 F:/Afrishop/Afrishop/3-Backend-laravel/app/Http/Controllers/Api/LotQrController.php(154): Illuminate/Database/Eloquent/Collection->map(Object(Closure))
+#5 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(46): App/Http/Controllers/Api/LotQrController->planche(Object(App/Models/LotQr))
+#6 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Route.php(276): Illuminate/Routing/ControllerDispatcher->dispatch(Object(Illuminate/Routing/Route), Object(App/Http/Controllers/Api/LotQrController), 'planche')
+#7 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Route.php(216): Illuminate/Routing/Route->runController()
+#8 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(822): Illuminate/Routing/Route->run()
+#9 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate/Routing/Router->{closure:Illuminate/Routing/Router::runRouteWithinStack():821}(Object(Illuminate/Http/Request))
+#10 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ValidateSignature.php(70): Illuminate/Pipeline/Pipeline->{closure:Illuminate/Pipeline/Pipeline::prepareDestination():178}(Object(Illuminate/Http/Request))
+#11 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Routing/Middleware/ValidateSignature->handle(Object(Illuminate/Http/Request), Object(Closure))
+#12 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(52): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#13 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Routing/Middleware/SubstituteBindings->handle(Object(Illuminate/Http/Request), Object(Closure))
+#14 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestForgery.php(104): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#15 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/PreventRequestForgery->handle(Object(Illuminate/Http/Request), Object(Closure))
+#16 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#17 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/View/Middleware/ShareErrorsFromSession->handle(Object(Illuminate/Http/Request), Object(Closure))
+#18 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#19 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate/Session/Middleware/StartSession->handleStatefulRequest(Object(Illuminate/Http/Request), Object(Illuminate/Session/Store), Object(Closure))
+#20 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Session/Middleware/StartSession->handle(Object(Illuminate/Http/Request), Object(Closure))
+#21 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#22 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse->handle(Object(Illuminate/Http/Request), Object(Closure))
+#23 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#24 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Cookie/Middleware/EncryptCookies->handle(Object(Illuminate/Http/Request), Object(Closure))
+#25 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#26 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate/Pipeline/Pipeline->then(Object(Closure))
+#27 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate/Routing/Router->runRouteWithinStack(Object(Illuminate/Routing/Route), Object(Illuminate/Http/Request))
+#28 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate/Routing/Router->runRoute(Object(Illuminate/Http/Request), Object(Illuminate/Routing/Route))
+#29 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate/Routing/Router->dispatchToRoute(Object(Illuminate/Http/Request))
+#30 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate/Routing/Router->dispatch(Object(Illuminate/Http/Request))
+#31 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate/Foundation/Http/Kernel->{closure:Illuminate/Foundation/Http/Kernel::dispatchToRouter():197}(Object(Illuminate/Http/Request))
+#32 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate/Pipeline/Pipeline->{closure:Illuminate/Pipeline/Pipeline::prepareDestination():178}(Object(Illuminate/Http/Request))
+#33 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate/Foundation/Http/Middleware/TransformsRequest->handle(Object(Illuminate/Http/Request), Object(Closure))
+#34 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull->handle(Object(Illuminate/Http/Request), Object(Closure))
+#35 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#36 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate/Foundation/Http/Middleware/TransformsRequest->handle(Object(Illuminate/Http/Request), Object(Closure))
+#37 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/TrimStrings->handle(Object(Illuminate/Http/Request), Object(Closure))
+#38 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#39 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Http/Middleware/ValidatePostSize->handle(Object(Illuminate/Http/Request), Object(Closure))
+#40 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#41 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance->handle(Object(Illuminate/Http/Request), Object(Closure))
+#42 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#43 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Http/Middleware/HandleCors->handle(Object(Illuminate/Http/Request), Object(Closure))
+#44 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#45 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Http/Middleware/TrustProxies->handle(Object(Illuminate/Http/Request), Object(Closure))
+#46 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#47 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks->handle(Object(Illuminate/Http/Request), Object(Closure))
+#48 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(28): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#49 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Http/Middleware/ValidatePathEncoding->handle(Object(Illuminate/Http/Request), Object(Closure))
+#50 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#51 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate/Pipeline/Pipeline->then(Object(Closure))
+#52 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate/Foundation/Http/Kernel->sendRequestThroughRouter(Object(Illuminate/Http/Request))
+#53 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(638): Illuminate/Foundation/Http/Kernel->handle(Object(Illuminate/Http/Request))
+#54 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(368): Illuminate/Foundation/Testing/TestCase->call('GET', 'http://localhos...', Array, Array, Array, Array)
+#55 F:/Afrishop/Afrishop/3-Backend-laravel/tests/Feature/EtiquettesQrTest.php(82): Illuminate/Foundation/Testing/TestCase->get('http://localhos...')
+#56 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestCase.php(1318): Tests/Feature/EtiquettesQrTest->test_la_planche_ne_s_ouvre_que_par_un_lien_signe()
+#57 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestCase.php(1355): PHPUnit/Framework/TestCase->invokeTestMethod('test_la_planche...', Array)
+#58 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestCase.php(521): PHPUnit/Framework/TestCase->runTest()
+#59 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestRunner/TestRunner.php(99): PHPUnit/Framework/TestCase->runBare()
+#60 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestCase.php(361): PHPUnit/Framework/TestRunner->run(Object(Tests/Feature/EtiquettesQrTest))
+#61 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestSuite.php(374): PHPUnit/Framework/TestCase->run()
+#62 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestSuite.php(374): PHPUnit/Framework/TestSuite->run()
+#63 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestSuite.php(374): PHPUnit/Framework/TestSuite->run()
+#64 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(64): PHPUnit/Framework/TestSuite->run()
+#65 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/TextUI/Application.php(229): PHPUnit/TextUI/TestRunner->run(Object(PHPUnit/TextUI/Configuration/Configuration), Object(PHPUnit/Runner/ResultCache/DefaultResultCache), Object(PHPUnit/Framework/TestSuite))
+#66 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/phpunit(104): PHPUnit/TextUI/Application->run(Array)
+#67 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/bin/phpunit(122): include('F://Afrishop//Afr...')
+#68 {main}
+"} 
+[2026-10-03 14:20:56] testing.ERROR: Call to undefined method App\Models\ScanQr::hacher() {"userId":6,"exception":"[object] (BadMethodCallException(code: 0): Call to undefined method App\\Models\\ScanQr::hacher() at F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php:67)
+[stacktrace]
+#0 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php(36): Illuminate/Database/Eloquent/Model::throwBadMethodCallException('hacher')
+#1 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(2842): Illuminate/Database/Eloquent/Model->forwardCallTo(Object(Illuminate/Database/Eloquent/Builder), 'hacher', Array)
+#2 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php(2858): Illuminate/Database/Eloquent/Model->__call('hacher', Array)
+#3 F:/Afrishop/Afrishop/3-Backend-laravel/app/Services/LotQrService.php(287): Illuminate/Database/Eloquent/Model::__callStatic('hacher', Array)
+#4 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Database/Concerns/ManagesTransactions.php(35): App/Services/LotQrService->{closure:App/Services/LotQrService::enregistrerScan():282}(Object(Illuminate/Database/MySqlConnection))
+#5 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(502): Illuminate/Database/Connection->transaction(Object(Closure))
+#6 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(364): Illuminate/Database/DatabaseManager->__call('transaction', Array)
+#7 F:/Afrishop/Afrishop/3-Backend-laravel/app/Services/LotQrService.php(282): Illuminate/Support/Facades/Facade::__callStatic('transaction', Array)
+#8 F:/Afrishop/Afrishop/3-Backend-laravel/app/Services/LotQrService.php(250): App/Services/LotQrService->enregistrerScan(Object(App/Models/CodeQr), '127.0.0.1', 'Symfony', NULL)
+#9 F:/Afrishop/Afrishop/3-Backend-laravel/app/Http/Controllers/Api/VerificationQrController.php(33): App/Services/LotQrService->verifier('MDP8SEQTTVEY', '127.0.0.1', 'Symfony', NULL)
+#10 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(46): App/Http/Controllers/Api/VerificationQrController->verifier(Object(Illuminate/Http/Request), 'MDP8SEQTTVEY')
+#11 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Route.php(276): Illuminate/Routing/ControllerDispatcher->dispatch(Object(Illuminate/Routing/Route), Object(App/Http/Controllers/Api/VerificationQrController), 'verifier')
+#12 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Route.php(216): Illuminate/Routing/Route->runController()
+#13 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(822): Illuminate/Routing/Route->run()
+#14 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate/Routing/Router->{closure:Illuminate/Routing/Router::runRouteWithinStack():821}(Object(Illuminate/Http/Request))
+#15 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(52): Illuminate/Pipeline/Pipeline->{closure:Illuminate/Pipeline/Pipeline::prepareDestination():178}(Object(Illuminate/Http/Request))
+#16 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Routing/Middleware/SubstituteBindings->handle(Object(Illuminate/Http/Request), Object(Closure))
+#17 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(168): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#18 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(93): Illuminate/Routing/Middleware/ThrottleRequests->handleRequest(Object(Illuminate/Http/Request), Object(Closure), Array)
+#19 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Routing/Middleware/ThrottleRequests->handle(Object(Illuminate/Http/Request), Object(Closure), '60', '1')
+#20 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestForgery.php(104): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#21 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/PreventRequestForgery->handle(Object(Illuminate/Http/Request), Object(Closure))
+#22 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#23 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/View/Middleware/ShareErrorsFromSession->handle(Object(Illuminate/Http/Request), Object(Closure))
+#24 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#25 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate/Session/Middleware/StartSession->handleStatefulRequest(Object(Illuminate/Http/Request), Object(Illuminate/Session/Store), Object(Closure))
+#26 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Session/Middleware/StartSession->handle(Object(Illuminate/Http/Request), Object(Closure))
+#27 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#28 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse->handle(Object(Illuminate/Http/Request), Object(Closure))
+#29 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#30 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Cookie/Middleware/EncryptCookies->handle(Object(Illuminate/Http/Request), Object(Closure))
+#31 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#32 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate/Pipeline/Pipeline->then(Object(Closure))
+#33 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate/Routing/Router->runRouteWithinStack(Object(Illuminate/Routing/Route), Object(Illuminate/Http/Request))
+#34 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate/Routing/Router->runRoute(Object(Illuminate/Http/Request), Object(Illuminate/Routing/Route))
+#35 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate/Routing/Router->dispatchToRoute(Object(Illuminate/Http/Request))
+#36 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate/Routing/Router->dispatch(Object(Illuminate/Http/Request))
+#37 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate/Foundation/Http/Kernel->{closure:Illuminate/Foundation/Http/Kernel::dispatchToRouter():197}(Object(Illuminate/Http/Request))
+#38 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate/Pipeline/Pipeline->{closure:Illuminate/Pipeline/Pipeline::prepareDestination():178}(Object(Illuminate/Http/Request))
+#39 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate/Foundation/Http/Middleware/TransformsRequest->handle(Object(Illuminate/Http/Request), Object(Closure))
+#40 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull->handle(Object(Illuminate/Http/Request), Object(Closure))
+#41 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#42 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate/Foundation/Http/Middleware/TransformsRequest->handle(Object(Illuminate/Http/Request), Object(Closure))
+#43 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/TrimStrings->handle(Object(Illuminate/Http/Request), Object(Closure))
+#44 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#45 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Http/Middleware/ValidatePostSize->handle(Object(Illuminate/Http/Request), Object(Closure))
+#46 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#47 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance->handle(Object(Illuminate/Http/Request), Object(Closure))
+#48 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(61): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#49 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Http/Middleware/HandleCors->handle(Object(Illuminate/Http/Request), Object(Closure))
+#50 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#51 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Http/Middleware/TrustProxies->handle(Object(Illuminate/Http/Request), Object(Closure))
+#52 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#53 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks->handle(Object(Illuminate/Http/Request), Object(Closure))
+#54 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(28): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#55 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate/Http/Middleware/ValidatePathEncoding->handle(Object(Illuminate/Http/Request), Object(Closure))
+#56 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate/Pipeline/Pipeline->{closure:{closure:Illuminate/Pipeline/Pipeline::carry():194}:195}(Object(Illuminate/Http/Request))
+#57 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate/Pipeline/Pipeline->then(Object(Closure))
+#58 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate/Foundation/Http/Kernel->sendRequestThroughRouter(Object(Illuminate/Http/Request))
+#59 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(638): Illuminate/Foundation/Http/Kernel->handle(Object(Illuminate/Http/Request))
+#60 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(368): Illuminate/Foundation/Testing/TestCase->call('GET', '/v/MDP8SEQTTVEY', Array, Array, Array, Array)
+#61 F:/Afrishop/Afrishop/3-Backend-laravel/tests/Feature/EtiquettesQrTest.php(86): Illuminate/Foundation/Testing/TestCase->get('/v/MDP8SEQTTVEY')
+#62 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestCase.php(1318): Tests/Feature/EtiquettesQrTest->test_la_planche_ne_s_ouvre_que_par_un_lien_signe()
+#63 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestCase.php(1355): PHPUnit/Framework/TestCase->invokeTestMethod('test_la_planche...', Array)
+#64 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestCase.php(521): PHPUnit/Framework/TestCase->runTest()
+#65 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestRunner/TestRunner.php(99): PHPUnit/Framework/TestCase->runBare()
+#66 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestCase.php(361): PHPUnit/Framework/TestRunner->run(Object(Tests/Feature/EtiquettesQrTest))
+#67 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestSuite.php(374): PHPUnit/Framework/TestCase->run()
+#68 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestSuite.php(374): PHPUnit/Framework/TestSuite->run()
+#69 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/Framework/TestSuite.php(374): PHPUnit/Framework/TestSuite->run()
+#70 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(64): PHPUnit/Framework/TestSuite->run()
+#71 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/src/TextUI/Application.php(229): PHPUnit/TextUI/TestRunner->run(Object(PHPUnit/TextUI/Configuration/Configuration), Object(PHPUnit/Runner/ResultCache/DefaultResultCache), Object(PHPUnit/Framework/TestSuite))
+#72 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/phpunit/phpunit/phpunit(104): PHPUnit/TextUI/Application->run(Array)
+#73 F:/Afrishop/Afrishop/3-Backend-laravel/vendor/bin/phpunit(122): include('F://Afrishop//Afr...')
+#74 {main}
+"} 
+[2026-10-03 14:24:22] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-TYDDB4","transaction":48,"raison":"paiement reçu après annulation de la commande"} 
+[2026-10-03 14:24:23] testing.WARNING: Paiement jamais encaissé pour un colis déjà parti : examen humain requis. {"sous_commande":"BF-CMD-2026-2VQRF6-BF-V252","statut":"expediee"} 
+[2026-10-03 14:24:23] testing.WARNING: Encaissement sans commande à honorer : remboursement à effectuer {"commande":"BF-CMD-2026-KBHUKT","transaction":57,"raison":"paiement en double (la commande était déjà payée)"} 
+[2026-10-03 14:24:24] testing.INFO: afrishop:liberer-fonds {"liberees":0} 
+[2026-10-03 14:24:24] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-10-03 14:24:24] testing.INFO: afrishop:liberer-fonds {"liberees":1} 
+[2026-10-03 14:24:24] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-10-03 14:24:24] testing.INFO: afrishop:preparer-reversements {"nombre":0} 
+[2026-10-03 14:24:28] local.INFO: [SMS simulé] → 22670001122 : Afrishop : votre code de livraison pour BF-CMD-TEST-1 est 482913. Donnez-le au livreur après vérification du colis.  
+[2026-10-03 14:24:32] testing.INFO: afrishop:preparer-reversements {"nombre":1} 
+[2026-10-03 14:24:32] testing.INFO: afrishop:reconcilier-psp {"date":"2026-10-02","prestataires":1} 
+[2026-10-03 14:24:32] testing.INFO: afrishop:reconcilier-psp {"date":"2026-10-02","prestataires":1} 

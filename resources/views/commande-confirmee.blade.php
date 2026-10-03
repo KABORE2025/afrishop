@@ -167,6 +167,32 @@
       @endforeach
     </table>
 
+    {{-- ANNULATION : tant que la boutique n'a rien préparé. --}}
+    @if ($paye && $sc->statut === 'a_preparer' && $sc->etat_fonds->value === 'sequestre')
+      <details style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bord);font-size:14px">
+        <summary style="cursor:pointer;color:var(--gris)">Annuler ce colis</summary>
+        <form method="post" action="{{ route('commande.annuler', [$commande->reference, $sc->reference]) }}"
+              style="margin-top:10px;display:grid;gap:8px"
+              onsubmit="return confirm('Annuler ce colis ? Vous serez remboursé.')">
+          @csrf
+              @unless ($verifiee)
+              <label>
+                <span style="display:block;font-size:13px;color:var(--gris)">Téléphone utilisé pour la commande</span>
+                <input name="telephone" inputmode="tel" required value="{{ old('telephone') }}" style="{{ $champ }}">
+              </label>
+              @endunless
+          <p style="margin:0;font-size:12px;color:var(--gris)">
+            Possible tant que la boutique n'a pas commencé à préparer le colis. Vous êtes remboursé sur le compte qui a payé.
+          </p>
+          <div><button type="submit" class="chip" style="padding:10px 18px">Confirmer l'annulation</button></div>
+        </form>
+      </details>
+    @elseif ($sc->statut === 'annulee' && $sc->etat_fonds->value === 'rembourse')
+      <p style="margin:12px 0 0;font-size:14px;color:var(--gris)">Colis annulé : vous êtes remboursé.</p>
+    @elseif ($sc->statut === 'retournee')
+      <p style="margin:12px 0 0;font-size:14px;color:var(--gris)">Article retourné à la boutique : vous êtes remboursé.</p>
+    @endif
+
     {{-- RENVOI DU CODE : le même code, vers le téléphone de la commande —
          jamais vers un numéro saisi ici (CodeRemiseService). --}}
     @if ($paye && $codes->codeEnAttente($sc))
@@ -206,6 +232,7 @@
       $litigeOuvert  = $sc->litiges->first(fn ($l) => $l->estOuvert());
       $litigeTranche = $sc->litiges->sortByDesc('id')->first(fn ($l) => ! $l->estOuvert());
       $fin = $protection->finProtection($sc);
+      $retour = $sc->retours->sortByDesc('id')->first();
     @endphp
 
     @if ($sc->statut === 'livree')
@@ -221,6 +248,16 @@
             — {{ $litigeTranche->statut === 'resolu_client' ? 'en votre faveur : vous êtes remboursé.' : 'en faveur de la boutique.' }}
             @if ($litigeTranche->resolution)
               <span style="display:block;color:var(--gris)">{{ $litigeTranche->resolution }}</span>
+            @endif
+          </p>
+        @elseif ($retour && in_array($retour->statut, ['demande', 'accepte', 'en_transit', 'recu'], true))
+          <p style="margin:0;color:#a1690f">
+            <b>Retour {{ $retour->reference }}</b> —
+            @if ($retour->statut === 'demande')
+              en attente de la réponse de la boutique.
+            @else
+              accepté : rapportez l'article à la boutique{{ $retour->frais_a_la_charge === 'client' ? ' (renvoi à votre charge)' : '' }}.
+              Vous serez remboursé dès qu'elle l'aura reçu.
             @endif
           </p>
         @elseif ($sc->confirme_par_client_le)
@@ -310,6 +347,44 @@
               </div>
             </form>
           </details>
+
+          @if ($retour?->statut === 'refuse')
+            <p style="margin:10px 0 0;font-size:13px;color:var(--gris)">
+              Votre demande de retour a été refusée par la boutique : {{ $retour->motif_refus }}.
+            </p>
+          @elseif (! $retour)
+            <details style="margin-top:8px" @if (old('motif_retour')) open @endif>
+              <summary class="chip" style="cursor:pointer;display:inline-block">Retourner l'article</summary>
+              <form method="post" action="{{ route('commande.retour', [$commande->reference, $sc->reference]) }}"
+                    style="margin-top:10px;display:grid;gap:8px">
+                @csrf
+              @unless ($verifiee)
+              <label>
+                <span style="display:block;font-size:13px;color:var(--gris)">Téléphone utilisé pour la commande</span>
+                <input name="telephone" inputmode="tel" required value="{{ old('telephone') }}" style="{{ $champ }}">
+              </label>
+              @endunless
+                <label>
+                  <span style="display:block;font-size:13px;color:var(--gris)">Pourquoi ?</span>
+                  <select name="motif" required style="{{ $champ }}">
+                    <option value="ne_convient_pas">L'article ne me convient pas</option>
+                    <option value="taille_incorrecte">Mauvaise taille</option>
+                    <option value="erreur_commande">La boutique m'a envoyé un autre article</option>
+                    <option value="autre">Autre raison</option>
+                  </select>
+                </label>
+                <label>
+                  <span style="display:block;font-size:13px;color:var(--gris)">Précisions (facultatif)</span>
+                  <textarea name="commentaire" rows="2" maxlength="1000" style="{{ $champ }}"></textarea>
+                </label>
+                <p style="margin:0;font-size:12px;color:var(--gris)">
+                  L'article doit être rendu dans l'état reçu. Le renvoi est à votre charge, sauf si la boutique s'est trompée.
+                  Vous êtes remboursé quand la boutique l'a reçu. Pour un article cassé ou faux, utilisez plutôt « Signaler un problème ».
+                </p>
+                <div><button type="submit" class="chip" style="padding:10px 18px">Demander le retour</button></div>
+              </form>
+            </details>
+          @endif
         @elseif ($fin && $fin->isPast())
           <p style="margin:0;color:var(--gris)">
             Délai de vérification écoulé : pour un problème, appelez le service client Afrishop au
@@ -317,6 +392,45 @@
           </p>
         @endif
       </div>
+
+      {{-- AVIS : un par produit du colis, seulement après la remise. --}}
+      @php
+        $produitsColis = $sc->lignes->filter(fn ($l) => $l->variante?->produit_id)->unique(fn ($l) => $l->variante->produit_id);
+      @endphp
+      @foreach ($produitsColis as $l)
+        @php $avis = $avisDonnes[$sc->id.'-'.$l->variante->produit_id] ?? null; @endphp
+        <div style="margin-top:10px;font-size:14px">
+          @if ($avis)
+            <p style="margin:0;color:var(--gris)">Votre avis sur « {{ $l->nom_produit }} » :
+              <span style="color:var(--brun)">{{ str_repeat('★', $avis->note) }}{{ str_repeat('☆', 5 - $avis->note) }}</span></p>
+          @else
+            <details>
+              <summary style="cursor:pointer;color:var(--brun);font-weight:600">Donner mon avis sur « {{ $l->nom_produit }} »</summary>
+              <form method="post" action="{{ route('commande.avis', [$commande->reference, $sc->reference]) }}"
+                    style="margin-top:8px;display:grid;gap:8px">
+                @csrf
+                <input type="hidden" name="produit_id" value="{{ $l->variante->produit_id }}">
+              @unless ($verifiee)
+              <label>
+                <span style="display:block;font-size:13px;color:var(--gris)">Téléphone utilisé pour la commande</span>
+                <input name="telephone" inputmode="tel" required value="{{ old('telephone') }}" style="{{ $champ }}">
+              </label>
+              @endunless
+                <fieldset style="border:0;padding:0;margin:0;display:flex;gap:10px;flex-wrap:wrap">
+                  <legend style="font-size:13px;color:var(--gris);margin-bottom:4px">Note</legend>
+                  @for ($n = 5; $n >= 1; $n--)
+                    <label style="cursor:pointer"><input type="radio" name="note" value="{{ $n }}" required>
+                      <span style="color:var(--brun)">{{ str_repeat('★', $n) }}</span></label>
+                  @endfor
+                </fieldset>
+                <textarea name="commentaire" rows="2" maxlength="1000" style="{{ $champ }}"
+                          placeholder="Qualité, conformité à la photo, délai… (facultatif)"></textarea>
+                <div><button type="submit" class="chip" style="padding:9px 16px">Publier mon avis</button></div>
+              </form>
+            </details>
+          @endif
+        </div>
+      @endforeach
     @endif
   </div>
 @endforeach

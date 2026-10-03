@@ -257,7 +257,7 @@ class CommandeWebController extends Controller
     public function confirmee(string $reference): View
     {
         $commande = Commande::where('reference', $reference)
-            ->with(['sousCommandes.boutique', 'sousCommandes.lignes', 'sousCommandes.litiges'])
+            ->with(['sousCommandes.boutique', 'sousCommandes.lignes.variante:id,produit_id', 'sousCommandes.litiges', 'sousCommandes.retours'])
             ->firstOrFail();
 
         // Fenêtre de protection : le service décide, la vue ne fait
@@ -269,6 +269,11 @@ class CommandeWebController extends Controller
         // précédent) : les formulaires n'ont plus à le redemander.
         $verifiee = in_array($reference, (array) session('commandes_verifiees', []), true);
 
-        return view('commande-confirmee', compact('commande', 'protection', 'codes', 'verifiee'));
+        // Avis déjà donnés, par « colis-produit » : un seul par produit et par colis.
+        $avisDonnes = \App\Models\Avis::whereIn('sous_commande_id', $commande->sousCommandes->pluck('id'))
+            ->get(['sous_commande_id', 'produit_id', 'note'])
+            ->keyBy(fn ($a) => $a->sous_commande_id.'-'.$a->produit_id);
+
+        return view('commande-confirmee', compact('commande', 'protection', 'codes', 'verifiee', 'avisDonnes'));
     }
 }

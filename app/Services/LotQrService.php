@@ -55,9 +55,9 @@ class LotQrService
      * @param  int  $creeParId  L'administrateur qui génère le lot
      * @param  int|null  $demandeParId  Le vendeur à l'origine de la demande
      */
-    public function creerLot(array $donnees, int $creeParId, ?int $demandeParId = null): LotQr
+    public function creerLot(array $donnees, int $creeParId, ?int $demandeParId = null, ?LotQr $demande = null): LotQr
     {
-        $produit = Produit::findOrFail($donnees['produit_id']);
+        $produit = Produit::with('boutique')->findOrFail($donnees['produit_id']);
 
         // Garde-fou métier : on ne colle pas de date de péremption sur
         // un panier en osier. Le drapeau « tracable » est posé à la
@@ -87,16 +87,26 @@ class LotQrService
             throw new RuntimeException("La date d'expiration doit être postérieure à la date de fabrication.");
         }
 
-        // Si le numéro de départ n'est pas fourni, on reprend la
-        // numérotation là où le lot précédent s'est arrêté.
-        $numeroDebut = $donnees['numero_debut'] ?? LotQr::prochainNumeroDebut($produit->id);
+        return DB::transaction(function () use ($donnees, $produit, $quantite, $fabrication, $expiration, $creeParId, $demandeParId, $demande) {
 
-        return DB::transaction(function () use ($donnees, $produit, $quantite, $fabrication, $expiration, $numeroDebut, $creeParId, $demandeParId) {
+            // L'étiquette lisible est « date de fabrication / numéro », et
+            // elle est UNIQUE sur toute la plateforme. Numéroter par produit
+            // faisait collisionner deux produits fabriqués le même jour
+            // (02/08/2026/0001 deux fois) : la génération échouait. La
+            // numérotation suit donc la DATE, tous produits confondus.
+            $suivant = LotQr::prochainNumeroPourDate($fabrication);
+            $numeroDebut = $donnees['numero_debut'] ?? $suivant;
+            if ($numeroDebut < $suivant && LotQr::numerosOccupes($fabrication, $numeroDebut, $quantite)) {
+                throw new RuntimeException("Ces numéros sont déjà utilisés pour la date {$fabrication->format('d/m/Y')}. "
+                    ."Laissez le numéro de départ vide (prochain libre : {$suivant}).");
+            }
 
-            $lot = LotQr::create([
+            $attributs = [
                 'produit_id'       => $produit->id,
                 'boutique_id'      => $produit->boutique_id,
-                'reference'        => LotQr::prochaineReference(),
+                // Colonne obligatoire, jamais renseignée : toute création
+                // de lot échouait en base.
+                'pays_id'          => $produit->boutique->pays_id,
                 'date_fabrication' => $fabrication,
                 'date_expiration'  => $expiration,
                 'fabricant'        => $donnees['fabricant'],
@@ -107,7 +117,15 @@ class LotQrService
                 'statut'           => StatutLotQr::Genere,
                 'cree_par_id'      => $creeParId,
                 'demande_par_id'   => $demandeParId,
-            ]);
+            ];
+
+            // Demande d'une boutique : on la transforme en lot, même référence.
+            if ($demande) {
+                $demande->update(array_merge($attributs, ['reference' => $demande->reference, 'demande_par_id' => $demande->demande_par_id]));
+                $lot = $demande->fresh();
+            } else {
+                $lot = LotQr::create(array_merge($attributs, ['reference' => LotQr::prochaineReference()]));
+            }
 
             $this->genererCodes($lot);
 

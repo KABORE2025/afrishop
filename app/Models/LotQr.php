@@ -76,6 +76,27 @@ class LotQr extends Model
         return $dernier ? $dernier->numeroFin() + 1 : 1;
     }
 
+    /** Prochain numéro libre pour une date de fabrication, tous produits confondus. */
+    public static function prochainNumeroPourDate(\DateTimeInterface $date): int
+    {
+        $max = CodeQr::query()
+            ->join('lots_qr', 'lots_qr.id', '=', 'codes_qr.lot_qr_id')
+            ->whereDate('lots_qr.date_fabrication', $date)
+            ->max('codes_qr.numero');
+
+        return $max ? ((int) $max) + 1 : 1;
+    }
+
+    /** Une plage de numéros chevauche-t-elle des étiquettes existantes à cette date ? */
+    public static function numerosOccupes(\DateTimeInterface $date, int $debut, int $quantite): bool
+    {
+        return CodeQr::query()
+            ->join('lots_qr', 'lots_qr.id', '=', 'codes_qr.lot_qr_id')
+            ->whereDate('lots_qr.date_fabrication', $date)
+            ->whereBetween('codes_qr.numero', [$debut, $debut + $quantite - 1])
+            ->exists();
+    }
+
     /** Référence lisible du lot : LOT-2026-0004. */
     public static function prochaineReference(): string
     {

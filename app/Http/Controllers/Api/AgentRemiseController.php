@@ -59,6 +59,15 @@ class AgentRemiseController extends Controller
                     .'il le trouve en haut de son espace livreur.');
             }
 
+            // Compte pas encore activé (créé par inviter(), sans mot de
+            // passe) : il ne peut ni se connecter ni accepter une
+            // invitation, et réécrire son affiliation effaçait le code
+            // d'activation reçu par SMS — compte bloqué pour toujours.
+            if ($livreur->mot_de_passe === null) {
+                abort(422, 'Ce livreur n’a pas encore activé son compte. Il doit d’abord l’activer avec '
+                    .'le code reçu par SMS ; vous pourrez l’inviter ensuite.');
+            }
+
             $affiliation = AgentRemiseBoutique::firstOrNew([
                 'livreur_id' => $livreur->id, 'boutique_id' => $boutique->id,
             ]);
@@ -185,8 +194,9 @@ class AgentRemiseController extends Controller
             $affiliation->save();
             Notification::create([
                 'telephone' => $data['telephone'], 'canal' => 'sms',
-                'corps_envoye' => "Afrishop : {$boutique->nom} vous invite comme agent de remise. Code d'activation : {$code}. Valable 7 jours.",
-                'statut' => 'en_file', 'nb_segments' => 1,
+                'corps_envoye' => "Afrishop : {$boutique->nom} vous invite comme livreur. Code d'activation : {$code}, valable 7 jours. "
+                    .'Activez votre compte sur '.route('livreur.activer'),
+                'statut' => 'en_file', 'nb_segments' => 2,
             ]);
             return $affiliation;
         });

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\Notification;
+use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\CreeDonneesTrait;
 use Tests\TestCase;
@@ -99,6 +101,38 @@ class AgentRemiseTest extends TestCase
 
         $this->assertDatabaseMissing('agents_remise_boutiques', [
             'boutique_id' => $boutique->id, 'livreur_id' => $livreur->id,
+        ]);
+    }
+
+    /**
+     * Revue du 27/09 : inviter par son identifiant un livreur qui n'a pas
+     * encore activé son compte effaçait son code d'activation. Il ne
+     * pouvait plus ni s'activer ni se connecter : compte bloqué.
+     */
+    public function test_un_livreur_non_active_ne_peut_pas_etre_invite_et_garde_son_code(): void
+    {
+        $pays = $this->creerPays();
+        $ville = $this->creerVille($pays);
+        ['boutique' => $boutique, 'utilisateur' => $vendeur] = $this->creerBoutiqueAvecVendeur($pays, ['ville_id' => $ville->id]);
+
+        $this->actingAs($vendeur, 'sanctum')->postJson('/api/vendeur/agents-remise/invitations', [
+            'nom' => 'Livreur Neuf', 'telephone' => '22670123456', 'cnib' => 'B1234567',
+        ])->assertCreated();
+        $livreur = Utilisateur::where('telephone', '22670123456')->firstOrFail();
+        preg_match('/\b(\d{6})\b/', Notification::where('telephone', '22670123456')->latest('id')->first()->corps_envoye, $m);
+
+        $this->actingAs($vendeur, 'sanctum')
+            ->postJson('/api/vendeur/agents-remise/rattachements', ['livreur_id' => $livreur->id])
+            ->assertStatus(422);
+
+        // Le code reçu par SMS fonctionne toujours.
+        $this->postJson('/api/agents-remise/activer', [
+            'cnib' => 'B1234567', 'telephone' => '22670123456', 'code' => $m[1],
+            'mot_de_passe' => 'motdepasse123', 'mot_de_passe_confirmation' => 'motdepasse123',
+        ])->assertOk();
+
+        $this->assertDatabaseHas('agents_remise_boutiques', [
+            'boutique_id' => $boutique->id, 'livreur_id' => $livreur->id, 'statut' => 'actif',
         ]);
     }
 

@@ -1,17 +1,22 @@
 <?php
 
+use App\Http\Controllers\Api\AdminBoutiqueController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminReglagesController;
 use App\Http\Controllers\Api\AdminSuiviController;
 use App\Http\Controllers\Api\AdministrateurController;
 use App\Http\Controllers\Api\AgentRemiseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogueController;
 use App\Http\Controllers\Api\CommandeController;
+use App\Http\Controllers\Api\CompteController;
 use App\Http\Controllers\Api\LivreurController;
 use App\Http\Controllers\Api\LotQrController;
+use App\Http\Controllers\Api\MaBoutiqueController;
 use App\Http\Controllers\Api\PaiementWebhookController;
 use App\Http\Controllers\Api\TransporteurController;
 use App\Http\Controllers\Api\VendeurController;
+use App\Http\Controllers\Api\VendeurRetourController;
 use App\Http\Controllers\Api\VerificationQrController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,9 +48,13 @@ use Illuminate\Support\Facades\Route;
 // rien n'empêchait d'essayer des milliers de mots de passe par minute.
 Route::post('/auth/inscription', [AuthController::class, 'inscrire'])->middleware('throttle:inscription');
 Route::post('/auth/connexion', [AuthController::class, 'connecter'])->middleware('throttle:connexion');
+// Mot de passe oublié : code par SMS au numéro du compte (CompteController).
+Route::post('/auth/mot-de-passe-oublie', [CompteController::class, 'demanderCode'])->middleware('throttle:reinitialisation');
+Route::post('/auth/reinitialiser', [CompteController::class, 'reinitialiser'])->middleware('throttle:reinitialisation');
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/deconnexion', [AuthController::class, 'deconnecter']);
     Route::get('/auth/moi', [AuthController::class, 'moi']);
+    Route::post('/auth/mot-de-passe', [CompteController::class, 'changerMotDePasse']);
 });
 
 // ---------------------------------------------------------------------
@@ -120,7 +129,20 @@ Route::middleware(['auth:sanctum', 'role:vendeur'])->prefix('vendeur')->group(fu
     // Le vendeur DEMANDE un lot d'étiquettes ; il ne le génère pas.
     // Lui laisser générer ses propres codes reviendrait à lui laisser
     // fabriquer ses propres preuves d'authenticité.
-    Route::post('/lots-qr/demandes', [VendeurController::class, 'demanderLotQr']);
+    // Étiquettes QR : la boutique DEMANDE, Afrishop génère.
+    Route::get('/lots-qr', [LotQrController::class, 'mesLots']);
+    Route::post('/lots-qr/demandes', [LotQrController::class, 'demander']);
+
+    // Ma boutique : fiche, logo, compte de paiement (re-vérifié à chaque changement).
+    Route::get('/boutique', [MaBoutiqueController::class, 'voir']);
+    Route::put('/boutique', [MaBoutiqueController::class, 'modifier']);
+    Route::put('/boutique/paiement', [MaBoutiqueController::class, 'modifierPaiement']);
+    Route::post('/boutique/logo', [MaBoutiqueController::class, 'logo']);
+
+    // Retours demandés par les clients (RetourService).
+    Route::post('/retours/{retour}/accepter', [VendeurRetourController::class, 'accepter']);
+    Route::post('/retours/{retour}/refuser', [VendeurRetourController::class, 'refuser']);
+    Route::post('/retours/{retour}/recevoir', [VendeurRetourController::class, 'recevoir']);
 });
 
 // Le livreur est le seul acteur qui peut présenter et valider le code
@@ -209,8 +231,26 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     // Modération du catalogue : publier ou refuser une fiche produit.
     Route::post('/produits/{produit}/moderer', [AdminController::class, 'modererProduit']);
 
+    // Étiquettes QR. La planche s'imprime par un lien SIGNÉ (routes/web.php).
+    Route::get('/lots-qr', [LotQrController::class, 'index']);
     Route::post('/lots-qr', [LotQrController::class, 'creer']);
-    Route::get('/lots-qr/{lot}/planche', [LotQrController::class, 'planche'])->name('admin.lots.planche');
+    Route::post('/lots-qr/{lot}/generer', [LotQrController::class, 'generer']);
+    Route::post('/lots-qr/{lot}/refuser', [LotQrController::class, 'refuser']);
+    Route::get('/lots-qr/{lot}/lien-planche', [LotQrController::class, 'lienPlanche']);
+
+    // Boutiques : compte de paiement, identification du gérant, suspension.
+    Route::get('/boutiques', [AdminBoutiqueController::class, 'index']);
+    Route::post('/boutiques/{boutique}/verifier-paiement', [AdminBoutiqueController::class, 'verifierPaiement']);
+    Route::post('/boutiques/{boutique}/identification', [AdminBoutiqueController::class, 'identification']);
+    Route::post('/boutiques/{boutique}/suspendre', [AdminBoutiqueController::class, 'suspendre']);
+    Route::post('/boutiques/{boutique}/reactiver', [AdminBoutiqueController::class, 'reactiver']);
+
+    // Réglages de la plateforme, journal d'administration, avis clients.
+    Route::get('/parametres', [AdminReglagesController::class, 'parametres']);
+    Route::put('/parametres/{cle}', [AdminReglagesController::class, 'modifierParametre']);
+    Route::get('/journal', [AdminReglagesController::class, 'journal']);
+    Route::get('/avis', [AdminReglagesController::class, 'avis']);
+    Route::post('/avis/{avis}/retirer', [AdminReglagesController::class, 'retirerAvis']);
     Route::get('/lots-qr/{lot}/statistiques', [LotQrController::class, 'statistiques']);
     Route::post('/lots-qr/{lot}/rappel', [LotQrController::class, 'rappeler']);
 });

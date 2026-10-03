@@ -6,4 +6,6 @@
 <a href="/vendeur/commandes" class="{{ str_starts_with($actif, 'vendeur/commandes') ? 'text-brun' : 'hover:text-brun' }}">Commandes</a>
 <a href="/vendeur/livreurs" class="{{ str_starts_with($actif, 'vendeur/livreurs') ? 'text-brun' : 'hover:text-brun' }}">Livreurs</a>
 <a href="/vendeur/produits" class="{{ str_starts_with($actif, 'vendeur/produits') ? 'text-brun' : 'hover:text-brun' }}">Produits</a>
+<a href="/vendeur/etiquettes" class="{{ str_starts_with($actif, 'vendeur/etiquettes') ? 'text-brun' : 'hover:text-brun' }}">Étiquettes</a>
+<a href="/vendeur/boutique" class="{{ str_starts_with($actif, 'vendeur/boutique') ? 'text-brun' : 'hover:text-brun' }}">Ma boutique</a>
 <a href="/vendeur/reversements" class="{{ str_starts_with($actif, 'vendeur/reversements') ? 'text-brun' : 'hover:text-brun' }}">Reversements</a>

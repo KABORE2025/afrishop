@@ -133,6 +133,27 @@
   </div>
 </div>
 
+{{-- AVIS — seuls des acheteurs dont le colis a été remis peuvent noter. --}}
+<h2 style="font-size:18px;margin:28px 0 6px">Avis des acheteurs</h2>
+@if ($avis->isEmpty())
+  <p style="color:var(--gris);font-size:14px;margin:0">Pas encore d'avis. Seuls les clients qui ont reçu ce produit peuvent en laisser un.</p>
+@else
+  <p style="margin:0 0 10px;font-size:15px">
+    <b style="color:var(--brun)">{{ str_repeat('★', (int) round($noteMoyenne)) }}{{ str_repeat('☆', 5 - (int) round($noteMoyenne)) }}</b>
+    <b>{{ number_format($noteMoyenne, 1, ',', ' ') }}/5</b>
+    <span style="color:var(--gris)">— {{ $nbAvis }} avis d'acheteurs vérifiés</span>
+  </p>
+  @foreach ($avis as $a)
+    <div class="carte" style="padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px">
+        <span style="color:var(--brun)">{{ str_repeat('★', $a->note) }}{{ str_repeat('☆', 5 - $a->note) }}</span>
+        <span style="color:var(--gris)">{{ $a->auteur_affiche }} — {{ $a->cree_le?->format('d/m/Y') }}</span>
+      </div>
+      @if ($a->commentaire)<p style="margin:6px 0 0;font-size:14px">{{ $a->commentaire }}</p>@endif
+    </div>
+  @endforeach
+@endif
+
 @if ($offres->isNotEmpty())
   <h2 style="font-size:18px;margin:28px 0 6px">Le même produit ailleurs</h2>
   <p style="color:var(--gris);font-size:14px;margin:0 0 10px">

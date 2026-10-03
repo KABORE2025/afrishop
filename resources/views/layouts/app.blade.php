@@ -88,6 +88,8 @@
                           :class="estAdmin ? 'bg-brun' : 'bg-brun-clair'"
                           x-text="(utilisateur.nom || '?').charAt(0).toUpperCase()"></span>
 
+                    <a href="/compte/mot-de-passe" class="text-sm font-semibold text-gris hover:text-brun">Mot de passe</a>
+
                     <button type="button" @click="deconnecter"
                             class="text-sm font-semibold text-gris hover:text-brun">
                         Quitter

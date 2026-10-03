@@ -162,7 +162,7 @@
                         {{-- ------------------------------------------------
                              LES DÉCISIONS
                              ------------------------------------------------ --}}
-                        <p class="mt-3" x-show="!window.estAdminPlein()"><p class="tuile-note">Décision réservée à un administrateur.</p></p>
+                        <div class="mt-3" x-show="!window.estAdminPlein()"><p class="tuile-note">Décision réservée à un administrateur.</p></div>
                         <div class="mt-3 flex flex-wrap gap-2" x-show="window.estAdminPlein()">
                             <button class="btn-primaire"
                                     x-show="p.moderation.statut !== 'publie'"

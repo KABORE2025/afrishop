@@ -145,6 +145,21 @@
                                     x-show="sc.marchandise.statut === 'expediee' && sc.expedition?.statut === 'retour_expediteur'"
                                     @click="confirmerRetour(sc)">Colis revenu en boutique</button>
 
+                            {{-- RETOUR demandé par le client : fonds gelés jusqu'à la fin. --}}
+                            <template x-if="sc.retour && ['demande','accepte'].includes(sc.retour.statut)">
+                                <div class="mb-1 text-left text-xs">
+                                    <p class="font-semibold text-alerte" x-text="'Retour ' + sc.retour.reference + ' — ' + libelleMotifRetour(sc.retour.motif)"></p>
+                                    <p class="text-gris" x-show="sc.retour.commentaire" x-text="sc.retour.commentaire"></p>
+                                    <p class="text-gris" x-text="sc.retour.frais_a_la_charge === 'boutique' ? 'Renvoi à votre charge (erreur de commande).' : 'Renvoi à la charge du client.'"></p>
+                                </div>
+                            </template>
+                            <button type="button" class="btn-primaire" x-show="sc.retour?.statut === 'demande'"
+                                    @click="agirRetour(sc, 'accepter')">Accepter le retour</button>
+                            <button type="button" class="btn-secondaire" x-show="sc.retour?.statut === 'demande'"
+                                    @click="agirRetour(sc, 'refuser')">Refuser</button>
+                            <button type="button" class="btn-primaire" x-show="sc.retour?.statut === 'accepte'"
+                                    @click="agirRetour(sc, 'recevoir')">Article reçu — rembourser</button>
+
                             <button type="button" class="btn-danger"
                                     x-show="sc.litige?.ouvert && !sc.litige?.a_repondu"
                                     @click="ouvrirLitige(sc)">Répondre au litige</button>
@@ -370,6 +385,25 @@
 
             libelleStatut(s) { return STATUTS[s] ?? s; },
             libelleMotif(m) { return MOTIFS_LITIGE[m] ?? m; },
+            libelleMotifRetour(m) {
+                return { ne_convient_pas: 'ne convient pas', taille_incorrecte: 'taille incorrecte',
+                         erreur_commande: 'mauvais article envoyé', autre: 'autre motif' }[m] ?? m;
+            },
+
+            async agirRetour(sc, action) {
+                let corps = {};
+                if (action === 'refuser') {
+                    const motif = prompt('Motif du refus (au moins 10 caractères) — le client le lira :');
+                    if (!motif) return;
+                    corps = { motif };
+                }
+                if (action === 'recevoir' && !confirm('Vous avez l’article en main ? Le client sera remboursé et le stock rendu.')) return;
+                try {
+                    const r = await window.api.post(`/vendeur/retours/${sc.retour.id}/${action}`, corps);
+                    alert(r.message);
+                    this.charger(this.pagination?.current_page ?? 1);
+                } catch (e) { alert(e.message); }
+            },
             dateHeure(iso) {
                 if (!iso) return '—';
                 return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });

@@ -159,6 +159,13 @@ class AppServiceProvider extends ServiceProvider
     {
         $chiffres = fn (?string $v) => preg_replace('/\D/', '', (string) $v);
 
+        // Mot de passe oublié : chaque demande envoie un SMS payant, et le
+        // code se devine en essayant. Par IP ET par numéro.
+        RateLimiter::for('reinitialisation', fn (Request $r) => [
+            Limit::perMinute(5)->by('reinit-ip:'.$r->ip()),
+            Limit::perHour(5)->by('reinit-tel:'.$chiffres($r->input('telephone'))),
+        ]);
+
         RateLimiter::for('connexion', fn (Request $r) => [
             Limit::perMinute(5)->by('connexion:'.$chiffres($r->input('telephone')).'|'.$r->ip()),
             Limit::perHour(20)->by('connexion-compte:'.$chiffres($r->input('telephone'))),

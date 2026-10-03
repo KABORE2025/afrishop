@@ -187,8 +187,12 @@ class Boutique extends Model
 
         $aujourdhui = now()->toDateString();
 
-        return $aujourdhui >= $this->fermee_du
-            && ($this->fermee_au === null || $aujourdhui <= $this->fermee_au);
+        // Comparer des dates « AAAA-MM-JJ » entre elles. Comparer la chaîne
+        // du jour à l'objet date (« AAAA-MM-JJ 00:00:00 ») ratait le
+        // premier jour : une boutique fermée « à partir d'aujourd'hui »
+        // recevait encore des commandes ce jour-là.
+        return $aujourdhui >= $this->fermee_du->toDateString()
+            && ($this->fermee_au === null || $aujourdhui <= $this->fermee_au->toDateString());
     }
 
     /**

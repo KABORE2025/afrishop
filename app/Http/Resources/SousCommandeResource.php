@@ -105,6 +105,17 @@ class SousCommandeResource extends JsonResource
                 'mode_livraison' => $this->commande->mode_livraison,
             ]),
 
+            /* Le retour demandé par le client, s'il y en a un. */
+            'retour' => $this->whenLoaded('retours', function () {
+                $rt = $this->retours->sortByDesc('id')->first();
+
+                return $rt ? [
+                    'id' => $rt->id, 'reference' => $rt->reference, 'statut' => $rt->statut,
+                    'motif' => $rt->motif, 'commentaire' => $rt->commentaire,
+                    'frais_a_la_charge' => $rt->frais_a_la_charge, 'motif_refus' => $rt->motif_refus,
+                ] : null;
+            }),
+
             'lignes'     => LigneCommandeResource::collection($this->whenLoaded('lignes')),
             'expedition' => new ExpeditionResource($this->whenLoaded('expedition')),
 

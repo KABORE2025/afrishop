@@ -37,9 +37,13 @@
         </button>
     </form>
 
+    <p class="mt-4 text-center text-sm">
+        <a href="/mot-de-passe-oublie" class="font-semibold text-brun hover:underline">Mot de passe oublié ?</a>
+    </p>
+
     <p class="mt-4 text-center text-sm text-gris">
         Pas encore vendeur ?
-        <a href="{{ route('vitrine') }}" class="font-semibold text-brun">Déposer une candidature</a>
+        <a href="{{ route('devenir-vendeur') }}" class="font-semibold text-brun">Déposer une candidature</a>
     </p>
 </div>
 @endsection

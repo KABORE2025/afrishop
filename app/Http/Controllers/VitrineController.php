@@ -112,6 +112,16 @@ class VitrineController extends Controller
          */
         $indisponible = $produit->boutique->raisonIndisponibilite();
 
-        return view('produit', compact('produit', 'offres', 'indisponible'));
+        // Avis d'acheteurs réels (colis remis), les plus récents d'abord.
+        $avis = \App\Models\Avis::where('produit_id', $produit->id)->where('statut', 'publie')
+            ->orderByDesc('id')->limit(20)->get();
+        $noteMoyenne = $avis->isNotEmpty()
+            ? round(\App\Models\Avis::where('produit_id', $produit->id)->where('statut', 'publie')->avg('note'), 1)
+            : null;
+        $nbAvis = $avis->isNotEmpty()
+            ? \App\Models\Avis::where('produit_id', $produit->id)->where('statut', 'publie')->count()
+            : 0;
+
+        return view('produit', compact('produit', 'offres', 'indisponible', 'avis', 'noteMoyenne', 'nbAvis'));
     }
 }

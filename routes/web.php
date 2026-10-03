@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\VerificationQrController;
 use App\Http\Controllers\BoiteSmsTestController;
 use App\Http\Controllers\CandidatureWebController;
+use App\Http\Controllers\ClientColisController;
+use App\Http\Controllers\Api\LotQrController;
 use App\Http\Controllers\CommandeWebController;
 use App\Http\Controllers\ProtectionClientController;
 use App\Http\Controllers\SuiviCommandeController;
@@ -109,6 +111,24 @@ Route::post('/commande/{reference}/colis/{colis}/renvoyer-code', [SuiviCommandeC
 Route::match(['get', 'post'], '/commande/{reference}/recu', [SuiviCommandeController::class, 'recu'])
     ->middleware('throttle:protection')->name('commande.recu');
 
+// Annuler un colis pas encore préparé, demander un retour, laisser un avis.
+Route::post('/commande/{reference}/colis/{colis}/annuler', [ClientColisController::class, 'annuler'])
+    ->middleware('throttle:protection')->name('commande.annuler');
+Route::post('/commande/{reference}/colis/{colis}/retour', [ClientColisController::class, 'retour'])
+    ->middleware('throttle:protection')->name('commande.retour');
+Route::post('/commande/{reference}/colis/{colis}/avis', [ClientColisController::class, 'avis'])
+    ->middleware('throttle:protection')->name('commande.avis');
+
+// Planche d'étiquettes QR : lien SIGNÉ et temporaire émis par la console
+// (LotQrController::lienPlanche). Sans signature, n'importe qui
+// connaissant l'adresse imprimerait de vraies étiquettes.
+Route::get('/console/lots-qr/{lot}/planche', [LotQrController::class, 'planche'])
+    ->middleware('signed')->name('admin.lots.planche');
+
+// Comptes : pages sans données, l'API fait la garde.
+Route::view('/mot-de-passe-oublie', 'compte.mot-de-passe-oublie')->name('mot-de-passe-oublie');
+Route::view('/compte/mot-de-passe', 'compte.mot-de-passe')->name('compte.mot-de-passe');
+
 // Photos d'un litige : disque privé, lien signé et temporaire (30 min)
 // émis par l'API admin ou vendeur. Voir PhotoLitigeController.
 Route::get('/litiges/photos/{media}/{taille}', PhotoLitigeController::class)
@@ -142,6 +162,8 @@ Route::prefix('vendeur')->name('vendeur.')->group(function () {
     Route::get('/livreurs', [EspaceVendeurController::class, 'livreurs'])->name('livreurs');
     Route::get('/produits', [EspaceVendeurController::class, 'produits'])->name('produits');
     Route::get('/reversements', [EspaceVendeurController::class, 'reversements'])->name('reversements');
+    Route::view('/boutique', 'vendeur.boutique')->name('boutique');
+    Route::view('/etiquettes', 'vendeur.etiquettes')->name('etiquettes');
 });
 
 // Espace livreur : même modèle que l'espace vendeur, données chargées
@@ -149,6 +171,8 @@ Route::prefix('vendeur')->name('vendeur.')->group(function () {
 Route::prefix('livreur')->name('livreur.')->group(function () {
     Route::get('/connexion', [EspaceLivreurController::class, 'connexion'])->name('connexion');
     Route::get('/', [EspaceLivreurController::class, 'commandes'])->name('commandes');
+    // Activation d'un nouveau livreur avec le code reçu par SMS.
+    Route::view('/activer', 'livreur.activer')->name('activer');
 });
 
 /*
@@ -166,6 +190,11 @@ Route::prefix('console')->name('console.')->group(function () {
     Route::get('/commandes', [ConsoleController::class, 'commandes'])->name('commandes');
     Route::get('/sequestre', [ConsoleController::class, 'sequestre'])->name('sequestre');
     Route::get('/administrateurs', [ConsoleController::class, 'administrateurs'])->name('administrateurs');
+    Route::view('/boutiques', 'console.boutiques')->name('boutiques');
+    Route::view('/etiquettes', 'console.etiquettes')->name('etiquettes');
+    Route::view('/reglages', 'console.reglages')->name('reglages');
+    Route::view('/journal', 'console.journal')->name('journal');
+    Route::view('/avis', 'console.avis')->name('avis');
     Route::get('/reversements', [ConsoleController::class, 'reversements'])->name('reversements');
 });
 

@@ -60,7 +60,7 @@ class VendeurController extends Controller
 
         $requete = SousCommande::query()
             ->where('boutique_id', $boutiqueId)
-            ->with(['lignes', 'expedition', 'litiges.photos', 'commande:id,reference,cree_le,mode_livraison']);
+            ->with(['lignes', 'expedition', 'litiges.photos', 'retours', 'commande:id,reference,cree_le,mode_livraison']);
 
         /*
          * Filtres — un vendeur cherche « ce que je dois préparer », pas

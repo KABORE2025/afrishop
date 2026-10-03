@@ -12,6 +12,13 @@
         <div class="note" x-show="message" x-cloak x-text="message"></div>
         <button class="btn-primaire w-full" :disabled="enCours">Se connecter</button>
     </form>
+    <p class="mt-4 text-center text-sm">
+        <a href="/mot-de-passe-oublie" class="font-semibold text-brun hover:underline">Mot de passe oublié ?</a>
+    </p>
+    <p class="mt-2 text-center text-sm text-gris">
+        Nouveau livreur, avec un code reçu par SMS ?
+        <a href="/livreur/activer" class="font-semibold text-brun hover:underline">Activer mon compte</a>
+    </p>
 </div>
 @endsection
 
